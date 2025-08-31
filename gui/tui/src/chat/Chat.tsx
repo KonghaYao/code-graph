@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
-import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
 import { MessagesBox } from './components/MessageBox';
 import HistoryList from './components/HistoryList';
@@ -11,6 +10,7 @@ import { Message } from '@langgraph-js/sdk';
 import { SettingsProvider } from './context/SettingsContext';
 import SettingsPanel from './components/SettingsPanel';
 import { useWindowSize } from '../hooks/useWindowSize';
+import AgentOptions from './AgentOptions';
 
 const MESSAGE_APPROX_HEIGHT = 5; // Approximate lines per message
 
@@ -52,21 +52,16 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
-    const { userInput, setUserInput, sendMessage, setCurrentAgent, client, currentChatId } = useChat();
+    const { userInput, setUserInput, sendMessage, currentAgent, client, currentChatId } = useChat();
     const { extraParams } = useExtraParams();
-    // 终端环境中不支持图片上传
-    // const [imageUrls, setImageUrls] = useState<string[]>([]);
 
-    const handleAgentSelect = (item: { value: string }) => {
-        setCurrentAgent(item.value);
-        setMode('agent'); // Focus input after selection
-    };
-
-    // const handleFileUploaded = (url: string) => {
-    //     setImageUrls((prev) => [...prev, url]);
+    // const handleAgentSelect = (item: { value: string }) => {
+    //     setCurrentAgent(item.value);
+    //     setMode('agent'); // Focus input after selection
     // };
 
     const sendTextMessage = () => {
+        if (!userInput) return;
         const content: Message[] = [
             {
                 type: 'human',
@@ -80,22 +75,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
         setUserInput('');
     };
 
-    const agentOptions =
-        client?.availableAssistants.map((i) => ({
-            label: i.name,
-            value: i.graph_id,
-        })) || [];
-
     return (
         <Box flexDirection="column" borderStyle="round" padding={1}>
-            <Box>
-                <Box marginRight={1}>
-                    <Text>Agent:</Text>
-                </Box>
-                {agentOptions.length > 0 && (
-                    <SelectInput items={agentOptions} onSelect={handleAgentSelect} isFocused={mode === 'agent'} />
-                )}
-            </Box>
             <Box>
                 <Box marginRight={1}>
                     <Text>Input:</Text>
@@ -109,6 +90,14 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
                 />
             </Box>
             <Box marginTop={1} justifyContent="space-between">
+                <Box>
+                    <Box marginRight={1}>
+                        <Text>Agent:</Text>
+                    </Box>
+                    <Text>
+                        {client?.availableAssistants.find((a) => a.graph_id === currentAgent)?.name || '未选择'}
+                    </Text>
+                </Box>
                 <Text color="gray">会话 ID: {currentChatId}</Text>
             </Box>
         </Box>
@@ -117,7 +106,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
 
 const Chat: React.FC = () => {
     const { toggleHistoryVisible, renderMessages } = useChat();
-    const [activeView, setActiveView] = useState<'chat' | 'history' | 'settings' | 'graph' | 'artifacts'>('chat');
+    const [activeView, setActiveView] = useState<
+        'chat' | 'history' | 'settings' | 'graph' | 'artifacts' | 'agentOptions'
+    >('chat');
     const [mode, setMode] = useState<'command' | 'agent'>('agent');
     const [scrollOffset, setScrollOffset] = useState(0);
     const { height: terminalHeight } = useWindowSize();
@@ -145,6 +136,7 @@ const Chat: React.FC = () => {
                 toggleHistoryVisible();
                 setActiveView('history');
             } else if (input === 's') setActiveView('settings');
+            else if (input === 'g') setActiveView('agentOptions'); // 'g' for agent options
         },
         { isActive: mode === 'command' }, // Only active when in command mode
     );
@@ -213,6 +205,14 @@ const Chat: React.FC = () => {
                         }}
                     />
                 )}
+                {activeView === 'agentOptions' && (
+                    <AgentOptions
+                        onClose={() => {
+                            setActiveView('chat');
+                            setMode('agent');
+                        }}
+                    />
+                )}
             </Box>
             <Box borderStyle="round" paddingX={1} justifyContent="space-between">
                 <Text>
@@ -228,6 +228,8 @@ const Chat: React.FC = () => {
                             <Text>: 历史 | </Text>
                             <Text color="cyan">'s'</Text>
                             <Text>: 设置 | </Text>
+                            <Text color="cyan">'g'</Text>
+                            <Text>: Agent选择 | </Text>
                             <Text color="cyan">'ctrl+c'</Text>
                             <Text>: 退出</Text>
                         </Text>
@@ -257,7 +259,6 @@ const ChatWrapper: React.FC = () => {
 const AppProviders: React.FC = () => (
     <SettingsProvider>
         <ChatWrapper />
-        {/* <Text>Hello</Text> */}
     </SettingsProvider>
 );
 

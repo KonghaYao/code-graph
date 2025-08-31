@@ -49,7 +49,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
 
     const handleSelect = (item: any) => {
         if (item.value === 'new_chat') {
-            createNewChat();
+            // createNewChat();
         } else {
             toHistoryChat(item.thread);
         }

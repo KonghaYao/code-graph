@@ -35,9 +35,9 @@ importers:
       '@vscode/ripgrep':
         specifier: ^1.15.14
         version: 1.15.14
-      fast-glob:
-        specifier: ^3.3.3
-        version: 3.3.3
+      glob:
+        specifier: ^11.0.3
+        version: 11.0.3
       langchain:
         specifier: ^0.3.30
         version: 0.3.30(@langchain/core@0.3.68(openai@5.12.1(zod@3.25.76)))(openai@5.12.1(zod@3.25.76))

@@ -36,7 +36,7 @@ const codingAgent = entrypoint('coding-agent', async (state: typeof AState.State
             // exit_plan_mode_tool,
             glob_tool,
             grep_tool,
-            ls_tool,
+            // ls_tool,
             multi_edit_tool,
             // notebook_edit_tool,
             read_tool,

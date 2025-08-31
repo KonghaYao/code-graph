@@ -1,10 +1,14 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import glob from 'fast-glob';
+import { glob } from 'glob';
 
 export const glob_tool = tool(
     async ({ pattern, path }) => {
-        const files = await glob(pattern, { cwd: path, absolute: true });
+        const files = await glob(pattern, {
+            ignore: ['node_modules', '.git'],
+            cwd: path,
+            absolute: true,
+        });
         return files.join('\n');
     },
     {

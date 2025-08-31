@@ -18,7 +18,7 @@
         "@langgraph-js/cli": "^3.0.0",
         "@langgraph-js/pro": "^1.8.0",
         "@vscode/ripgrep": "^1.15.14",
-        "fast-glob": "^3.3.3",
+        "glob": "^11.0.3",
         "langchain": "^0.3.30",
         "shelljs": "^0.10.0",
         "zod": "^3.25.76"

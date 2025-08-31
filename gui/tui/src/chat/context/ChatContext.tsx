@@ -1,4 +1,4 @@
-import React, { createContext, useContext, ReactNode, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, ReactNode, useEffect, useMemo, memo } from 'react';
 import { globalChatStore } from '../store';
 import { useUnionStore } from '@langgraph-js/sdk';
 import { useStore } from '@nanostores/react';
@@ -24,23 +24,14 @@ interface ChatProviderProps {
 export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     const { config } = useSettings();
 
-    // Always call globalChatStore, even if with default values, to ensure consistent hook calls
-
-    const storeInstance = useMemo(() => globalChatStore(config!.apiUrl, config!.agentName), [config]);
+    const storeInstance = useMemo(() => {
+        const chatStore = globalChatStore(config!.apiUrl, config!.agentName);
+        chatStore.mutations.initClient().catch((err) => {
+            console.error(err);
+        });
+        return chatStore;
+    }, [config?.apiUrl, config?.agentName]);
     const store = useUnionStore(storeInstance, useStore);
-    useEffect(() => {
-        // Prevent initClient if store or config not ready, or if settings are still loading
-        if (!store || !config) return;
 
-        store
-            .initClient()
-            .then((res) => {
-                console.log('初始化完成');
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }, [storeInstance]);
-
-    return <ChatContext.Provider value={{ ...store }}>{children}</ChatContext.Provider>;
+    return <ChatContext.Provider value={store}>{children}</ChatContext.Provider>;
 };
