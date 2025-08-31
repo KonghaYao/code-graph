@@ -1,3 +1,4 @@
+import { Runnable } from '@langchain/core/runnables';
 import {
     START,
     StateGraph,
@@ -7,6 +8,7 @@ import {
     Annotation,
 } from '@langchain/langgraph';
 import { getHandoffDestinations } from '@langgraph-js/pro';
+import { RunnableAgent } from 'langchain/agents';
 
 /**
  * State schema for the multi-agent swarm.
@@ -72,13 +74,14 @@ export type CreateSwarmParams<
     AgentAnnotationRootT extends AnnotationRoot<any> = typeof MessagesAnnotation,
     AnnotationRootD extends AnnotationRoot<any> = any,
 > = {
-    agents: CompiledStateGraph<
-        AgentAnnotationRootT['State'],
-        AgentAnnotationRootT['Update'],
-        string,
-        AgentAnnotationRootT['spec'],
-        AgentAnnotationRootT['spec']
-    >[];
+    // agents: CompiledStateGraph<
+    //     AgentAnnotationRootT['State'],
+    //     AgentAnnotationRootT['Update'],
+    //     string,
+    //     AgentAnnotationRootT['spec'],
+    //     AgentAnnotationRootT['spec']
+    // >[];
+    agents: Runnable[];
     defaultActiveAgent: string;
     stateSchema?: AnnotationRootT;
     contextSchema?: AnnotationRootD;
@@ -137,8 +140,8 @@ const createSwarm = <
 
     for (const agent of agents) {
         builder.addNode(agent.name!, agent, {
-            ends: getHandoffDestinations(agent),
-            subgraphs: [agent],
+            ends: getHandoffDestinations(agent as any),
+            subgraphs: [agent as any],
         });
     }
 
