@@ -1,0 +1,41 @@
+{
+    "name": "agents",
+    "author": "Your Name",
+    "version": "0.0.1",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "langgraph-js dev",
+        "dev:bun": "bunx --bun langgraph-js dev",
+        "build": "langgraph-js build",
+        "ui": "langgraph-ui"
+    },
+    "dependencies": {
+        "@langchain/core": "^0.3.68",
+        "@langchain/langgraph": "^0.4.8",
+        "@langchain/langgraph-checkpoint": "0.1.1",
+        "@langchain/openai": "^0.6.6",
+        "@langgraph-js/cli": "^3.0.0",
+        "@langgraph-js/pro": "^1.8.0",
+        "langchain": "^0.3.30",
+        "zod": "^3.25.76"
+    },
+    "devDependencies": {
+        "@langgraph-js/ui": "^1.7.1",
+        "@types/node": "^20.19.9",
+        "tsx": "^4.20.3",
+        "typescript": "^5.9.2"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "@tailwindcss/oxide",
+            "better-sqlite3",
+            "esbuild"
+        ],
+        "overrides": {
+            "@langchain/langgraph": "0.4.8",
+            "@langchain/langgraph-checkpoint": "0.1.1",
+            "@langchain/langgraph-checkpoint-sqlite": "0.2.0"
+        }
+    }
+}
