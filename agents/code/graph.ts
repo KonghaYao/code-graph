@@ -28,7 +28,6 @@ const model = new ChatOpenAI({
 
 const codingAgent = entrypoint('coding-agent', async (state: typeof AState.State, c: RunnableConfig) => {
     const config = useConfiguration(c);
-    console.log(config);
     const agent = createReactAgent({
         llm: model,
         prompt: await getSystemPrompt(config),
@@ -43,8 +42,8 @@ const codingAgent = entrypoint('coding-agent', async (state: typeof AState.State
             read_tool,
             // task_tool,
             // todo_write_tool,
-            web_fetch_tool,
-            web_search_tool,
+            // web_fetch_tool,
+            // web_search_tool,
             write_tool,
             bash_output_tool,
             bash_tool,

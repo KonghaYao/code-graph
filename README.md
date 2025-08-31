@@ -2,14 +2,14 @@
 
 A minimal LangGraph JS template with two graphs:
 
-- react-agent: single-agent with tools
-- swarm: multi-agent with handoff
+-   react-agent: single-agent with tools
+-   swarm: multi-agent with handoff
 
 ## Requirements
 
-- Node.js 20
-- pnpm or npm
-- .env for provider API keys
+-   Node.js 20
+-   pnpm or npm
+-   .env for provider API keys
 
 ## Quick Start
 
@@ -20,25 +20,25 @@ A minimal LangGraph JS template with two graphs:
 
 ## Structure
 
-```
+```txt
 templates/agent-template/
-   agents/
-   react-agent/
-   configuration.ts
-   graph.ts
-   prompts.ts
-   tools/
-   calculator.ts
-   echo.ts
-   fetch_json.ts
-   now.ts
-   sleep.ts
-   swarm/
-   configuration.ts
-   graph.ts
-  langgraph.json
-  package.json
-  .env
+  ├─ agents/
+  │  ├─ react-agent/
+  │  │  ├─ configuration.ts
+  │  │  ├─ graph.ts
+  │  │  ├─ prompts.ts
+  │  │  └─ tools/
+  │  │     ├─ calculator.ts
+  │  │     ├─ echo.ts
+  │  │     ├─ fetch_json.ts
+  │  │     ├─ now.ts
+  │  │     └─ sleep.ts
+  │  └─ swarm/
+  │     ├─ configuration.ts
+  │     └─ graph.ts
+  ├─ langgraph.json
+  ├─ package.json
+  └─ .env
 ```
 
 ## Graph Registration
@@ -54,14 +54,14 @@ templates/agent-template/
 
 ## Commands
 
-- `pnpm dev`
-- `pnpm build`
+-   `pnpm dev`
+-   `pnpm build`
 
 ## Customize
 
-- Add tools under `agents/react-agent/tools/` and export in `tools/index.ts`
-- Add or modify graphs under `agents/` and register in `langgraph.json`
-- Edit `configuration.ts` and `prompts.ts` per agent
+-   Add tools under `agents/react-agent/tools/` and export in `tools/index.ts`
+-   Add or modify graphs under `agents/` and register in `langgraph.json`
+-   Edit `configuration.ts` and `prompts.ts` per agent
 
 ## Environment (.env)
 
@@ -76,3 +76,11 @@ OPENAI_BASE_URL=
 
 SQLITE_DATABASE_URL=./.langgraph_api/langgraph.db
 ```
+
+## Credits
+
+本项目参考了
+
+-   [ShareAI-lab](https://github.com/shareAI-lab)
+-   [Claude Code](https://docs.anthropic.com/)
+-   [Cursor](https://cursor.com/)。

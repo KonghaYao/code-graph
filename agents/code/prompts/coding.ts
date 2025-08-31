@@ -5,10 +5,6 @@ export const EnvConfig = createState().build({
     cwd: createDefaultAnnotation(() => process.cwd()),
 });
 
-export function getCodingSystemPromptPrefix(config: typeof EnvConfig.State): string {
-    return `You are ${config.agent_name}, ShareAI-lab's Agent AI CLI for terminal & coding.`;
-}
-
 export async function getSystemPrompt(config: typeof EnvConfig.State): Promise<string> {
     return [
         `
