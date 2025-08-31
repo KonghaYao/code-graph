@@ -1,22 +1,6 @@
-# Agent Template
+# Code Graph
 
-A minimal LangGraph JS template with two graphs:
-
--   react-agent: single-agent with tools
--   swarm: multi-agent with handoff
-
-## Requirements
-
--   Node.js 20
--   pnpm or npm
--   .env for provider API keys
-
-## Quick Start
-
-1. Install: `pnpm install` (or `npm install`)
-2. Create `.env` at project root and add your API keys
-3. Run: `pnpm dev`
-4. Build: `pnpm build`
+一个视图无关的 LangGraph Coding Agent, Like Claude Code or Gemini Cli.
 
 ## Structure
 
