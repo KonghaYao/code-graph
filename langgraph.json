@@ -2,8 +2,7 @@
     "node_version": "20",
     "dependencies": ["."],
     "graphs": {
-        "agent": "./agents/react-agent/graph.ts:graph",
-        "swarm": "./agents/swarm/graph.ts:graph"
+        "code": "./agents/code/graph.ts:graph"
     },
     "env": ".env"
 }

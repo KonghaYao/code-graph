@@ -1,11 +1,12 @@
 import { RunnableConfig } from '@langchain/core/runnables';
 import { createDefaultAnnotation, createState } from '@langgraph-js/pro';
-export const ConfigurationSchema = createState().build({
-    /**
-     * The system prompt to be used by the agent.
-     */
-    systemPromptTemplate: createDefaultAnnotation(() => ''),
+import { EnvConfig } from './prompts/coding.js';
 
+const PermissionConfig = createState().build({
+    permission: createDefaultAnnotation(() => 'all'),
+});
+
+export const ConfigurationSchema = createState(EnvConfig, PermissionConfig).build({
     /**
      * The name of the language model to be used by the agent.
      */
