@@ -5,9 +5,8 @@ import TextInput from 'ink-text-input';
 import { MessagesBox } from './components/MessageBox';
 import HistoryList from './components/HistoryList';
 import { ChatProvider, useChat } from './context/ChatContext';
-import { ExtraParamsProvider, useExtraParams } from './context/ExtraParamsContext';
 import { Message } from '@langgraph-js/sdk';
-import { SettingsProvider } from './context/SettingsContext';
+import { SettingsProvider, useSettings } from './context/SettingsContext';
 import SettingsPanel from './components/SettingsPanel';
 import { useWindowSize } from '../hooks/useWindowSize';
 import AgentOptions from './AgentOptions';
@@ -26,7 +25,7 @@ const ChatMessages: React.FC<{ scrollOffset: number; terminalHeight: number }> =
     const visibleMessages = renderMessages.slice(startIndex, endIndex);
 
     return (
-        <Box flexDirection="column" flexGrow={1} paddingX={1} paddingY={0}>
+        <Box flexDirection="column" flexGrow={1} paddingX={0} paddingY={0}>
             <MessagesBox
                 renderMessages={visibleMessages}
                 collapsedTools={collapsedTools}
@@ -56,7 +55,7 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
     const { userInput, setUserInput, sendMessage, currentAgent, client, currentChatId } = useChat();
-    const { extraParams } = useExtraParams();
+    const { extraParams, config } = useSettings();
 
     // const handleAgentSelect = (item: { value: string }) => {
     //     setCurrentAgent(item.value);
@@ -112,6 +111,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
 };
 
 const Chat: React.FC = () => {
+    const { extraParams } = useSettings();
     const { toggleHistoryVisible, renderMessages } = useChat();
     const [activeView, setActiveView] = useState<
         'chat' | 'history' | 'settings' | 'graph' | 'artifacts' | 'agentOptions'
@@ -124,7 +124,6 @@ const Chat: React.FC = () => {
     const maxVisibleMessages = Math.floor(availableHeight / MESSAGE_APPROX_HEIGHT);
     const totalMessages = renderMessages.length;
     const maxScrollOffset = Math.max(0, totalMessages - maxVisibleMessages);
-
     // Global Ctrl+C exit handler
     useInput((input, key) => {
         if (key.ctrl && input === 'c') {
@@ -235,7 +234,7 @@ const Chat: React.FC = () => {
                     {mode === 'agent' && (
                         <Text color="cyan" bold>
                             {' '}
-                            [AGENT]
+                            [AGENT] {extraParams.main_model}
                         </Text>
                     )}
                 </Text>
@@ -280,11 +279,15 @@ const Chat: React.FC = () => {
 };
 
 const ChatWrapper: React.FC = () => {
+    const { config } = useSettings();
+
+    if (!config) {
+        return <Text>Loading settings...</Text>;
+    }
+
     return (
-        <ChatProvider>
-            <ExtraParamsProvider>
-                <Chat />
-            </ExtraParamsProvider>
+        <ChatProvider apiUrl={config.apiUrl} agentName={config.agentName}>
+            <Chat />
         </ChatProvider>
     );
 };

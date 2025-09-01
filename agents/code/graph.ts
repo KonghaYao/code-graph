@@ -1,5 +1,5 @@
 import { entrypoint } from '@langchain/langgraph';
-import { createDefaultAnnotation, createState, SwarmState } from '@langgraph-js/pro';
+import { createDefaultAnnotation, createModelHelper, createState, SwarmState } from '@langgraph-js/pro';
 import { createSwarm } from './swarm.js';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { ChatOpenAI } from '@langchain/openai';
@@ -11,23 +11,23 @@ import {
     edit_tool,
     glob_tool,
     grep_tool,
-    ls_tool,
     multi_edit_tool,
-    // notebook_edit_tool,
     read_tool,
     write_tool,
 } from './tools/filesystem_tools/index.js';
-import { web_fetch_tool, web_search_tool } from './tools/web_tools/index.js';
-import { exit_plan_mode_tool, task_tool, todo_write_tool } from './tools/task_tools/index.js';
+// import { web_fetch_tool, web_search_tool } from './tools/web_tools/index.js';
+// import { exit_plan_mode_tool, task_tool, todo_write_tool } from './tools/task_tools/index.js';
 
-const AState = createState(SwarmState).build({});
-const model = new ChatOpenAI({
-    modelName: 'gpt-4.1-mini',
-    temperature: 0,
+const AState = createState(SwarmState).build({
+    main_model: createDefaultAnnotation(() => 'claude-sonnet-4'),
 });
 
 const codingAgent = entrypoint('coding-agent', async (state: typeof AState.State, c: RunnableConfig) => {
     const config = useConfiguration(c);
+
+    const model = new ChatOpenAI({
+        model: state.main_model,
+    });
     const agent = createReactAgent({
         llm: model,
         prompt: await getSystemPrompt(config),

@@ -9,16 +9,21 @@ interface SettingsPanelProps {
     onClose: () => void;
 }
 
+type FocusableInput = 'apiUrl' | 'agentName' | 'mainModel' | null;
+
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose }) => {
     const { config, updateConfig } = useSettings();
     const { client } = useChat();
     const [tempApiUrl, setTempApiUrl] = useState(config?.apiUrl || '');
     const [tempAgentName, setTempAgentName] = useState(config?.agentName || '');
+    const [tempMainModel, setTempMainModel] = useState(config?.main_model || '');
+    const [focusedInput, setFocusedInput] = useState<FocusableInput>('apiUrl');
 
     useEffect(() => {
         if (config) {
             setTempApiUrl(config.apiUrl);
             setTempAgentName(config.agentName);
+            setTempMainModel(config.main_model);
         }
     }, [config]);
 
@@ -26,13 +31,19 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose }) => {
         if (key.escape || input === 'q') {
             onClose();
         }
+        if (key.tab) {
+            const inputs: FocusableInput[] = ['apiUrl', 'agentName', 'mainModel'];
+            const currentIndex = inputs.indexOf(focusedInput);
+            const nextIndex = (currentIndex + 1) % inputs.length;
+            setFocusedInput(inputs[nextIndex]);
+        }
         if (input === 's') {
             handleSave();
         }
     });
 
     const handleSave = async () => {
-        await updateConfig({ apiUrl: tempApiUrl, agentName: tempAgentName });
+        await updateConfig({ apiUrl: tempApiUrl, agentName: tempAgentName, main_model: tempMainModel });
         onClose();
     };
 
@@ -44,6 +55,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose }) => {
 
     const handleAgentSelect = (item: { value: string }) => {
         setTempAgentName(item.value);
+        setFocusedInput('mainModel'); // Move focus to the next input after selecting agent
     };
 
     return (
@@ -68,7 +80,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose }) => {
                 <Text color="white" bold>
                     🌐 API URL:
                 </Text>
-                <TextInput value={tempApiUrl} onChange={setTempApiUrl} onSubmit={handleSave} />
+                <TextInput
+                    value={tempApiUrl}
+                    onChange={setTempApiUrl}
+                    onSubmit={handleSave}
+                    focus={focusedInput === 'apiUrl'}
+                />
             </Box>
 
             <Box flexDirection="column" marginTop={1} marginBottom={0}>
@@ -79,6 +96,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose }) => {
                     items={agentOptions}
                     onSelect={handleAgentSelect}
                     initialIndex={agentOptions.findIndex((opt) => opt.value === tempAgentName)}
+                    isFocused={focusedInput === 'agentName'}
+                />
+            </Box>
+            <Box flexDirection="column" marginTop={1} marginBottom={0}>
+                <Text color="white" bold>
+                    🧠 主模型:
+                </Text>
+                <TextInput
+                    value={tempMainModel}
+                    onChange={setTempMainModel}
+                    onSubmit={handleSave}
+                    focus={focusedInput === 'mainModel'}
                 />
             </Box>
 

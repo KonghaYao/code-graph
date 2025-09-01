@@ -1,34 +1,45 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { writeConfig, AppConfig, readConfig } from '../../utils/config';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react';
+import { getConfig, updateConfig as updateDbConfig, initDb, AppConfig } from '../store/index';
 
 interface SettingsContextType {
     config: AppConfig | null;
     updateConfig: (newConfig: Partial<AppConfig>) => Promise<void>;
+    extraParams: {
+        main_model: string;
+    };
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
-const globalConfig = { apiUrl: 'http://0.0.0.0:8123', agentName: 'code' };
-
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [config, setConfig] = useState<AppConfig | null>(globalConfig);
-
+    const [config, setConfig] = useState<AppConfig | null>(null);
+    const [loading, setLoading] = useState(true);
+    const extraParams = useMemo(() => {
+        return { main_model: config?.main_model || 'claude-sonnet-4' };
+    }, [config]);
     useEffect(() => {
         const loadConfig = async () => {
-            const loadedConfig = await readConfig();
+            await initDb();
+            const loadedConfig = getConfig();
             setConfig(loadedConfig);
+            setLoading(false);
         };
         loadConfig();
     }, []);
 
     const updateConfig = async (newConfig: Partial<AppConfig>) => {
-        if (!config) return; // Should not happen if loaded correctly
-        const updatedConfig = { ...config, ...newConfig };
+        const updatedConfig = { ...config, ...newConfig } as AppConfig;
         setConfig(updatedConfig);
-        await writeConfig(updatedConfig);
+        await updateDbConfig(newConfig);
     };
 
-    return <SettingsContext.Provider value={{ config, updateConfig }}>{children}</SettingsContext.Provider>;
+    if (loading) {
+        return null; // 或者显示加载指示器
+    }
+
+    return (
+        <SettingsContext.Provider value={{ config, updateConfig, extraParams }}>{children}</SettingsContext.Provider>
+    );
 };
 
 export const useSettings = () => {
