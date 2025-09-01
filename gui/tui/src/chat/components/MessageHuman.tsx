@@ -25,8 +25,11 @@ const MessageHuman: React.FC<MessageHumanProps> = ({ content }) => {
     };
 
     return (
-        <Box justifyContent="flex-end">
-            <Box paddingX={1} borderStyle="round">
+        <Box justifyContent="flex-end" marginBottom={0}>
+            <Box paddingX={1} paddingY={0} borderStyle="double" borderColor="green">
+                <Text color="green" bold>
+                    👤{' '}
+                </Text>
                 {renderContent()}
             </Box>
         </Box>

@@ -43,12 +43,13 @@ export const UsageMetadata: React.FC<UsageMetadataProps> = ({
     const speed = spendSeconds > 0 && Number.isFinite(outputTokens) ? outputTokens / spendSeconds : 0;
 
     return (
-        <Box marginTop={1}>
-            <Box gap={2}>
+        <Box marginTop={0}>
+            <Box gap={1}>
                 {(totalTokens > 0 || inputTokens > 0 || outputTokens > 0) && (
-                    <Text color="gray">
-                        📊 <Text>{formatTokens(totalTokens)}</Text> 📥 <Text>{formatTokens(inputTokens)}</Text> 📤{' '}
-                        <Text>{formatTokens(outputTokens)}</Text>
+                    <Text color="gray" dimColor>
+                        📊<Text color="yellow">{formatTokens(totalTokens)}</Text> 📥
+                        <Text color="green">{formatTokens(inputTokens)}</Text> 📤
+                        <Text color="red">{formatTokens(outputTokens)}</Text>
                     </Text>
                 )}
                 {spendSeconds > 0 && (
@@ -62,18 +63,18 @@ export const UsageMetadata: React.FC<UsageMetadataProps> = ({
                     </Text>
                 )}
                 {response_metadata?.model_name && (
-                    <Text color="gray">
-                        🤖 <Text>{response_metadata.model_name}</Text>
+                    <Text color="gray" dimColor>
+                        🤖<Text color="blue">{response_metadata.model_name}</Text>
                     </Text>
                 )}
                 {tool_call_id && (
-                    <Text color="gray">
-                        #️⃣ <Text>{tool_call_id}</Text>
+                    <Text color="gray" dimColor>
+                        #️⃣<Text>{tool_call_id.slice(0, 8)}</Text>
                     </Text>
                 )}
                 {id && (
-                    <Text color="gray">
-                        🆔 <Text>{id}</Text>
+                    <Text color="gray" dimColor>
+                        🆔<Text>{id.slice(0, 8)}</Text>
                     </Text>
                 )}
             </Box>

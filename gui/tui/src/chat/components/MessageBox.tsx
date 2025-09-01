@@ -16,9 +16,9 @@ export const MessagesBox = ({
     client: LangGraphClient;
 }) => {
     return (
-        <Box flexDirection="column">
+        <Box flexDirection="column" paddingY={0}>
             {renderMessages.map((message) => (
-                <Box key={message.unique_id} flexDirection="column">
+                <Box key={message.unique_id} flexDirection="column" marginBottom={0}>
                     {message.type === 'human' ? (
                         <MessageHuman content={message.content} />
                     ) : message.type === 'tool' ? (

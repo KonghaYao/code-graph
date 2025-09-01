@@ -11,9 +11,11 @@ interface MessageAIProps {
 
 const MessageAI: React.FC<MessageAIProps> = ({ message }) => {
     return (
-        <Box borderStyle="round" paddingX={1} flexDirection="column">
-            <Box paddingBottom={1}>
-                <Text bold>{message.name}</Text>
+        <Box borderStyle="double" borderColor="cyan" paddingX={1} paddingY={0} flexDirection="column" marginBottom={0}>
+            <Box paddingBottom={0}>
+                <Text color="cyan" bold>
+                    🤖 {message.name}
+                </Text>
             </Box>
             <Box>
                 <Markdown>{getMessageContent(message.content)}</Markdown>

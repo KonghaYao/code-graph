@@ -8,7 +8,7 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
-const globalConfig = { apiUrl: 'http://localhost:8123', agentName: 'code' };
+const globalConfig = { apiUrl: 'http://0.0.0.0:8123', agentName: 'code' };
 
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [config, setConfig] = useState<AppConfig | null>(globalConfig);

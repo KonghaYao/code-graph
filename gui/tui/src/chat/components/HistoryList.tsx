@@ -9,8 +9,7 @@ interface HistoryListProps {
 }
 
 const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
-    const { toggleGraphVisible, historyList, currentChatId, refreshHistoryList, createNewChat, toHistoryChat } =
-        useChat();
+    const { toggleGraphVisible, historyList, currentChatId, refreshHistoryList, toHistoryChat } = useChat();
 
     useEffect(() => {
         refreshHistoryList();
@@ -61,15 +60,30 @@ const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
     // For now, delete functionality is omitted from this SelectInput-based UI.
 
     return (
-        <Box flexDirection="column" borderStyle="round" padding={1} flexGrow={1}>
-            <Box paddingBottom={1} justifyContent="space-between">
-                <Text bold>📜 历史记录</Text>
-                <Text color="gray">'r' 刷新, 'q' 关闭</Text>
+        <Box flexDirection="column" borderStyle="double" borderColor="yellow" paddingX={1} paddingY={0} flexGrow={1}>
+            <Box paddingBottom={0} justifyContent="space-between">
+                <Text color="yellow" bold>
+                    📜 历史记录
+                </Text>
+                <Text color="gray">
+                    <Text color="cyan" bold>
+                        r
+                    </Text>
+                    :刷新{' '}
+                    <Text color="cyan" bold>
+                        q
+                    </Text>
+                    :关闭
+                </Text>
             </Box>
             {historyList.length === 0 ? (
-                <Text>暂无历史记录</Text>
+                <Box paddingLeft={1} marginTop={1}>
+                    <Text color="gray">❌ 暂无历史记录</Text>
+                </Box>
             ) : (
-                <SelectInput items={items} onSelect={handleSelect} />
+                <Box marginTop={1}>
+                    <SelectInput items={items} onSelect={handleSelect} />
+                </Box>
             )}
         </Box>
     );

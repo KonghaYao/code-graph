@@ -47,17 +47,24 @@ const MessageTool: React.FC<MessageToolProps> = ({
     const { getToolUIRender } = useChat();
     const render = getToolUIRender(message.name!);
     const borderColor = getToolColor(message.name!);
-    // In Ink, collapsibility is handled by not rendering content.
-    // The parent component's state (`isCollapsed`) determines this.
 
     if (render) {
         return render(message) as JSX.Element;
     }
 
     return (
-        <Box flexDirection="column" borderStyle="round" borderColor={borderColor} paddingX={1}>
+        <Box
+            flexDirection="column"
+            borderStyle="double"
+            borderColor={borderColor}
+            paddingX={1}
+            paddingY={0}
+            marginBottom={0}
+        >
             <Box>
-                <Text bold>{message.name}</Text>
+                <Text color={borderColor} bold>
+                    🔧 {message.name}
+                </Text>
             </Box>
 
             {false && (

@@ -12,7 +12,7 @@ import SettingsPanel from './components/SettingsPanel';
 import { useWindowSize } from '../hooks/useWindowSize';
 import AgentOptions from './AgentOptions';
 
-const MESSAGE_APPROX_HEIGHT = 5; // Approximate lines per message
+const MESSAGE_APPROX_HEIGHT = 3; // Approximate lines per message (更紧凑)
 
 const ChatMessages: React.FC<{ scrollOffset: number; terminalHeight: number }> = ({ scrollOffset, terminalHeight }) => {
     const { renderMessages, loading, inChatError, client, collapsedTools, toggleToolCollapse, isFELocking } = useChat();
@@ -26,7 +26,7 @@ const ChatMessages: React.FC<{ scrollOffset: number; terminalHeight: number }> =
     const visibleMessages = renderMessages.slice(startIndex, endIndex);
 
     return (
-        <Box flexDirection="column" flexGrow={1} padding={1}>
+        <Box flexDirection="column" flexGrow={1} paddingX={1} paddingY={0}>
             <MessagesBox
                 renderMessages={visibleMessages}
                 collapsedTools={collapsedTools}
@@ -34,14 +34,17 @@ const ChatMessages: React.FC<{ scrollOffset: number; terminalHeight: number }> =
                 client={client!}
             />
             {loading && !isFELocking() && (
-                <Box>
+                <Box marginTop={0} paddingLeft={1}>
                     <Text>
-                        <Spinner type="dots" />
-                        正在思考中...
+                        <Spinner type="dots" /> <Text color="cyan">正在思考中...</Text>
                     </Text>
                 </Box>
             )}
-            {inChatError && <Text color="red">{JSON.stringify(inChatError)}</Text>}
+            {inChatError && (
+                <Box marginTop={0} paddingLeft={1}>
+                    <Text color="red">❌ {JSON.stringify(inChatError)}</Text>
+                </Box>
+            )}
         </Box>
     );
 };
@@ -76,10 +79,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
     };
 
     return (
-        <Box flexDirection="column" borderStyle="round" padding={1}>
-            <Box>
+        <Box flexDirection="column" borderStyle="double" borderColor="cyan" paddingX={1} paddingY={0}>
+            <Box alignItems="center">
                 <Box marginRight={1}>
-                    <Text>Input:</Text>
+                    <Text color="green" bold>
+                        💬
+                    </Text>
                 </Box>
                 <TextInput
                     value={userInput as string}
@@ -89,16 +94,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
                     focus={mode === 'agent'}
                 />
             </Box>
-            <Box marginTop={1} justifyContent="space-between">
-                <Box>
-                    <Box marginRight={1}>
-                        <Text>Agent:</Text>
-                    </Box>
-                    <Text>
+            <Box justifyContent="space-between" marginTop={0}>
+                <Box alignItems="center">
+                    <Text color="magenta" bold>
+                        🤖{' '}
+                    </Text>
+                    <Text color="white">
                         {client?.availableAssistants.find((a) => a.graph_id === currentAgent)?.name || '未选择'}
                     </Text>
                 </Box>
-                <Text color="gray">会话 ID: {currentChatId}</Text>
+                <Text color="gray" dimColor>
+                    💬 {currentChatId?.slice(-8) || 'N/A'}
+                </Text>
             </Box>
         </Box>
     );
@@ -113,7 +120,7 @@ const Chat: React.FC = () => {
     const [scrollOffset, setScrollOffset] = useState(0);
     const { height: terminalHeight } = useWindowSize();
 
-    const availableHeight = terminalHeight - 5; // Account for header and input box
+    const availableHeight = terminalHeight - 4; // Account for header and input box (更紧凑)
     const maxVisibleMessages = Math.floor(availableHeight / MESSAGE_APPROX_HEIGHT);
     const totalMessages = renderMessages.length;
     const maxScrollOffset = Math.max(0, totalMessages - maxVisibleMessages);
@@ -214,30 +221,56 @@ const Chat: React.FC = () => {
                     />
                 )}
             </Box>
-            <Box borderStyle="round" paddingX={1} justifyContent="space-between">
+            <Box borderStyle="double" borderColor="magenta" paddingX={1} paddingY={0} justifyContent="space-between">
                 <Text>
-                    💬 LangGraph Chat {mode === 'command' && <Text color="yellow">(命令模式)</Text>}
-                    {mode === 'agent' && <Text color="cyan">(Agent 模式)</Text>}
+                    <Text color="magenta" bold>
+                        ⚡ LangGraph Chat
+                    </Text>
+                    {mode === 'command' && (
+                        <Text color="yellow" bold>
+                            {' '}
+                            [CMD]
+                        </Text>
+                    )}
+                    {mode === 'agent' && (
+                        <Text color="cyan" bold>
+                            {' '}
+                            [AGENT]
+                        </Text>
+                    )}
                 </Text>
                 <Text>
                     {mode === 'command' ? (
                         <Text>
-                            <Text color="cyan">'i/a'</Text>
-                            <Text>: Agent | </Text>
-                            <Text color="cyan">'h'</Text>
-                            <Text>: 历史 | </Text>
-                            <Text color="cyan">'s'</Text>
-                            <Text>: 设置 | </Text>
-                            <Text color="cyan">'g'</Text>
-                            <Text>: Agent选择 | </Text>
-                            <Text color="cyan">'ctrl+c'</Text>
-                            <Text>: 退出</Text>
+                            <Text color="cyan" bold>
+                                i/a
+                            </Text>
+                            <Text color="gray">:Agent </Text>
+                            <Text color="cyan" bold>
+                                h
+                            </Text>
+                            <Text color="gray">:历史 </Text>
+                            <Text color="cyan" bold>
+                                s
+                            </Text>
+                            <Text color="gray">:设置 </Text>
+                            <Text color="cyan" bold>
+                                g
+                            </Text>
+                            <Text color="gray">:选择 </Text>
+                            <Text color="red" bold>
+                                ^C
+                            </Text>
+                            <Text color="gray">:退出</Text>
                         </Text>
                     ) : (
                         <Text>
-                            <Text color="gray">↑/↓: 选择 | </Text>
-                            <Text color="cyan">'esc'</Text>
-                            <Text color="gray">: 命令模式</Text>
+                            <Text color="yellow">↑↓</Text>
+                            <Text color="gray">:滚动 </Text>
+                            <Text color="cyan" bold>
+                                ESC
+                            </Text>
+                            <Text color="gray">:命令</Text>
                         </Text>
                     )}
                 </Text>

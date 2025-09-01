@@ -31,8 +31,18 @@ const AgentOptions: React.FC<AgentOptionsProps> = ({ onClose }) => {
     };
 
     return (
-        <Box flexDirection="column" width="100%" height="100%" padding={1}>
-            <Text>选择一个 Agent:</Text>
+        <Box
+            flexDirection="column"
+            width="100%"
+            height="100%"
+            borderStyle="double"
+            borderColor="green"
+            paddingX={1}
+            paddingY={0}
+        >
+            <Text color="green" bold>
+                🤖 选择一个 Agent:
+            </Text>
             <Box marginTop={1} flexGrow={1}>
                 {agentOptions.length > 0 ? (
                     <SelectInput
@@ -41,11 +51,17 @@ const AgentOptions: React.FC<AgentOptionsProps> = ({ onClose }) => {
                         initialIndex={agentOptions.findIndex((opt) => opt.value === selectedAgentId)}
                     />
                 ) : (
-                    <Text>没有可用的 Agent。</Text>
+                    <Text color="gray">❌ 没有可用的 Agent。</Text>
                 )}
             </Box>
             <Box marginTop={1}>
-                <Text color="gray">按 'esc' 返回。</Text>
+                <Text color="gray">
+                    按{' '}
+                    <Text color="cyan" bold>
+                        ESC
+                    </Text>{' '}
+                    返回。
+                </Text>
             </Box>
         </Box>
     );

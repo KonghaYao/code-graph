@@ -47,19 +47,34 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose }) => {
     };
 
     return (
-        <Box flexDirection="column" borderStyle="round" padding={1} flexGrow={1}>
-            <Box paddingBottom={1} justifyContent="space-between">
-                <Text bold>⚙️ 设置</Text>
-                <Text color="gray">'s': 保存 | 'q': 取消</Text>
+        <Box flexDirection="column" borderStyle="double" borderColor="magenta" paddingX={1} paddingY={0} flexGrow={1}>
+            <Box paddingBottom={0} justifyContent="space-between">
+                <Text color="magenta" bold>
+                    ⚙️ 设置
+                </Text>
+                <Text color="gray">
+                    <Text color="cyan" bold>
+                        s
+                    </Text>
+                    :保存{' '}
+                    <Text color="cyan" bold>
+                        q
+                    </Text>
+                    :取消
+                </Text>
             </Box>
 
-            <Box flexDirection="column" marginBottom={1}>
-                <Text>API URL:</Text>
+            <Box flexDirection="column" marginTop={1} marginBottom={0}>
+                <Text color="white" bold>
+                    🌐 API URL:
+                </Text>
                 <TextInput value={tempApiUrl} onChange={setTempApiUrl} onSubmit={handleSave} />
             </Box>
 
-            <Box flexDirection="column" marginBottom={1}>
-                <Text>Agent 名称:</Text>
+            <Box flexDirection="column" marginTop={1} marginBottom={0}>
+                <Text color="white" bold>
+                    🤖 Agent 名称:
+                </Text>
                 <SelectInput
                     items={agentOptions}
                     onSelect={handleAgentSelect}
@@ -67,8 +82,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose }) => {
                 />
             </Box>
 
-            <Box>
-                <Text color="cyan">按 's' 保存或 'q' 取消</Text>
+            <Box marginTop={1}>
+                <Text color="cyan">
+                    按{' '}
+                    <Text color="cyan" bold>
+                        s
+                    </Text>{' '}
+                    保存或{' '}
+                    <Text color="cyan" bold>
+                        q
+                    </Text>{' '}
+                    取消
+                </Text>
             </Box>
         </Box>
     );
