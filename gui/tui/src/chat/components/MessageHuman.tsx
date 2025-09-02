@@ -3,9 +3,10 @@ import { Box, Text } from 'ink';
 
 interface MessageHumanProps {
     content: string | any[];
+    messageNumber: number;
 }
 
-const MessageHuman: React.FC<MessageHumanProps> = ({ content }) => {
+const MessageHuman: React.FC<MessageHumanProps> = ({ content, messageNumber }) => {
     const renderContent = () => {
         if (typeof content === 'string') {
             return <Text color="white">{content}</Text>;
@@ -25,10 +26,10 @@ const MessageHuman: React.FC<MessageHumanProps> = ({ content }) => {
     };
 
     return (
-        <Box justifyContent="flex-end" marginBottom={0}>
+        <Box marginBottom={0}>
             <Box paddingX={1} paddingY={0} borderStyle="double" borderColor="green">
                 <Text color="green" bold>
-                    👤{' '}
+                    {messageNumber}. 👤{' '}
                 </Text>
                 {renderContent()}
             </Box>

@@ -28,6 +28,7 @@ const ChatMessages: React.FC<{ scrollOffset: number; terminalHeight: number }> =
         <Box flexDirection="column" flexGrow={1} paddingX={0} paddingY={0}>
             <MessagesBox
                 renderMessages={visibleMessages}
+                startIndex={startIndex}
                 collapsedTools={collapsedTools}
                 toggleToolCollapse={toggleToolCollapse}
                 client={client!}
@@ -179,7 +180,7 @@ const Chat: React.FC = () => {
 
     // Handle auto-scroll to bottom when new messages arrive
     useEffect(() => {
-        setScrollOffset(maxScrollOffset);
+        setScrollOffset(0);
     }, [totalMessages, maxScrollOffset]);
 
     // Props for ChatInput

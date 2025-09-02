@@ -1,4 +1,4 @@
-import { Box } from 'ink';
+import { Box, Text } from 'ink';
 import MessageHuman from './MessageHuman';
 import MessageAI from './MessageAI';
 import MessageTool from './MessageTool';
@@ -9,18 +9,20 @@ export const MessagesBox = ({
     collapsedTools,
     toggleToolCollapse,
     client,
+    startIndex,
 }: {
     renderMessages: RenderMessage[];
     collapsedTools: string[];
     toggleToolCollapse: (id: string) => void;
     client: LangGraphClient;
+    startIndex: number;
 }) => {
     return (
         <Box flexDirection="column" paddingY={0}>
-            {renderMessages.map((message) => (
+            {renderMessages.map((message, index) => (
                 <Box key={message.unique_id} flexDirection="column" marginBottom={0}>
                     {message.type === 'human' ? (
-                        <MessageHuman content={message.content} />
+                        <MessageHuman content={message.content} messageNumber={index + 1 + startIndex} />
                     ) : message.type === 'tool' ? (
                         <MessageTool
                             message={message}
@@ -29,9 +31,10 @@ export const MessagesBox = ({
                             formatTokens={formatTokens}
                             isCollapsed={collapsedTools.includes(message.id!)}
                             onToggleCollapse={() => toggleToolCollapse(message.id!)}
+                            messageNumber={index + 1 + startIndex}
                         />
                     ) : (
-                        <MessageAI message={message} />
+                        <MessageAI message={message} messageNumber={index + 1 + startIndex} />
                     )}
                 </Box>
             ))}

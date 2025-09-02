@@ -83,7 +83,10 @@ export const grep_tool = tool(
                 .string()
                 .optional()
                 .describe('File or directory to search in (rg PATH). Defaults to current working directory.'),
-            glob: z.string().describe('Glob pattern to filter files (e.g. "*.js", "*.{ts,tsx}") - maps to rg --glob'),
+            glob: z
+                .string()
+                .optional()
+                .describe('Glob pattern to filter files (e.g. "*.js", "*.{ts,tsx}") - maps to rg --glob'),
             output_mode: z
                 .enum(['content', 'files_with_matches', 'count'])
                 .optional()
