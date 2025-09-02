@@ -113,7 +113,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
 
 const Chat: React.FC = () => {
     const { extraParams } = useSettings();
-    const { toggleHistoryVisible, renderMessages } = useChat();
+    const { toggleHistoryVisible, renderMessages, setUserInput, createNewChat } = useChat();
     const [activeView, setActiveView] = useState<
         'chat' | 'history' | 'settings' | 'graph' | 'artifacts' | 'agentOptions'
     >('chat');
@@ -138,12 +138,19 @@ const Chat: React.FC = () => {
             if (activeView !== 'chat') {
                 return;
             }
-            if (input === 'i' || input === 'a') setMode('agent');
+            if (input === 'a') setMode('agent');
             else if (input === 'h') {
                 toggleHistoryVisible();
                 setActiveView('history');
             } else if (input === 's') setActiveView('settings');
             else if (input === 'g') setActiveView('agentOptions'); // 'g' for agent options
+            else if (input === 'n') {
+                // 'n' for new chat
+                createNewChat(); // 调用 client 上的 newChat 方法
+                setUserInput(''); // 清空输入框
+                setScrollOffset(0); // 滚动到最底部
+                setMode('agent'); // 进入 agent 模式
+            }
         },
         { isActive: mode === 'command' }, // Only active when in command mode
     );
@@ -243,7 +250,7 @@ const Chat: React.FC = () => {
                     {mode === 'command' ? (
                         <Text>
                             <Text color="cyan" bold>
-                                i/a
+                                a
                             </Text>
                             <Text color="gray">:Agent </Text>
                             <Text color="cyan" bold>
@@ -258,6 +265,10 @@ const Chat: React.FC = () => {
                                 g
                             </Text>
                             <Text color="gray">:选择 </Text>
+                            <Text color="cyan" bold>
+                                n
+                            </Text>
+                            <Text color="gray">:新建 </Text>
                             <Text color="red" bold>
                                 ^C
                             </Text>

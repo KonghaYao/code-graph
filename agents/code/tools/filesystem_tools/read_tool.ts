@@ -2,6 +2,8 @@ import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { promises as fs } from 'fs';
 
+const MAX_LINES = 2000;
+
 export const read_tool = tool(
     async ({ file_path, offset, limit }) => {
         try {
@@ -28,11 +30,11 @@ Assume this tool is able to read all files on the machine. If the User provides 
 
 Usage:
 - The file_path parameter must be an absolute path, not a relative path
-- By default, it reads up to 2000 lines starting from the beginning of the file
+- By default, it reads up to ${MAX_LINES} lines starting from the beginning of the file
 - You can optionally specify a line offset and limit (especially handy for long files), but it's recommended to read the whole file by not providing these parameters
-- Any lines longer than 2000 characters will be truncated
+- Any lines longer than ${MAX_LINES} characters will be truncated
 - Results are returned using cat -n format, with line numbers starting at 1
-- This tool allows Claude Code to read images (eg PNG, JPG, etc). When reading an image file the contents are presented visually as Claude Code is a multimodal LLM.
+- This tool allows You to read images (eg PNG, JPG, etc). When reading an image file the contents are presented visually as You is a multimodal LLM.
 - This tool can read PDF files (.pdf). PDFs are processed page by page, extracting both text and visual content for analysis.
 - This tool can read Jupyter notebooks (.ipynb files) and returns all cells with their outputs, combining code, text, and visualizations.
 - You have the capability to call multiple tools in a single response. It is always better to speculatively read multiple files as a batch that are potentially useful. 
@@ -42,12 +44,14 @@ Usage:
             file_path: z.string().describe('The absolute path to the file to read'),
             offset: z
                 .number()
+                .default(0)
                 .optional()
                 .describe(
                     'The line number to start reading from. Only provide if the file is too large to read at once',
                 ),
             limit: z
                 .number()
+                .default(MAX_LINES)
                 .optional()
                 .describe('The number of lines to read. Only provide if the file is too large to read at once.'),
         }),

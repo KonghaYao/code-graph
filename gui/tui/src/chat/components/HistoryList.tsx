@@ -9,7 +9,8 @@ interface HistoryListProps {
 }
 
 const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
-    const { toggleGraphVisible, historyList, currentChatId, refreshHistoryList, toHistoryChat } = useChat();
+    const { toggleGraphVisible, historyList, currentChatId, refreshHistoryList, toHistoryChat, createNewChat } =
+        useChat();
 
     useEffect(() => {
         refreshHistoryList();
@@ -48,7 +49,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
 
     const handleSelect = (item: any) => {
         if (item.value === 'new_chat') {
-            // createNewChat();
+            createNewChat();
         } else {
             toHistoryChat(item.thread);
         }

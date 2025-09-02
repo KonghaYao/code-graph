@@ -36,8 +36,8 @@ const codingAgent = entrypoint('coding-agent', async (state: typeof AState.State
             // exit_plan_mode_tool,
             glob_tool,
             grep_tool,
-            // ls_tool,
-            multi_edit_tool,
+            // ls_tool, # ls 本身非常不稳定， 容易访问到 git 等无用目录；glob 反而更好
+            // multi_edit_tool, # 多重写入容易爆炸，非常不推荐
             // notebook_edit_tool,
             read_tool,
             // task_tool,
