@@ -21,6 +21,28 @@ export const grep_tool = tool(
         head_limit,
         multiline,
     }) => {
+        // 性能优化：验证和限制危险的查询模式
+        if (pattern.length < 2) {
+            return `Error: Pattern too short (${pattern.length} characters). Use patterns with at least 2 characters to avoid performance issues.`;
+        }
+
+        // 检测可能导致性能问题的模式
+        const dangerousPatterns = [
+            /^\.+\*?$/, // 只有点和星号的模式如 ".*", "...", ".*..*"
+            /^\.\*$/, // 纯 ".*" 模式
+            /^.*\*.*\*.*$/, // 多个星号的复杂模式
+            /^\[\^.*\]\*$/, // 复杂的字符类否定
+        ];
+
+        if (dangerousPatterns.some((dp) => dp.test(pattern))) {
+            return `Error: Pattern "${pattern}" may cause performance issues. Please use a more specific pattern.`;
+        }
+
+        // 对于没有文件类型或路径限制的广泛搜索，强制添加默认限制
+        if (!type && !glob && !path && !head_limit) {
+            head_limit = 1000; // 默认限制为1000行结果
+        }
+
         const commandParts: string[] = [rgPath];
 
         if (B) commandParts.push('-B', B.toString());
@@ -46,18 +68,29 @@ export const grep_tool = tool(
             commandParts.push(shellEscape(path));
         }
 
+        // 添加性能优化参数
+        commandParts.push('--max-count', '10000'); // 限制每个文件的最大匹配数
+
         let command = commandParts.join(' ');
 
         if (head_limit) {
             command += ` | head -n ${head_limit}`;
         }
 
-        const result = shell.exec(command, { silent: true });
+        // 添加超时控制
+        const result = shell.exec(command, {
+            silent: true,
+            timeout: 30000, // 30秒超时
+        });
 
         if (result.code !== 0 && result.stderr) {
             // rg exits with code 1 if no matches are found, which is not an error if stdout is empty.
             if (result.code === 1 && result.stdout === '') {
                 return 'No matches found.';
+            }
+            // 检查是否是超时错误
+            if (result.stderr.includes('timeout') || result.stderr.includes('killed')) {
+                return `Error: Search timed out after 30 seconds. Please use a more specific pattern or limit the search scope with type/glob/path parameters.`;
             }
             return `Error executing ripgrep: ${result.stderr}`;
         }
@@ -66,16 +99,23 @@ export const grep_tool = tool(
     },
     {
         name: 'Grep',
-        description: `A powerful search tool built on ripgrep
+        description: `A powerful search tool built on ripgrep with performance optimizations
 
-  Usage:
-  - ALWAYS use Grep for search tasks. NEVER invoke \`grep\` or \`rg\` as a Bash command. The Grep tool has been optimized for correct permissions and access.
-  - Supports full regex syntax (e.g., "log.*Error", "function\\s+\\w+")
-  - Filter files with glob parameter (e.g., "*.js", "**/*.tsx") or type parameter (e.g., "js", "py", "rust")
-  - Output modes: "content" shows matching lines, "files_with_matches" shows only file paths (default), "count" shows match counts
-  - Use Task tool for open-ended searches requiring multiple rounds
-  - Pattern syntax: Uses ripgrep (not grep) - literal braces need escaping (use \`interface\\{\\}\` to find \`interface{}\` in Go code)
-  - Multiline matching: By default patterns match within single lines only. For cross-line patterns like \`struct \\{[\\s\\S]*?field\`, use \`multiline: true\`
+Usage:
+- ALWAYS use Grep for search tasks. NEVER invoke \`grep\` or \`rg\` as a Bash command. The Grep tool has been optimized for correct permissions and access.
+- Supports full regex syntax (e.g., "log.*Error", "function\\s+\\w+")
+- Filter files with glob parameter (e.g., "*.js", "**/*.tsx") or type parameter (e.g., "js", "py", "rust")
+- Output modes: "content" shows matching lines, "files_with_matches" shows only file paths (default), "count" shows match counts
+- Use Task tool for open-ended searches requiring multiple rounds
+- Pattern syntax: Uses ripgrep (not grep) - literal braces need escaping (use \`interface\\{\\}\` to find \`interface{}\` in Go code)
+- Multiline matching: By default patterns match within single lines only. For cross-line patterns like \`struct \\{[\\s\\S]*?field\`, use \`multiline: true\`
+
+Performance Guidelines:
+- Patterns must be at least 2 characters long to avoid performance issues
+- Avoid overly broad patterns like ".*" or complex multi-wildcard patterns
+- For large searches without type/glob/path restrictions, results are automatically limited to 1000 lines
+- Searches timeout after 30 seconds - use more specific patterns if this occurs
+- Each file is limited to 10000 matches maximum
 `,
         schema: z.object({
             pattern: z.string().describe('The regular expression pattern to search for in file contents'),

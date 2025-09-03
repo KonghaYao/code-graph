@@ -7,11 +7,9 @@ const todoSchema = z.object({
     id: z.string(),
 });
 
-const todos = new Map<string, any[]>();
-
 export const todo_write_tool = tool(
-    async ({ todos }) => {
-        return 'Todos saved successfully.';
+    async () => {
+        return 'todo saved successfully';
     },
     {
         name: 'TodoWrite',

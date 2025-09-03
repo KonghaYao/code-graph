@@ -15,6 +15,7 @@ import {
     read_tool,
     write_tool,
 } from './tools/filesystem_tools/index.js';
+import { todo_write_tool } from './tools/task_tools/todo_tool.js';
 // import { web_fetch_tool, web_search_tool } from './tools/web_tools/index.js';
 // import { exit_plan_mode_tool, task_tool, todo_write_tool } from './tools/task_tools/index.js';
 
@@ -34,6 +35,8 @@ const codingAgent = entrypoint('coding-agent', async (state: typeof AState.State
         tools: [
             edit_tool,
             // exit_plan_mode_tool,
+
+            todo_write_tool,
             glob_tool,
             grep_tool,
             // ls_tool, # ls 本身非常不稳定， 容易访问到 git 等无用目录；glob 反而更好
@@ -41,7 +44,6 @@ const codingAgent = entrypoint('coding-agent', async (state: typeof AState.State
             // notebook_edit_tool,
             read_tool,
             // task_tool,
-            // todo_write_tool,
             // web_fetch_tool,
             // web_search_tool,
             write_tool,
