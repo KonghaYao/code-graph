@@ -5,6 +5,7 @@ export interface AppConfig {
     apiUrl: string;
     agentName: string;
     main_model: string;
+    active_agent: string;
 }
 
 interface Data {
@@ -16,6 +17,7 @@ const defaultData: Data = {
         apiUrl: 'http://127.0.0.1:8123',
         agentName: 'code',
         main_model: 'claude-sonnet-4',
+        active_agent: 'code',
     },
 };
 

@@ -257,7 +257,7 @@ const Chat: React.FC = () => {
                     {mode === 'agent' && (
                         <Text color="cyan" bold>
                             {' '}
-                            [AGENT] {extraParams.main_model}
+                            [{extraParams.active_agent}] {extraParams.main_model}
                         </Text>
                     )}
                 </Text>

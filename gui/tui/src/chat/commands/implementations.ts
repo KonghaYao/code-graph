@@ -87,39 +87,34 @@ export const clearCommand: CommandDefinition = {
 };
 
 /**
- * /agent 命令 - 切换代理
+ * /init-agent 初始化 agent.md 文件
  */
-export const agentCommand: CommandDefinition = {
-    name: 'agent',
-    description: '显示或切换当前代理',
-    aliases: ['a'],
-    usage: '/agent [代理名称]',
+export const createAgentMdCommand: CommandDefinition = {
+    name: 'init-agent-md',
+    description: '初始化 agent.md 文件',
+    aliases: ['init-md'],
+    usage: '/init-agent-md',
     execute: async (args: string[], context: CommandContext): Promise<CommandResult> => {
-        if (args.length === 0) {
-            // 显示当前代理信息
-            const currentAgentName =
-                context.client?.availableAssistants.find((a: any) => a.graph_id === context.currentAgent)?.name ||
-                '未选择';
-
-            const availableAgents =
-                context.client?.availableAssistants.map((a: any) => `  - ${a.name} (${a.graph_id})`).join('\n') ||
-                '  无可用代理';
-
-            return {
-                success: true,
-                message: `当前代理: ${currentAgentName}\n\n可用代理:\n${availableAgents}`,
-                shouldClearInput: true,
-            };
-        }
-
-        // TODO: 实现代理切换逻辑
+        context.updateConfig!({
+            active_agent: 'doc-write-agent',
+        });
+        context.userInput = '';
+        context.sendMessage(
+            [
+                {
+                    type: 'human',
+                    content: '请开始创建 AGENTS.md',
+                },
+            ],
+            { extraParams: context.extraParams },
+        );
         return {
-            success: false,
-            message: '代理切换功能暂未实现',
+            success: true,
+            message: '',
             shouldClearInput: true,
         };
     },
 };
 
 // 导出所有命令
-export const builtinCommands: CommandDefinition[] = [initCommand, helpCommand, clearCommand, agentCommand];
+export const builtinCommands: CommandDefinition[] = [initCommand, helpCommand, clearCommand, createAgentMdCommand];

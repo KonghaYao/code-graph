@@ -6,6 +6,7 @@ interface SettingsContextType {
     updateConfig: (newConfig: Partial<AppConfig>) => Promise<void>;
     extraParams: {
         main_model: string;
+        active_agent: string;
     };
 }
 
@@ -15,7 +16,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const [config, setConfig] = useState<AppConfig | null>(null);
     const [loading, setLoading] = useState(true);
     const extraParams = useMemo(() => {
-        return { main_model: config?.main_model || 'claude-sonnet-4' };
+        return { main_model: config?.main_model || 'claude-sonnet-4', active_agent: config?.active_agent || 'code' };
     }, [config]);
     useEffect(() => {
         const loadConfig = async () => {
@@ -29,6 +30,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     const updateConfig = async (newConfig: Partial<AppConfig>) => {
         const updatedConfig = { ...config, ...newConfig } as AppConfig;
+        // @ts-ignore active_agent 字段不需要持久化
+        delete updatedConfig['active_agent'];
         setConfig(updatedConfig);
         await updateDbConfig(newConfig);
     };
