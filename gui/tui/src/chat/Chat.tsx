@@ -10,6 +10,7 @@ import { SettingsProvider, useSettings } from './context/SettingsContext';
 import SettingsPanel from './components/SettingsPanel';
 import { useWindowSize } from '../hooks/useWindowSize';
 import AgentOptions from './AgentOptions';
+import { useCommandHandler } from './components/CommandHandler';
 
 const MESSAGE_APPROX_HEIGHT = 3; // Approximate lines per message (更紧凑)
 
@@ -56,15 +57,23 @@ interface ChatInputProps {
 
 const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
     const { userInput, setUserInput, sendMessage, currentAgent, client, currentChatId } = useChat();
-    const { extraParams, config } = useSettings();
+    const { extraParams } = useSettings();
 
-    // const handleAgentSelect = (item: { value: string }) => {
-    //     setCurrentAgent(item.value);
-    //     setMode('agent'); // Focus input after selection
-    // };
+    // 使用命令处理组件
+    const commandHandler = useCommandHandler({
+        extraParams,
+    });
 
-    const sendTextMessage = () => {
+    const sendTextMessage = async () => {
         if (!userInput) return;
+
+        // 尝试执行命令
+        const commandHandled = await commandHandler.executeCommand();
+        if (commandHandled) {
+            return; // 命令已处理，不继续执行普通消息发送
+        }
+
+        // 普通消息处理
         const content: Message[] = [
             {
                 type: 'human',
@@ -80,17 +89,23 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
 
     return (
         <Box flexDirection="column" borderStyle="double" borderColor="cyan" paddingX={1} paddingY={0}>
+            {/* 命令错误显示 */}
+            <commandHandler.CommandErrorUI />
+
+            {/* 命令提示 */}
+            <commandHandler.CommandHintUI />
+
             <Box alignItems="center">
                 <Box marginRight={1}>
-                    <Text color="green" bold>
-                        💬
+                    <Text color={commandHandler.isCommandInput ? 'yellow' : 'green'} bold>
+                        {commandHandler.isCommandInput ? '⚡' : '💬'}
                     </Text>
                 </Box>
                 <TextInput
                     value={userInput as string}
                     onChange={setUserInput}
                     onSubmit={sendTextMessage}
-                    placeholder="输入消息..."
+                    placeholder={commandHandler.isCommandInput ? '输入命令... (试试 /help)' : '输入消息...'}
                     focus={mode === 'agent'}
                 />
             </Box>
