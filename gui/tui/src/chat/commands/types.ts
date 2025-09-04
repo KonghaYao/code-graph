@@ -30,6 +30,8 @@ export interface CommandContext {
     extraParams?: any;
     /** 创建新聊天 */
     createNewChat: () => void;
+    /** 更新配置函数 */
+    updateConfig?: (config: any) => Promise<void>;
 }
 
 export interface CommandDefinition {

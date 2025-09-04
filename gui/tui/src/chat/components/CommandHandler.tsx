@@ -7,6 +7,7 @@ import { Box, Text } from 'ink';
 import { commandRegistry } from '../commands';
 import { CommandContext } from '../commands/types';
 import { useChat } from '../context/ChatContext';
+import { useSettings } from '../context/SettingsContext';
 import { Message } from '@langgraph-js/sdk';
 
 interface CommandHandlerProps {
@@ -38,6 +39,8 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
 
     // 从 useChat 获取所有需要的状态和函数
     const { userInput, setUserInput, sendMessage, currentAgent, client, createNewChat } = useChat();
+    // 从 useSettings 获取配置更新函数
+    const { updateConfig } = useSettings();
 
     const [commandError, setCommandError] = useState<string | null>(null);
 
@@ -60,6 +63,7 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
                 client,
                 extraParams,
                 createNewChat,
+                updateConfig,
             };
 
             const result = await commandRegistry.executeCommand(userInput, commandContext);
