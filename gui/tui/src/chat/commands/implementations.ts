@@ -101,7 +101,7 @@ export const createAgentMdCommand: CommandDefinition = {
         context.userInput = '';
         return {
             success: true,
-            message: '请开始你的工作',
+            messageContent: '请开始你的工作',
             shouldSendMessage: true,
             shouldClearInput: true,
         };

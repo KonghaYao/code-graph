@@ -16,7 +16,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const [config, setConfig] = useState<AppConfig | null>(null);
     const [loading, setLoading] = useState(true);
     const extraParams = useMemo(() => {
-        return { main_model: config?.main_model || 'claude-sonnet-4', activeAgent: config?.activeAgent || 'code' };
+        return {
+            main_model: config?.main_model || 'claude-sonnet-4',
+            activeAgent: config?.activeAgent || 'coding-agent',
+        };
     }, [config]);
     useEffect(() => {
         const loadConfig = async () => {

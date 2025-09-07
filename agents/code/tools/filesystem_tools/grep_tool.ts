@@ -1,90 +1,75 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { rgPath } from '@vscode/ripgrep';
-import shell from 'shelljs';
+import { execa } from 'execa';
 
-// Helper to escape strings for shell command to prevent injection and misinterpretation
-const shellEscape = (str: string) => `'${str.replace(/'/g, "'\\''")}'`;
+// 使用 execa 执行命令的异步函数
+const execCommand = async (
+    command: string,
+    args: string[],
+    options: { timeout?: number; cwd?: string } = {},
+): Promise<{ code: number; stdout: string; stderr: string }> => {
+    const { timeout = 15000, cwd = process.cwd() } = options;
+
+    try {
+        console.log('execCommand', command, args, cwd);
+        const result = await execa(command, args, {
+            cwd,
+            timeout,
+            reject: false, // 不要在非零退出码时抛出异常
+            stripFinalNewline: false, // 保留原始输出格式
+            stdio: ['pipe', 'pipe', 'pipe'],
+            env: process.env, // 确保禁用颜色输出
+        });
+
+        return {
+            code: result.exitCode ?? 0,
+            stdout: result.stdout,
+            stderr: result.stderr,
+        };
+    } catch (error: any) {
+        // 处理超时和其他错误
+        if (error.timedOut) {
+            return {
+                code: 124, // timeout exit code
+                stdout: error.stdout || '',
+                stderr: (error.stderr || '') + '\nProcess timed out',
+            };
+        }
+
+        return {
+            code: error.exitCode || 1,
+            stdout: error.stdout || '',
+            stderr: error.stderr || error.message || 'Unknown error',
+        };
+    }
+};
 
 export const grep_tool = tool(
-    async ({
-        pattern,
-        path,
-        glob,
-        output_mode,
-        '-B': B,
-        '-A': A,
-        '-C': C,
-        '-n': n,
-        '-i': i,
-        type,
-        head_limit,
-        multiline,
-    }) => {
-        // 性能优化：验证和限制危险的查询模式
-        if (pattern.length < 2) {
-            return `Error: Pattern too short (${pattern.length} characters). Use patterns with at least 2 characters to avoid performance issues.`;
+    async ({ args, head_limit }) => {
+        // 基本验证：确保 args 数组不为空
+        if (!args || args.length === 0) {
+            return 'Error: No arguments provided. Please provide ripgrep arguments.';
         }
 
-        // 检测可能导致性能问题的模式
-        const dangerousPatterns = [
-            /^\.+\*?$/, // 只有点和星号的模式如 ".*", "...", ".*..*"
-            /^\.\*$/, // 纯 ".*" 模式
-            /^.*\*.*\*.*$/, // 多个星号的复杂模式
-            /^\[\^.*\]\*$/, // 复杂的字符类否定
-        ];
-
-        if (dangerousPatterns.some((dp) => dp.test(pattern))) {
-            return `Error: Pattern "${pattern}" may cause performance issues. Please use a more specific pattern.`;
+        // 如果没有设置默认限制，添加性能优化参数
+        if (!head_limit && !args.includes('--max-count')) {
+            head_limit = 500; // 默认限制为500行结果
         }
 
-        // 对于没有文件类型或路径限制的广泛搜索，强制添加默认限制
-        if (!type && !glob && !path && !head_limit) {
-            head_limit = 500; // 默认限制为500行结果，提高响应速度
-        }
-
-        const commandParts: string[] = [rgPath];
-
-        // 添加性能优化参数（必须在模式之前）
-        commandParts.push('--max-count', '1000'); // 限制每个文件的最大匹配数，减少到1000
-
-        if (B) commandParts.push('-B', B.toString());
-        if (A) commandParts.push('-A', A.toString());
-        if (C) commandParts.push('-C', C.toString());
-        if (n) commandParts.push('--line-number');
-        if (i) commandParts.push('--ignore-case');
-        if (multiline) commandParts.push('--multiline', '--multiline-dotall');
-
-        // 设置默认输出模式为 content（更有用）
-        const actualOutputMode = output_mode || 'content';
-        if (actualOutputMode === 'files_with_matches') {
-            commandParts.push('--files-with-matches');
-        } else if (actualOutputMode === 'count') {
-            commandParts.push('--count');
-        }
-
-        if (type) commandParts.push('--type', type);
-        if (glob) commandParts.push('--glob', shellEscape(glob));
-
-        commandParts.push('--');
-        commandParts.push(shellEscape(pattern));
-
-        if (path) {
-            commandParts.push(shellEscape(path));
-        }
-
-        let command = commandParts.join(' ');
-
-        if (head_limit) {
-            command += ` | head -n ${head_limit}`;
-        }
-
-        // 添加超时控制，并确保在正确的工作目录执行
-        const result = shell.exec(command, {
-            silent: true,
-            timeout: 15000, // 15秒超时，提高响应速度
-            cwd: process.cwd(), // 确保使用当前工作目录
+        // 执行 ripgrep 命令
+        let result = await execCommand(rgPath, args, {
+            timeout: 15000, // 15秒超时
+            cwd: process.cwd(),
         });
+
+        // 如果需要限制输出行数，使用 Node.js 处理而不是 shell pipe
+        if (head_limit && result.stdout) {
+            const lines = result.stdout.split('\n');
+            if (lines.length > head_limit) {
+                result.stdout = lines.slice(0, head_limit).join('\n');
+            }
+        }
 
         if (result.code !== 0 && result.stderr) {
             // rg exits with code 1 if no matches are found, which is not an error if stdout is empty.
@@ -92,7 +77,7 @@ export const grep_tool = tool(
                 return 'No matches found.';
             }
             // 检查是否是超时错误
-            if (result.stderr.includes('timeout') || result.stderr.includes('killed')) {
+            if (result.code === 124 || result.stderr.includes('timeout') || result.stderr.includes('timed out')) {
                 return `Error: Search timed out after 15 seconds. Please use a more specific pattern or limit the search scope with type/glob/path parameters.`;
             }
             return `Error executing ripgrep: ${result.stderr}`;
@@ -101,85 +86,64 @@ export const grep_tool = tool(
         return result.stdout || 'No matches found.';
     },
     {
-        name: 'Grep',
-        description: `A powerful search tool for finding text patterns within file contents using ripgrep
+        name: 'search-files-rg',
+        description: `Ripgrep (rg) - A fast text search tool that recursively searches directories for regex patterns
 
 ⚠️ IMPORTANT USAGE GUIDELINES:
-- Use this tool ONLY for searching TEXT PATTERNS within file contents
-- For reading entire files or specific files, use the Read tool instead
-- For finding files by name/path patterns, use the Glob tool instead
-- This tool is optimized for content search, not file browsing
+- This tool wraps the ripgrep (rg) command-line tool
+- Use this ONLY for searching TEXT PATTERNS within file contents
+- For reading entire files, use the Read tool instead
+- For finding files by name patterns, use the Glob tool instead
 
-Usage:
-- Supports full regex syntax (e.g., "log.*Error", "function\\s+\\w+")  
-- Filter files with glob parameter (e.g., "src/*.js", "src/**/*.tsx") or type parameter (e.g., "js", "py", "rust")
-- Output modes: "content" shows matching lines, "files_with_matches" shows only file paths, "count" shows match counts
-- Pattern syntax: Uses ripgrep (not grep) - literal braces need escaping (use \`interface\\{\\}\` to find \`interface{}\` in Go code)
-- Multiline matching: By default patterns match within single lines only. For cross-line patterns like \`struct \\{[\\s\\S]*?field\`, use \`multiline: true\`
+🔍 SEARCH PATH REQUIREMENT:
+- MUST always specify a search path at the end of args array
+- If no specific path needed, use "./" for current directory
+- Never omit the path parameter - ripgrep requires it
 
-Performance Guidelines:
-- Patterns must be at least 2 characters long to avoid performance issues
-- Avoid overly broad patterns like ".*" or complex multi-wildcard patterns  
-- For large searches without type/glob/path restrictions, results are automatically limited to 500 lines
-- Searches timeout after 15 seconds - use more specific patterns if this occurs
-- Each file is limited to 1000 matches maximum
+Usage - Pass ripgrep (rg) arguments as an array:
+The args array corresponds directly to 'rg [OPTIONS] PATTERN [PATH ...]'
+
+Examples:
+- Search pattern in current directory: ["PATTERN", "./"]
+- Search in specific path: ["PATTERN", "src/"]
+- Search with file type filter: ["--type", "ts", "PATTERN", "./"]
+- Case insensitive search: ["-i", "PATTERN", "./"]
+- Show line numbers: ["-n", "PATTERN", "./"]
+- Show context lines: ["-C", "3", "PATTERN", "./"]
+- Only show file names: ["-l", "PATTERN", "./"]
+- Count matches: ["-c", "PATTERN", "./"]
+- Multiple options: ["-n", "-i", "--type", "js", "function", "src/"]
+
+Common ripgrep (rg) options:
+- -i, --ignore-case: Case insensitive search
+- -n, --line-number: Show line numbers
+- -A NUM: Show NUM lines after each match
+- -B NUM: Show NUM lines before each match
+- -C NUM: Show NUM lines around each match
+- -l, --files-with-matches: Only show file paths that match
+- -c, --count: Only show count of matches per file
+- --type TYPE: Only search files of TYPE (js, ts, py, rust, etc.)
+- --glob PATTERN: Include/exclude files matching PATTERN
+- --max-count NUM: Stop after NUM matches per file
+- --no-ignore: Don't respect .gitignore files
+- --hidden: Search hidden files and directories
+
+Performance:
+- 15 second timeout per search
+- Results limited to 500 lines by default (use head_limit parameter)
+- Respects .gitignore by default (use --no-ignore to override)
 `,
         schema: z.object({
-            pattern: z.string().describe('The regular expression pattern to search for in file contents'),
-            path: z
-                .string()
-                .optional()
-                .describe('File or directory to search in (rg PATH). Defaults to current working directory.'),
-            glob: z
-                .string()
-                .optional()
-                .describe('Glob pattern to filter files (e.g. "*.js", "*.{ts,tsx}") - maps to rg --glob'),
-            output_mode: z
-                .enum(['content', 'files_with_matches', 'count'])
-                .optional()
+            args: z
+                .array(z.string())
                 .describe(
-                    'Output mode: "content" shows matching lines (supports -A/-B/-C context, -n line numbers, head_limit), "files_with_matches" shows file paths (supports head_limit), "count" shows match counts (supports head_limit). Defaults to "content".',
-                ),
-            '-B': z
-                .number()
-                .optional()
-                .describe(
-                    'Number of lines to show before each match (rg -B). Requires output_mode: "content", ignored otherwise.',
-                ),
-            '-A': z
-                .number()
-                .optional()
-                .describe(
-                    'Number of lines to show after each match (rg -A). Requires output_mode: "content", ignored otherwise.',
-                ),
-            '-C': z
-                .number()
-                .optional()
-                .describe(
-                    'Number of lines to show before and after each match (rg -C). Requires output_mode: "content", ignored otherwise.',
-                ),
-            '-n': z
-                .boolean()
-                .optional()
-                .describe('Show line numbers in output (rg -n). Requires output_mode: "content", ignored otherwise.'),
-            '-i': z.boolean().optional().describe('Case insensitive search (rg -i)'),
-            type: z
-                .string()
-                .optional()
-                .describe(
-                    'File type to search (rg --type). Common types: js, py, rust, go, java, etc. More efficient than include for standard file types.',
+                    'Ripgrep (rg) command arguments as array. Format: [OPTIONS...] PATTERN [PATH...]. MUST include path at end! Examples: ["import", "./"] (search "import" in current dir), ["-n", "-i", "function", "./"] (search "function" with line numbers, case insensitive), ["--type", "ts", "export", "src/"] (search "export" in TypeScript files in src/).',
                 ),
             head_limit: z
                 .number()
                 .optional()
                 .describe(
-                    'Limit output to first N lines/entries, equivalent to "| head -N". Works across all output modes: content (limits output lines), files_with_matches (limits file paths), count (limits count entries). When unspecified, shows all results from ripgrep.',
-                ),
-            multiline: z
-                .boolean()
-                .optional()
-                .describe(
-                    'Enable multiline mode where . matches newlines and patterns can span lines (rg -U --multiline-dotall). Default: false.',
+                    'Limit output to first N lines. If not specified and no --max-count in args, defaults to 500 lines for performance.',
                 ),
         }),
     },
