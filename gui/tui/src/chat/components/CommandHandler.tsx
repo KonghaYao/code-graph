@@ -32,17 +32,20 @@ interface CommandHandlerReturn {
     CommandHintUI: React.FC;
     /** 命令错误UI组件 */
     CommandErrorUI: React.FC;
+    /** 命令成功消息UI组件 */
+    CommandSuccessUI: React.FC;
 }
 
 export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerReturn => {
-    const { extraParams, onCommandExecuted } = props;
+    const { onCommandExecuted } = props;
 
     // 从 useChat 获取所有需要的状态和函数
     const { userInput, setUserInput, sendMessage, currentAgent, client, createNewChat } = useChat();
     // 从 useSettings 获取配置更新函数
-    const { updateConfig } = useSettings();
+    const { extraParams, updateConfig } = useSettings();
 
     const [commandError, setCommandError] = useState<string | null>(null);
+    const [commandSuccessMessage, setCommandSuccessMessage] = useState<string | null>(null);
 
     // 检查是否为命令输入并获取建议
     const isCommandInput = userInput.startsWith('/');
@@ -73,8 +76,8 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
                 setTimeout(() => setCommandError(null), 3000); // 3秒后清除错误
             } else {
                 if (result.message) {
-                    // 显示命令执行结果（可选）
-                    console.log('命令执行成功:', result.message);
+                    setCommandSuccessMessage(result.message);
+                    setTimeout(() => setCommandSuccessMessage(null), 5000); // 3秒后清除成功消息
                 }
             }
 
@@ -138,6 +141,19 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
         );
     };
 
+    // 命令成功消息UI组件
+    const CommandSuccessUI: React.FC = () => {
+        if (!commandSuccessMessage) {
+            return null;
+        }
+
+        return (
+            <Box marginBottom={1}>
+                <Text color="green">✅ {commandSuccessMessage}</Text>
+            </Box>
+        );
+    };
+
     return {
         isCommandInput,
         commandSuggestions,
@@ -146,5 +162,6 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
         executeCommand,
         CommandHintUI,
         CommandErrorUI,
+        CommandSuccessUI,
     };
 };

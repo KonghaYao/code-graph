@@ -96,21 +96,13 @@ export const createAgentMdCommand: CommandDefinition = {
     usage: '/init-agent-md',
     execute: async (args: string[], context: CommandContext): Promise<CommandResult> => {
         context.updateConfig!({
-            active_agent: 'doc-write-agent',
+            activeAgent: 'doc-write-agent',
         });
         context.userInput = '';
-        context.sendMessage(
-            [
-                {
-                    type: 'human',
-                    content: '请开始创建 AGENTS.md',
-                },
-            ],
-            { extraParams: context.extraParams },
-        );
         return {
             success: true,
-            message: '',
+            message: '请开始你的工作',
+            shouldSendMessage: true,
             shouldClearInput: true,
         };
     },

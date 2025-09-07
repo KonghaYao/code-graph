@@ -92,6 +92,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
             {/* 命令错误显示 */}
             <commandHandler.CommandErrorUI />
 
+            {/* 命令成功消息显示 */}
+            <commandHandler.CommandSuccessUI />
+
             {/* 命令提示 */}
             <commandHandler.CommandHintUI />
 
@@ -257,7 +260,7 @@ const Chat: React.FC = () => {
                     {mode === 'agent' && (
                         <Text color="cyan" bold>
                             {' '}
-                            [{extraParams.active_agent}] {extraParams.main_model}
+                            [{extraParams.activeAgent}] {extraParams.main_model}
                         </Text>
                     )}
                 </Text>

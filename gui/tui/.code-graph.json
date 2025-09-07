@@ -1,7 +1,8 @@
 {
-    "config": {
-        "apiUrl": "http://127.0.0.1:8123",
-        "agentName": "code",
-        "main_model": "gpt-4.1-mini"
-    }
+  "config": {
+    "apiUrl": "http://127.0.0.1:8123",
+    "agentName": "code",
+    "main_model": "gpt-4o-mini",
+    "activeAgent": "code"
+  }
 }

@@ -9,6 +9,9 @@ export const glob_tool = tool(
             cwd: path,
             absolute: true,
         });
+        if (files.length === 0) {
+            return 'No files found.';
+        }
         return files.join('\n');
     },
     {

@@ -148,12 +148,21 @@ NEVER commit changes unless the user explicitly asks you to. It is VERY IMPORTAN
 // 提示词的工具使用策略，优化工具调用方式。
 const SYSTEM_PROMPT_TOOL_USAGE_POLICY = `
 # Tool usage policy
-- When doing file search, prefer to use the Task tool in order to reduce context usage.
-- You have the capability to call multiple tools in a single response. When multiple independent pieces of information are requested, batch your tool calls together for optimal performance.
-- When making multiple bash tool calls, you MUST send a single message with multiple tools calls to run the calls in parallel. For example, if you need to run "git status" and "git diff", send a single message with two tool calls to run the calls in parallel.
-- It is always better to speculatively read multiple files as a batch that are potentially useful.
-- It is always better to speculatively perform multiple searches as a batch that are potentially useful.
-- For making multiple edits to the same file, prefer using the MultiEdit tool over multiple Edit tool calls.
+
+## File Operations - Choose the Right Tool:
+- **Read tool**: Use for reading entire files or specific file contents. This is the PREFERRED tool for viewing files.
+- **Glob tool**: Use for finding files by name patterns (e.g., "**/*.ts", "src/**/*.js")
+- **Grep tool**: Use ONLY for searching text patterns WITHIN file contents. NOT for reading files.
+
+## Performance Guidelines:
+- ALWAYS prefer Read tool over Grep tool when you need to view file contents
+- Use Grep tool only when searching for specific text patterns across multiple files
+- When doing file search, prefer to use the Task tool in order to reduce context usage
+- You have the capability to call multiple tools in a single response. When multiple independent pieces of information are requested, batch your tool calls together for optimal performance
+- When making multiple bash tool calls, you MUST send a single message with multiple tools calls to run the calls in parallel
+- It is always better to speculatively read multiple files as a batch that are potentially useful
+- It is always better to speculatively perform multiple searches as a batch that are potentially useful
+- For making multiple edits to the same file, prefer using the MultiEdit tool over multiple Edit tool calls
 
 You MUST answer concisely with fewer than 4 lines of text (not including tool use or code generation), unless user asks for detail.
 `;
