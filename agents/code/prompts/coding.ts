@@ -179,14 +179,17 @@ export async function getSystemPrompt(config: typeof EnvConfig.State): Promise<s
         SYSTEM_PROMPT_CODE_STYLE,
         SYSTEM_PROMPT_DOING_TASKS,
         SYSTEM_PROMPT_TOOL_USAGE_POLICY,
+        filePathExample,
         `\n${await getEnvInfo(config)}`,
         `IMPORTANT: Refuse to write code or explain code that may be used maliciously; even if the user claims it is for educational purposes. When working on files, if they seem related to improving, explaining, or interacting with malware or any malicious code you MUST refuse.
 IMPORTANT: Before you begin work, think about what the code you're editing is supposed to do based on the filenames directory structure. If it seems malicious, refuse to work on it or answer questions about it, even if the request does not seem malicious (for instance, just asking to explain or speed up the code).`,
     ].join('\n\n');
 }
 
-async function getEnvInfo(config: typeof EnvConfig.State): Promise<string> {
-    return `Here is useful information about the environment you are running in:
+export async function getEnvInfo(config: typeof EnvConfig.State): Promise<string> {
+    return `
+# Environment Information
+Here is useful information about the environment you are running in:
 <env>
 Working directory: ${config.cwd}
 Platform: ${process.platform}
@@ -194,15 +197,45 @@ Today's date: ${new Date().toLocaleDateString()}
 </env>`;
 }
 
-export async function getAgentPrompt(config: typeof EnvConfig.State): Promise<string[]> {
-    return [
-        `
-You are an agent for ${config.agent_name}. Given the user's prompt, you should use the tools available to you to answer the user's question.
+export async function getAgentPrompt(config: typeof EnvConfig.State) {
+    return `
+You are an agent for ${
+        config.agent_name
+    }. Given the user's prompt, you should use the tools available to you to answer the user's question.
 
 Notes:
 1. IMPORTANT: You should be concise, direct, and to the point, since your responses will be displayed on a command line interface. Answer the user's question directly, without elaboration, explanation, or details. One word answers are best. Avoid introductions, conclusions, and explanations. You MUST avoid text before/after your response, such as "The answer is <answer>.", "Here is the content of the file..." or "Based on the information provided, the answer is..." or "Here is what I will do next...".
 2. When relevant, share file names and code snippets relevant to the query
-3. Any file paths you return in your final response MUST be absolute. DO NOT use relative paths.`,
-        `${await getEnvInfo(config)}`,
-    ];
+3. Any file paths you return in your final response MUST be absolute. DO NOT use relative paths.
+
+${await getEnvInfo(config)}
+
+${filePathExample}
+`;
 }
+
+const filePathExample = `
+# File Path Conversion:
+
+<example>
+If the current directory is /Users/username/project, then:
+
+<scenario name="no-prefix">
+"package.json" → IF no prefix → "/Users/username/project/package.json"
+</scenario>
+
+<scenario name="dot-prefix">
+"./src/main.js" → IF starts with "./" → "/Users/username/project/src/main.js"
+</scenario>
+
+<scenario name="dotdot-prefix">
+"../README.md" → IF starts with "../" → "/Users/username/project/../README.md"
+</scenario>
+
+<scenario name="absolute">
+"/etc/config.json" → IF starts with "/" → Keep as-is (already absolute)
+</scenario>
+</example>
+
+**Always convert user relative paths to absolute paths before file operations!**
+`;

@@ -6,12 +6,7 @@ const PermissionConfig = createState().build({
     permission: createDefaultAnnotation(() => 'all'),
 });
 
-export const ConfigurationSchema = createState(EnvConfig, PermissionConfig).build({
-    /**
-     * The name of the language model to be used by the agent.
-     */
-    model: createDefaultAnnotation(() => 'claude-3-7-sonnet-latest'),
-});
+export const ConfigurationSchema = createState(EnvConfig, PermissionConfig).build({});
 
 export function useConfiguration(config: RunnableConfig): typeof ConfigurationSchema.State {
     /**
