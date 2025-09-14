@@ -1,15 +1,14 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import shell from 'shelljs';
+import { execa } from 'execa';
 import { background_processes, type ManagedProcess } from './bash_manager.js';
 
 export const bash_tool = tool(
     async ({ command, timeout, run_in_background }) => {
         if (run_in_background) {
-            const child_process = shell.exec(command, {
-                async: true,
+            const child_process = execa('bash', ['-c', command], {
                 timeout,
-                silent: true,
+                reject: false,
             });
 
             if (!child_process.pid) {
@@ -35,14 +34,18 @@ export const bash_tool = tool(
 
             return `Command started in background with ID: ${child_process.pid}`;
         } else {
-            const result = shell.exec(command, {
-                timeout,
-                silent: true,
-            });
-            if (result.code !== 0) {
-                return result.stderr;
+            try {
+                const result = await execa('bash', ['-c', command], {
+                    timeout,
+                    reject: false,
+                });
+                if (result.exitCode !== 0) {
+                    return result.stderr;
+                }
+                return result.stdout;
+            } catch (error) {
+                return `Error executing command: ${error}`;
             }
-            return result.stdout;
         }
     },
     {

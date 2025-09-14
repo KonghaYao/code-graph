@@ -1,7 +1,7 @@
-import { ChildProcess } from 'child_process';
+import type { ResultPromise } from 'execa';
 
 export interface ManagedProcess {
-    process: ChildProcess;
+    process: ResultPromise;
     stdout: string[];
     stderr: string[];
 }
