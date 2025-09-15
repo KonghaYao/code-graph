@@ -133,7 +133,13 @@ Please start executing the task.`,
                         },
                         messages: [
                             new ToolMessage({
-                                content: resultStr,
+                                content:
+                                    resultStr +
+                                    `
+---
+
+task_id: ${currentTaskId}
+`,
                                 tool_call_id: toolCallId,
                             }),
                         ],

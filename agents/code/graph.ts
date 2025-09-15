@@ -10,6 +10,7 @@ import { edit_tool, glob_tool, grep_tool, read_tool, write_tool } from './tools/
 import { todo_write_tool } from './tools/task_tools/todo_tool.js';
 import { createAgentMdSystemPrompt } from './prompts/create_agent_md.js';
 import { createSubAgentTool, MainAgentState } from './tools/sub_agents/index.js';
+import { web_search_tool } from './tools/web_tools/web_search_tool.js';
 // import { web_fetch_tool, web_search_tool } from './tools/web_tools/index.js';
 // import { exit_plan_mode_tool, task_tool, todo_write_tool } from './tools/task_tools/index.js';
 
@@ -55,6 +56,16 @@ const codingAgent = entrypoint('coding-agent', async (state: typeof CodeState.St
                     agent_name: 'code_review_task',
                 }),
                 tools: allTools,
+            }),
+            createSubAgentTool({
+                name: 'web_search_task',
+                description: 'use this tool to search docs or other information from the web. ',
+                llm: model,
+                systemPrompt: await getAgentPrompt({
+                    cwd: state.cwd,
+                    agent_name: 'web_search_task',
+                }),
+                tools: [web_search_tool],
             }),
         ],
         stateSchema: CodeState,
