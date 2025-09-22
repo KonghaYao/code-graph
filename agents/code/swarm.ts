@@ -8,7 +8,6 @@ import {
     Annotation,
 } from '@langchain/langgraph';
 import { getHandoffDestinations } from '@langgraph-js/pro';
-import { RunnableAgent } from 'langchain/agents';
 
 /**
  * State schema for the multi-agent swarm.

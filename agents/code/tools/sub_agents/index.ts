@@ -1,5 +1,5 @@
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
-import { HumanMessage, ToolMessage, AIMessage } from '@langchain/core/messages';
+import { ToolMessage, AIMessage } from '@langchain/core/messages';
 import { tool, DynamicStructuredTool } from '@langchain/core/tools';
 import { Annotation, AnnotationRoot, Command, getCurrentTaskInput } from '@langchain/langgraph';
 import { createReactAgent, createReactAgentAnnotation } from '@langchain/langgraph/prebuilt';
@@ -22,12 +22,22 @@ export interface SubAgentConfig {
     tools: DynamicStructuredTool[];
     /** 状态模式 */
     stateSchema?: AnnotationRoot<any>;
+    /**
+     * 额外数据格式, 当大模型触发进入 sub-agent 的时候，携带的额外数据格式
+     * 默认不携带，或者为一个字符串
+     */
+    additionalDataFormat?: z.ZodType<any>;
+    /**
+     * 响应格式，sub-agent 返回数据给主 agent 时，所携带的数据
+     * 默认为 z.string(), 返回一段文本给主 agent
+     */
+    responseFormat?: z.ZodType<any>;
 }
 
 /**
  * 任务完成工具
  */
-const createFinishTaskTool = () =>
+const createFinishTaskTool = (config: { responseFormat?: z.ZodType<any> }) =>
     tool(
         async ({ result, summary }) => {
             return JSON.stringify({ result, summary, completed: true });
@@ -37,7 +47,7 @@ const createFinishTaskTool = () =>
             description:
                 'Finish the task and return the result. Use this tool when the task is successfully completed.',
             schema: z.object({
-                result: z.string().min(1).describe('The specific result of the task execution'),
+                result: config.responseFormat || z.string().describe('The specific result of the task execution'),
                 summary: z
                     .string()
                     .optional()
@@ -84,7 +94,7 @@ export const createSubAgentTool = (config: SubAgentConfig) => {
         throw new Error('SubAgentConfig 缺少必要参数');
     }
     const stateSchema = config.stateSchema ? createSubAgentStateSchema(config.stateSchema) : undefined;
-    const finishTaskTool = createFinishTaskTool();
+    const finishTaskTool = createFinishTaskTool({ responseFormat: config.responseFormat });
 
     const executeTaskTool = tool(
         async (input, taskConfig) => {
@@ -95,6 +105,8 @@ export const createSubAgentTool = (config: SubAgentConfig) => {
             try {
                 // 创建代理实例
                 const agent = createReactAgent({
+                    /** 标记不同的名称，给前端进行区别 */
+                    name: 'subagent_' + toolCallId,
                     llm: config.llm,
                     prompt:
                         config.systemPrompt +
@@ -103,7 +115,6 @@ export const createSubAgentTool = (config: SubAgentConfig) => {
 - **Task Name**: ${input.task_name}
 - **Task Description**: ${input.task_description}
 ${input.context_detail ? `- **Context Information**: ${input.context_detail}` : ''}
-${input.additional_instructions ? `- **Additional Instructions**: ${input.additional_instructions}` : ''}
 
 ## Execution Requirements
 1. Carefully analyze the task requirements to ensure correct understanding
@@ -169,7 +180,9 @@ task_id: ${currentTaskId}
                     .min(1)
                     .describe('Detailed description of the task, including specific requirements and expected results'),
                 context_detail: z.string().optional().describe('Relevant contextual information, optional'),
-                additional_instructions: z.string().optional().describe('Additional execution instructions, optional'),
+                additional_data:
+                    config.additionalDataFormat ||
+                    z.string().optional().describe('Additional execution data, optional'),
             }),
         },
     );
