@@ -19,6 +19,8 @@ export const MessagesBox = ({
 }) => {
     return (
         <Box flexDirection="column" paddingY={0}>
+            <Text>{JSON.stringify(renderMessages)}</Text>
+
             {renderMessages.map((message, index) => (
                 <Box key={message.unique_id} flexDirection="column" marginBottom={0}>
                     {message.type === 'human' ? (

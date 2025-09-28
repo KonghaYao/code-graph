@@ -11,11 +11,12 @@ import { todo_write_tool } from './tools/task_tools/todo_tool.js';
 import { createAgentMdSystemPrompt } from './prompts/create_agent_md.js';
 import { createSubAgentTool, MainAgentState } from './tools/sub_agents/index.js';
 import { web_search_tool } from './tools/web_tools/web_search_tool.js';
+import { show_form } from './tools/ui/show_form.js';
 // import { web_fetch_tool, web_search_tool } from './tools/web_tools/index.js';
 // import { exit_plan_mode_tool, task_tool, todo_write_tool } from './tools/task_tools/index.js';
 
 const CodeState = createState(SwarmState, MainAgentState, EnvConfig).build({
-    main_model: createDefaultAnnotation(() => 'gpt-4.1-mini'),
+    main_model: createDefaultAnnotation(() => 'qwen-plus'),
 });
 
 const codingAgent = entrypoint('coding-agent', async (state: typeof CodeState.State) => {
@@ -40,6 +41,7 @@ const codingAgent = entrypoint('coding-agent', async (state: typeof CodeState.St
         bash_output_tool,
         bash_tool,
         kill_bash_tool,
+        // show_form,
     ];
 
     const agent = createReactAgent({

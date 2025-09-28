@@ -14,7 +14,7 @@
     "packageManager": "pnpm@10.6.2",
     "dependencies": {
         "@inkjs/ui": "^2.0.0",
-        "@langgraph-js/sdk": "^1.11.0",
+        "@langgraph-js/sdk": "^2.0.0",
         "@nanostores/react": "^1.0.0",
         "comlink": "^4.4.2",
         "ink": "^6.2.3",

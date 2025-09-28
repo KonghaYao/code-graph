@@ -14,9 +14,12 @@
         "noUnusedParameters": true,
         "useDefineForClassFields": true,
         "strictPropertyInitialization": false,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "jsx": "react-jsx",
         "allowJs": true,
         "strict": true
     },
-    "include": ["agents/"],
+    "include": ["agents/", "pure-graph/", "gui/"],
     "exclude": ["node_modules/", "dist"]
 }
