@@ -1,10 +1,5 @@
-import { createDefaultAnnotation, createState } from '@langgraph-js/pro';
-
-export const EnvConfig = createState().build({
-    agent_name: createDefaultAnnotation(() => 'coding-graph'),
-    cwd: createDefaultAnnotation(() => process.cwd()),
-});
-
+import { CodeState } from '../state.js';
+import { z } from 'zod';
 // 提示词的介绍部分，包含代理的基本功能和恶意代码拒绝策略。
 const SYSTEM_PROMPT_INTRODUCTION = `
 You are an interactive CLI tool that helps users with software engineering tasks. Use the instructions below and the tools available to you to assist the user.
@@ -167,7 +162,7 @@ const SYSTEM_PROMPT_TOOL_USAGE_POLICY = `
 You MUST answer concisely with fewer than 4 lines of text (not including tool use or code generation), unless user asks for detail.
 `;
 
-export async function getSystemPrompt(config: typeof EnvConfig.State): Promise<string> {
+export async function getSystemPrompt(config: z.infer<typeof CodeState>): Promise<string> {
     return [
         SYSTEM_PROMPT_INTRODUCTION.replace(/\${config.agent_name}/g, config.agent_name),
         SYSTEM_PROMPT_TASK_MANAGEMENT,
@@ -186,7 +181,7 @@ IMPORTANT: Before you begin work, think about what the code you're editing is su
     ].join('\n\n');
 }
 
-export async function getEnvInfo(config: typeof EnvConfig.State): Promise<string> {
+export async function getEnvInfo(config: z.infer<typeof CodeState>): Promise<string> {
     return `
 # Environment Information
 Here is useful information about the environment you are running in:
@@ -197,7 +192,7 @@ Today's date: ${new Date().toLocaleDateString()}
 </env>`;
 }
 
-export async function getAgentPrompt(config: typeof EnvConfig.State) {
+export async function getAgentPrompt(config: z.infer<typeof CodeState>) {
     return `
 You are an agent for ${
         config.agent_name

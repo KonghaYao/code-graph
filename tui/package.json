@@ -4,8 +4,8 @@
     "description": "",
     "main": "index.js",
     "bin": "dist/app.js",
+    "type": "module",
     "scripts": {
-        "build": "babel --out-dir=dist src",
         "dev": "bun run src/app.tsx"
     },
     "keywords": [],
@@ -14,7 +14,7 @@
     "packageManager": "pnpm@10.6.2",
     "dependencies": {
         "@inkjs/ui": "^2.0.0",
-        "@langgraph-js/sdk": "^2.0.0",
+        "@langgraph-js/sdk": "^4.3.6",
         "@nanostores/react": "^1.0.0",
         "comlink": "^4.4.2",
         "ink": "^6.2.3",

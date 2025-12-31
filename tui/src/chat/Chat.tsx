@@ -4,18 +4,19 @@ import Spinner from 'ink-spinner';
 import TextInput from 'ink-text-input';
 import { MessagesBox } from './components/MessageBox';
 import HistoryList from './components/HistoryList';
-import { ChatProvider, useChat } from './context/ChatContext';
+import { ChatProvider, useChat } from '@langgraph-js/sdk/react';
 import { Message } from '@langgraph-js/sdk';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
 import SettingsPanel from './components/SettingsPanel';
 import { useWindowSize } from '../hooks/useWindowSize';
 import AgentOptions from './AgentOptions';
 import { useCommandHandler } from './components/CommandHandler';
+import { LangGraphFetch } from '../../../agents/code/export';
 
 const MESSAGE_APPROX_HEIGHT = 3; // Approximate lines per message (更紧凑)
 
 const ChatMessages: React.FC<{ scrollOffset: number; terminalHeight: number }> = ({ scrollOffset, terminalHeight }) => {
-    const { renderMessages, loading, inChatError, client, collapsedTools, toggleToolCollapse, isFELocking } = useChat();
+    const { renderMessages, loading, inChatError, collapsedTools, toggleToolCollapse, isFELocking } = useChat();
 
     const availableHeight = terminalHeight - 5; // Account for header and input box
     const maxVisibleMessages = Math.floor(availableHeight / MESSAGE_APPROX_HEIGHT);
@@ -32,7 +33,6 @@ const ChatMessages: React.FC<{ scrollOffset: number; terminalHeight: number }> =
                 startIndex={startIndex}
                 collapsedTools={collapsedTools}
                 toggleToolCollapse={toggleToolCollapse}
-                client={client!}
             />
             {loading && !isFELocking() && (
                 <Box marginTop={0} paddingLeft={1}>
@@ -316,7 +316,16 @@ const ChatWrapper: React.FC = () => {
     }
 
     return (
-        <ChatProvider apiUrl={config.apiUrl} agentName={config.agentName}>
+        <ChatProvider
+            apiUrl={config.apiUrl}
+            defaultAgent={config.agentName}
+            defaultHeaders={{}}
+            withCredentials={false}
+            showHistory={false}
+            showGraph={false}
+            onInitError={(error, currentAgent) => {}}
+            fetch={LangGraphFetch as any}
+        >
             <Chat />
         </ChatProvider>
     );

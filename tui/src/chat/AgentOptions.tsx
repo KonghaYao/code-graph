@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text } from 'ink';
 import SelectInput from 'ink-select-input';
-import { useChat } from './context/ChatContext';
+import { useChat } from '@langgraph-js/sdk/react';
 import { useSettings } from './context/SettingsContext';
 
 interface AgentOptionsProps {

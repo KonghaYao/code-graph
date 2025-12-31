@@ -4,7 +4,7 @@ import Markdown from './Markdown';
 import SyntaxHighlight from 'ink-syntax-highlight';
 import { LangGraphClient, RenderMessage, ToolMessage } from '@langgraph-js/sdk';
 import { UsageMetadata } from './UsageMetadata';
-import { useChat } from '../context/ChatContext';
+import { useChat } from '@langgraph-js/sdk/react';
 
 const TOOL_COLORS: { [key: string]: string } = {
     'border-red-400': 'red',
@@ -19,7 +19,6 @@ const TOOL_COLOR_NAMES = Object.keys(TOOL_COLORS);
 
 interface MessageToolProps {
     message: ToolMessage & RenderMessage;
-    client: LangGraphClient;
     getMessageContent: (content: any) => string;
     formatTokens: (tokens: number) => string;
     isCollapsed: boolean;
@@ -127,21 +126,13 @@ const Previewer = ({ content }: { content: string }) => {
     return <Markdown>{content}</Markdown>;
 };
 
-const MessageTool: React.FC<MessageToolProps> = ({
-    message,
-    client,
-    getMessageContent,
-    formatTokens,
-    isCollapsed,
-    onToggleCollapse,
-    messageNumber,
-}) => {
+const MessageTool: React.FC<MessageToolProps> = ({ message, getMessageContent, isCollapsed, messageNumber }) => {
     const { getToolUIRender } = useChat();
     const render = getToolUIRender(message.name!);
     const borderColor = getToolColor(message.name!);
 
     if (render) {
-        return render(message) as JSX.Element;
+        return render(message as RenderMessage) as JSX.Element;
     }
 
     return (

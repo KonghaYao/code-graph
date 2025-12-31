@@ -5,25 +5,23 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "bun run agents/server/index.ts",
-        "build": "langgraph-js build",
-        "ui": "langgraph-ui"
+        "dev": "bun run tui/src/app.tsx"
     },
     "dependencies": {
-        "@langchain/core": "^0.3.75",
-        "@langchain/langgraph": "^0.4.9",
-        "@langchain/openai": "^0.6.0",
-        "@langgraph-js/pro": "^1.8.1",
-        "@langgraph-js/pure-graph": "^1.0.2",
-        "@langgraph-js/sdk": "^2.0.0",
+        "@langchain/core": "^1.1.8",
+        "@langchain/langgraph": "^1.0.7",
+        "@langchain/openai": "^1.2.0",
+        "@langgraph-js/pro": "^2.2.0",
+        "@langgraph-js/pure-graph": "^2.8.0",
+        "@langgraph-js/sdk": "^4",
         "@vscode/ripgrep": "^1.15.14",
-        "better-sqlite3": "^12.2.0",
         "eventemitter3": "^5.0.1",
         "execa": "^9.6.0",
         "glob": "^11.0.3",
         "hono": "^4.9.9",
+        "langchain": "1.1.1",
         "uuid": "^13.0.0",
-        "zod": "^3.25.76"
+        "zod": "^4"
     },
     "devDependencies": {
         "@types/node": "^20.19.14",
@@ -34,7 +32,6 @@
         "onlyBuiltDependencies": [
             "@tailwindcss/oxide",
             "@vscode/ripgrep",
-            "better-sqlite3",
             "esbuild"
         ],
         "overrides": {}

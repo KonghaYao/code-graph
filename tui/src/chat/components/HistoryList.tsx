@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { Box, Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
-import { useChat } from '../context/ChatContext';
+import { useChat } from '@langgraph-js/sdk/react';
 import { getHistoryContent } from '@langgraph-js/sdk';
 import { formatTime } from '@langgraph-js/sdk';
 interface HistoryListProps {
@@ -36,9 +36,8 @@ const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
                 .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                 .map((thread) => ({
                     label:
-                        `${thread.thread_id === currentChatId ? '➡️' : ' '} ${
-                            getHistoryContent(thread) || '...'
-                        }`.substring(0, 50) + ` (${formatTime(new Date(thread.created_at))})`,
+                        `${thread.thread_id === currentChatId ? '➡️' : ' '}`.substring(0, 50) +
+                        ` (${formatTime(new Date(thread.created_at))})`,
                     value: thread.thread_id,
                     key: thread.thread_id,
                     thread: thread,

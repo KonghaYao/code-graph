@@ -4,8 +4,8 @@
         "rootDir": ".",
         "baseUrl": ".",
         "target": "ES2021",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
+        "module": "esnext",
+        "moduleResolution": "bundler",
         "esModuleInterop": true,
         "declaration": true,
         "noImplicitReturns": true,
@@ -20,6 +20,6 @@
         "allowJs": true,
         "strict": true
     },
-    "include": ["agents/", "pure-graph/", "gui/"],
+    "include": ["tui/", "agents/"],
     "exclude": ["node_modules/", "dist"]
 }

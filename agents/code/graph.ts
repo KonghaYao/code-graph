@@ -1,25 +1,14 @@
-import { entrypoint } from '@langchain/langgraph';
-import { createDefaultAnnotation, createState, SwarmState } from '@langgraph-js/pro';
-import { createSwarm } from './swarm.js';
-import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { ChatOpenAI } from '@langchain/openai';
-import { RunnableConfig } from '@langchain/core/runnables';
-import { EnvConfig, getAgentPrompt, getSystemPrompt } from './prompts/coding.js';
+import { getSystemPrompt } from './prompts/coding.js';
 import { bash_output_tool, bash_tool, kill_bash_tool } from './tools/bash_tools/index.js';
 import { edit_tool, glob_tool, grep_tool, read_tool, write_tool } from './tools/filesystem_tools/index.js';
 import { todo_write_tool } from './tools/task_tools/todo_tool.js';
-import { createAgentMdSystemPrompt } from './prompts/create_agent_md.js';
-import { createSubAgentTool, MainAgentState } from './tools/sub_agents/index.js';
-import { web_search_tool } from './tools/web_tools/web_search_tool.js';
-import { show_form } from './tools/ui/show_form.js';
-// import { web_fetch_tool, web_search_tool } from './tools/web_tools/index.js';
-// import { exit_plan_mode_tool, task_tool, todo_write_tool } from './tools/task_tools/index.js';
+import { createAgent } from 'langchain';
+import { z } from 'zod';
+import { createStateEntrypoint } from '@langgraph-js/pure-graph';
+import { CodeState } from './state.js';
 
-const CodeState = createState(SwarmState, MainAgentState, EnvConfig).build({
-    main_model: createDefaultAnnotation(() => 'qwen-plus'),
-});
-
-const codingAgent = entrypoint('coding-agent', async (state: typeof CodeState.State) => {
+const codingAgent = async (state: z.infer<typeof CodeState>) => {
     const model = new ChatOpenAI({
         model: state.main_model,
     });
@@ -44,32 +33,10 @@ const codingAgent = entrypoint('coding-agent', async (state: typeof CodeState.St
         // show_form,
     ];
 
-    const agent = createReactAgent({
-        llm: model,
-        prompt: await getSystemPrompt(state),
-        tools: [
-            ...allTools,
-            createSubAgentTool({
-                name: 'code_review_task',
-                description: 'use this tool to code review',
-                llm: model,
-                systemPrompt: await getAgentPrompt({
-                    cwd: state.cwd,
-                    agent_name: 'code_review_task',
-                }),
-                tools: allTools,
-            }),
-            createSubAgentTool({
-                name: 'web_search_task',
-                description: 'use this tool to search docs or other information from the web. ',
-                llm: model,
-                systemPrompt: await getAgentPrompt({
-                    cwd: state.cwd,
-                    agent_name: 'web_search_task',
-                }),
-                tools: [web_search_tool],
-            }),
-        ],
+    const agent = createAgent({
+        model: model,
+        systemPrompt: await getSystemPrompt(state),
+        tools: [...allTools],
         stateSchema: CodeState,
     });
     const response = await agent.invoke(state);
@@ -77,27 +44,12 @@ const codingAgent = entrypoint('coding-agent', async (state: typeof CodeState.St
         task_store: response.task_store,
         messages: response.messages,
     };
-});
+};
 
-export const docWriteAgent = entrypoint('doc-write-agent', async (state: typeof CodeState.State, c: RunnableConfig) => {
-    const model = new ChatOpenAI({
-        model: state.main_model,
-    });
-    const agent = createReactAgent({
-        llm: model,
-        prompt: createAgentMdSystemPrompt,
-        tools: [edit_tool, todo_write_tool, glob_tool, grep_tool, read_tool, write_tool],
-    });
-    const response = await agent.invoke({
-        messages: state.messages,
-    });
-    return {
-        messages: response.messages,
-    };
-});
-
-export const graph = createSwarm({
-    agents: [codingAgent, docWriteAgent],
-    defaultActiveAgent: 'coding-agent',
-    stateSchema: CodeState,
-}).compile();
+export const graph = createStateEntrypoint(
+    {
+        name: 'graph',
+        stateSchema: CodeState,
+    },
+    codingAgent,
+);

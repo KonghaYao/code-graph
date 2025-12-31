@@ -8,19 +8,16 @@ export const MessagesBox = ({
     renderMessages,
     collapsedTools,
     toggleToolCollapse,
-    client,
     startIndex,
 }: {
     renderMessages: RenderMessage[];
     collapsedTools: string[];
     toggleToolCollapse: (id: string) => void;
-    client: LangGraphClient;
+
     startIndex: number;
 }) => {
     return (
         <Box flexDirection="column" paddingY={0}>
-            <Text>{JSON.stringify(renderMessages)}</Text>
-
             {renderMessages.map((message, index) => (
                 <Box key={message.unique_id} flexDirection="column" marginBottom={0}>
                     {message.type === 'human' ? (
@@ -28,7 +25,6 @@ export const MessagesBox = ({
                     ) : message.type === 'tool' ? (
                         <MessageTool
                             message={message}
-                            client={client!}
                             getMessageContent={getMessageContent}
                             formatTokens={formatTokens}
                             isCollapsed={collapsedTools.includes(message.id!)}

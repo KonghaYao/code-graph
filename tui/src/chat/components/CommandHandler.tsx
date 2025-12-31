@@ -6,7 +6,7 @@ import React, { useState, useCallback } from 'react';
 import { Box, Text } from 'ink';
 import { commandRegistry } from '../commands';
 import { CommandContext } from '../commands/types';
-import { useChat } from '../context/ChatContext';
+import { useChat } from '@langgraph-js/sdk/react';
 import { useSettings } from '../context/SettingsContext';
 import { Message } from '@langgraph-js/sdk';
 

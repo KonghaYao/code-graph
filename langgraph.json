@@ -1,8 +1,0 @@
-{
-    "node_version": "20",
-    "dependencies": ["."],
-    "graphs": {
-        "code": "./agents/code/graph.ts:graph"
-    },
-    "env": ".env"
-}

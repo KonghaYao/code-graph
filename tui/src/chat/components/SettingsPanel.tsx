@@ -3,7 +3,7 @@ import { Box, Text, useInput } from 'ink';
 import TextInput from 'ink-text-input';
 import SelectInput from 'ink-select-input';
 import { useSettings } from '../context/SettingsContext';
-import { useChat } from '../context/ChatContext';
+import { useChat } from '@langgraph-js/sdk/react';
 
 interface SettingsPanelProps {
     onClose: () => void;
