@@ -11,16 +11,21 @@ export default defineConfig({
             devDeps: false,
             peerDeps: false,
             optDeps: false,
-            include: ['bun:sqlite', 'path', 'crypto', 'util', 'stream', 'fs', 'pg', 'redis', 'react-devtools-core'],
-        }),
-        viteStaticCopy({
-            targets: [
-                {
-                    src: './node_modules/node-sqlite3-wasm/dist/*.wasm',
-                    dest: '.',
-                },
+            include: [
+                'bun:sqlite',
+                'path',
+                'crypto',
+                'util',
+                'stream',
+                'fs',
+                'pg',
+                'redis',
+                'react-devtools-core',
+                '@vscode/ripgrep', // 修复特殊文件引用的情况
+                'node-sqlite3-wasm', // 修复特殊文件引用的情况
             ],
         }),
+
         react(),
         // analyzer({
         //     analyzerMode: 'server', // Options: 'server', 'static', 'json'
@@ -44,5 +49,8 @@ export default defineConfig({
     define: {
         __filename: 'import.meta.filename',
         'window.FormData': 'globalThis.FormData',
+    },
+    resolve: {
+        conditions: ['module', 'node', 'production'],
     },
 });

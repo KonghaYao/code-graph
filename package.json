@@ -6,14 +6,15 @@
     "type": "module",
     "scripts": {
         "dev": "bun run tui/src/app.tsx",
-        "preview": "bun run tui/dist/code-graph.js"
+        "preview:bun": "bun run tui/dist/code-graph.mjs",
+        "preview": "node --env-file=.env tui/dist/code-graph.mjs"
     },
     "dependencies": {
         "@langchain/core": "^1.1.8",
         "@langchain/langgraph": "^1.0.7",
         "@langchain/openai": "^1.2.0",
         "@langgraph-js/pro": "^2.2.0",
-        "@langgraph-js/pure-graph": "^2.8.0",
+        "@langgraph-js/pure-graph": "^2.8.1",
         "@langgraph-js/sdk": "^4",
         "@vscode/ripgrep": "^1.15.14",
         "eventemitter3": "^5.0.1",

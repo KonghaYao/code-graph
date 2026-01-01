@@ -13,10 +13,14 @@
     "license": "Apache-2.0",
     "packageManager": "pnpm@10.6.2",
     "dependencies": {
+        "@vscode/ripgrep": "^1.15.14",
+        "node-sqlite3-wasm": "^0.8.52"
+    },
+    "devDependencies": {
+        "chalk": "^5.6.2",
         "@inkjs/ui": "^2.0.0",
         "@langgraph-js/sdk": "^4.3.6",
         "@nanostores/react": "^1.0.0",
-        "chalk": "^5.6.2",
         "comlink": "^4.4.2",
         "ink": "^6.2.3",
         "ink-markdown": "^1.0.4",
@@ -27,10 +31,7 @@
         "lowdb": "^7.0.1",
         "marked": "^16.2.1",
         "marked-terminal": "^7.3.0",
-        "node-sqlite3-wasm": "^0.8.52",
-        "react": "^19.1.1"
-    },
-    "devDependencies": {
+        "react": "^19.1.1",
         "@types/marked-terminal": "^6.1.1",
         "@types/react": "^19.1.12",
         "@vitejs/plugin-react": "^5.1.2",
