@@ -5,6 +5,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "dev:server": "bun run agents/code/server.ts",
         "dev": "bun run tui/src/app.tsx",
         "preview:bun": "bun run tui/dist/code-graph.mjs",
         "preview": "node --env-file=.env tui/dist/code-graph.mjs"
@@ -13,6 +14,7 @@
         "@langchain/core": "^1.1.8",
         "@langchain/langgraph": "^1.0.7",
         "@langchain/openai": "^1.2.0",
+        "@langgraph-js/auk": "^1.0.0",
         "@langgraph-js/pro": "^2.2.0",
         "@langgraph-js/pure-graph": "^2.8.1",
         "@langgraph-js/sdk": "^4",

@@ -123,7 +123,7 @@ export const bash_tool = tool(
         }
     },
     {
-        name: 'Terminal',
+        name: 'terminal',
         description: `Executes commands in a persistent shell session (Bash on Linux/macOS, CMD on Windows).
 Features:
 - Run commands (foreground or background)
@@ -142,6 +142,7 @@ Notes:
 - Use '&&' or ';' to chain commands (PowerShell/CMD syntax varies, simple chaining often works)
 `,
         schema: z.object({
+            description: z.string().describe('what you want to do'),
             command: z.string().optional().describe('The command to execute (required for running commands)'),
             timeout: z.number().optional().describe('Timeout in ms (default: 120000)'),
             run_in_background: z.boolean().optional().describe('Run command in background'),

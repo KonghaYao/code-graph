@@ -13,6 +13,7 @@ import { useCommandHandler } from './components/CommandHandler';
 import { LangGraphFetch } from '../../../agents/code/export';
 import WelcomeHeader from './components/WelcomeHeader';
 import TokenProgressBar from './components/TokenProgressBar';
+import DefaultTools from './tools/index';
 
 const ChatMessages = () => {
     const { renderMessages, loading, inChatError, collapsedTools, toggleToolCollapse, isFELocking } = useChat();
@@ -125,12 +126,13 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
 };
 
 const Chat: React.FC = () => {
+    const { extraParams } = useSettings();
+    const { toggleHistoryVisible, setUserInput, createNewChat, setTools } = useChat();
     useEffect(() => {
         console.clear();
+        setTools(DefaultTools);
     }, []);
 
-    const { extraParams } = useSettings();
-    const { toggleHistoryVisible, setUserInput, createNewChat } = useChat();
     const [activeView, setActiveView] = useState<
         'chat' | 'history' | 'settings' | 'graph' | 'artifacts' | 'agentOptions'
     >('chat');

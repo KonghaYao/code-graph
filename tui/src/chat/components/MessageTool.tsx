@@ -126,10 +126,6 @@ const MessageTool: React.FC<MessageToolProps> = ({ message, getMessageContent, i
     const render = getToolUIRender(message.name!);
     const borderColor = getToolColor(message.name!);
 
-    if (render) {
-        return render(message as RenderMessage) as JSX.Element;
-    }
-
     return (
         <Box flexDirection="column" paddingX={1} paddingY={0} marginBottom={1}>
             <Box>
@@ -145,16 +141,17 @@ const MessageTool: React.FC<MessageToolProps> = ({ message, getMessageContent, i
                 />
             </Box>
 
-            {!isCollapsed && (
-                <Box flexDirection="column" paddingTop={0} paddingLeft={0}>
-                    {/* 入参 */}
-                    <InputPreviewer content={tool.getInputRepaired()} />
-
+            <Box flexDirection="column" paddingTop={0} paddingLeft={0}>
+                {/* 入参 */}
+                <InputPreviewer content={tool.getInputRepaired()} />
+                {render ? (
+                    (render(message as RenderMessage) as JSX.Element)
+                ) : (
                     <Box paddingTop={1} paddingBottom={0}>
                         <Text dimColor>{truncateContentForDisplay(getMessageContent(message.content))}</Text>
                     </Box>
-                </Box>
-            )}
+                )}
+            </Box>
         </Box>
     );
 };

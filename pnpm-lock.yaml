@@ -17,6 +17,9 @@ importers:
       '@langchain/openai':
         specifier: ^1.2.0
         version: 1.2.0(@langchain/core@1.1.8(openai@6.15.0(ws@8.18.3)(zod@4.3.2)))(ws@8.18.3)
+      '@langgraph-js/auk':
+        specifier: ^1.0.0
+        version: 1.0.0(@nanostores/react@1.0.0(nanostores@1.0.1)(react@19.2.3))(openai@6.15.0(ws@8.18.3)(zod@4.3.2))(react@19.2.3)(zod-to-json-schema@3.24.6(zod@4.3.2))
       '@langgraph-js/pro':
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.3)(ws@8.18.3)(zod-to-json-schema@3.24.6(zod@4.3.2))
@@ -670,6 +673,9 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       '@langchain/core': ^1.0.0
+
+  '@langgraph-js/auk@1.0.0':
+    resolution: {integrity: sha512-FuA8iKJS2dA5qzfoV8xGSCsUXM3T+U20k+DbTshWGiFAOSB3b7H95AhlruBiDeCaBSG0eDwR0pFYX4Y6ye+T6A==}
 
   '@langgraph-js/pro@2.2.0':
     resolution: {integrity: sha512-x7l035FVEk+S5uXXfu0vQqjsSaLp10CWDTWXyiEU6sJm5D8S+OWZxDfwJe17+yFI8ZWkMFgZ75i5G4sWCS2dFA==}
@@ -2942,6 +2948,27 @@ snapshots:
       zod: 4.3.2
     transitivePeerDependencies:
       - ws
+
+  '@langgraph-js/auk@1.0.0(@nanostores/react@1.0.0(nanostores@1.0.1)(react@19.2.3))(openai@6.15.0(ws@8.18.3)(zod@4.3.2))(react@19.2.3)(zod-to-json-schema@3.24.6(zod@4.3.2))':
+    dependencies:
+      '@langchain/core': 1.1.8(openai@6.15.0(ws@8.18.3)(zod@4.3.2))
+      '@langchain/langgraph': 1.0.7(@langchain/core@1.1.8(openai@6.15.0(ws@8.18.3)(zod@4.3.2)))(react@19.2.3)(zod-to-json-schema@3.24.6(zod@4.3.2))(zod@4.3.2)
+      '@langgraph-js/sdk': 4.3.6(@langchain/core@1.1.8(openai@6.15.0(ws@8.18.3)(zod@4.3.2)))(@nanostores/react@1.0.0(nanostores@1.0.1)(react@19.2.3))(react@19.2.3)
+      langchain: 1.1.1(@langchain/core@1.1.8(openai@6.15.0(ws@8.18.3)(zod@4.3.2)))(openai@6.15.0(ws@8.18.3)(zod@4.3.2))(react@19.2.3)(zod-to-json-schema@3.24.6(zod@4.3.2))
+      zod: 4.3.2
+    transitivePeerDependencies:
+      - '@nanostores/react'
+      - '@nanostores/solid'
+      - '@nanostores/vue'
+      - '@opentelemetry/api'
+      - '@opentelemetry/exporter-trace-otlp-proto'
+      - '@opentelemetry/sdk-trace-base'
+      - openai
+      - react
+      - react-dom
+      - solid-js
+      - vue
+      - zod-to-json-schema
 
   '@langgraph-js/pro@2.2.0(react@19.2.3)(ws@8.18.3)(zod-to-json-schema@3.24.6(zod@4.3.2))':
     dependencies:
