@@ -5,7 +5,25 @@ import { glob } from 'glob';
 export const glob_tool = tool(
     async ({ pattern, path }) => {
         const files = await glob(pattern, {
-            ignore: ['node_modules', '.git'],
+            ignore: [
+                'node_modules',
+                '.git',
+                'dist',
+                'build',
+                '.next',
+                '.turbo',
+                'coverage',
+                '.nyc_output',
+                'temp',
+                '.cache',
+                'vendor',
+                'venv',
+                '__pycache__',
+                '*.pyc',
+                'target',
+                'out',
+                '.output',
+            ],
             cwd: path,
             absolute: true,
         });
@@ -15,7 +33,7 @@ export const glob_tool = tool(
         return files.join('\n');
     },
     {
-        name: 'Glob',
+        name: 'glob_files',
         description: `- Fast file pattern matching tool that works with any codebase size
 - Supports glob patterns like "**/*.js" or "src/**/*.ts"
 - Returns matching file paths sorted by modification time

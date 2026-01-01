@@ -12,7 +12,7 @@ export const write_tool = tool(
         }
     },
     {
-        name: 'Write',
+        name: 'write_file',
         description: `Writes a file to the local filesystem.
 Usage:
 - This tool will overwrite the existing file if there is one at the provided path.

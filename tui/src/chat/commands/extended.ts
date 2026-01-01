@@ -72,7 +72,7 @@ export const templateCommand: CommandDefinition = {
 /**
  * 可用模型列表
  */
-const AVAILABLE_MODELS = ['claude-sonnet-4', 'gpt-4o-mini', 'gpt-4.1-mini', 'gemini-2.5-pro', 'gemini-2.5-flash'];
+const AVAILABLE_MODELS = ['claude-sonnet-4.5', 'gpt-5.2', 'gemini-3-pro', 'glm-4.7'];
 
 /**
  * /model 命令 - 切换模型
@@ -110,16 +110,7 @@ export const modelCommand: CommandDefinition = {
                 (model) => model === modelInput || model.toLowerCase().includes(modelInput.toLowerCase()),
             );
         }
-
-        if (!targetModel) {
-            const availableList = AVAILABLE_MODELS.map((model, index) => `  ${index + 1}. ${model}`).join('\n');
-
-            return {
-                success: false,
-                message: `未找到模型 "${modelInput}"。\n\n可用模型:\n${availableList}`,
-                shouldClearInput: true,
-            };
-        }
+        targetModel = targetModel || modelInput;
 
         // 执行模型切换
         try {

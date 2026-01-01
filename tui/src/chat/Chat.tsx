@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
-import TextInput from 'ink-text-input';
+import { EnhancedTextInput } from './components/EnhancedTextInput';
 import { MessagesBox } from './components/MessageBox';
 import HistoryList from './components/HistoryList';
 import { ChatProvider, useChat } from '@langgraph-js/sdk/react';
@@ -13,6 +13,7 @@ import { useCommandHandler } from './components/CommandHandler';
 import { LangGraphFetch } from '../../../agents/code/export';
 import WelcomeHeader from './components/WelcomeHeader';
 import TokenProgressBar from './components/TokenProgressBar';
+
 const ChatMessages = () => {
     const { renderMessages, loading, inChatError, collapsedTools, toggleToolCollapse, isFELocking } = useChat();
 
@@ -30,7 +31,7 @@ const ChatMessages = () => {
             {loading && !isFELocking() && (
                 <Box marginTop={0} paddingLeft={1}>
                     <Text>
-                        <Spinner type="dots" /> <Text color="cyan">正在思考中...</Text>
+                        <Spinner type="dots" /> <Text color="cyan">正在思考中... alt + C 中断</Text>
                     </Text>
                 </Box>
             )}
@@ -49,7 +50,7 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
-    const { userInput, setUserInput, sendMessage, client, renderMessages } = useChat();
+    const { userInput, setUserInput, sendMessage, client, renderMessages, stopGeneration } = useChat();
     const { extraParams } = useSettings();
 
     // 使用命令处理组件
@@ -101,10 +102,17 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
                         {commandHandler.isCommandInput ? '⚡' : '💬'}
                     </Text>
                 </Box>
-                <TextInput
+                <EnhancedTextInput
                     value={userInput as string}
                     onChange={setUserInput}
                     onSubmit={sendTextMessage}
+                    onHotKey={(value) => {
+                        if (value === 'ç') {
+                            stopGeneration();
+                            return false;
+                        }
+                        return true;
+                    }}
                     placeholder={commandHandler.isCommandInput ? '输入命令... (试试 /help)' : '输入消息...'}
                     focus={mode === 'agent'}
                 />
@@ -117,6 +125,10 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
 };
 
 const Chat: React.FC = () => {
+    useEffect(() => {
+        console.clear();
+    }, []);
+
     const { extraParams } = useSettings();
     const { toggleHistoryVisible, setUserInput, createNewChat } = useChat();
     const [activeView, setActiveView] = useState<
@@ -144,6 +156,7 @@ const Chat: React.FC = () => {
             else if (input === 'g') setActiveView('agentOptions'); // 'g' for agent options
             else if (input === 'n') {
                 // 'n' for new chat
+                console.clear();
                 createNewChat(); // 调用 client 上的 newChat 方法
                 setUserInput(''); // 清空输入框
                 setMode('agent'); // 进入 agent 模式

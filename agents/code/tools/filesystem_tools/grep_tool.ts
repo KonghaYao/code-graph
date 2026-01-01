@@ -12,7 +12,7 @@ const execCommand = async (
     const { timeout = 15000, cwd = process.cwd() } = options;
 
     try {
-        console.log('execCommand', command, args, cwd);
+        // console.log('execCommand', command, args, cwd);
         const result = await execa(command, args, {
             cwd,
             timeout,

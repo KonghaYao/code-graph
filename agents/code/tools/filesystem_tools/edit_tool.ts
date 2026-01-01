@@ -90,26 +90,63 @@ export const edit_tool = tool(
         }
     },
     {
-        name: 'Edit',
+        name: 'edit_file',
         description: `Performs range-based edits in files using start and end line markers.
 
 Usage:
-- You must use your \`Read\` tool at least once in the conversation before editing. This tool will error if you attempt an edit without reading the file.
+- You must use your \`read_file\` tool at least once in the conversation before editing. This tool will error if you attempt an edit without reading the file.
+- start_line and end_line are REQUIRED - both must be provided to define the range to replace
 - Specify start_line and end_line to define the range to replace with new_string
 - start_line can be one or two lines - if it contains \\n, it will match two consecutive lines
 - The tool will find the first occurrence of start_line, then find the first occurrence of end_line after it
 - All content between and including the start_line and end_line will be replaced with new_string
-- If multiple valid ranges are found, the tool will warn you to be more specific
+- Note: The end_line itself is also deleted. The tool finds the line containing end_line and removes everything from start_line through end_line (inclusive)
 - ALWAYS prefer editing existing files in the codebase. NEVER write new files unless explicitly required.
-- Only use emojis if the user explicitly requests it. Avoid adding emojis to files unless asked.`,
+- Only use emojis if the user explicitly requests it. Avoid adding emojis to files unless asked.
+
+Examples:
+1. Replace a single line:
+   - start_line: "const foo = 'bar';"
+   - end_line: "const foo = 'bar';"
+   - new_string: "const foo = 'baz';"
+
+2. Replace multiple lines:
+   - start_line: "function example() {"
+   - end_line: "}"
+   - new_string: "function example() {\\n  return 'updated';\\n}"
+
+3. Replace with exact whitespace matching:
+   - start_line: "    const value = 1;"  // Must match 4 spaces
+   - end_line: "    const value = 1;"
+   - new_string: "    const value = 2;"
+
+4. Replace a multi-line block:
+   - start_line: "import {\\n  tool"
+   - end_line: "from '@langchain/core/tools';"
+   - new_string: "import { tool } from '@langchain/core/tools';"
+
+Common Pitfalls:
+- Exact matching: If your edit fails with "end_line not found", the content may have extra spaces, tabs, or different line endings
+- Multiple occurrences: If start_line appears multiple times, you may get unexpected matches
+- Template strings: Be careful with backticks and newlines in template literals
+- Recommendation: After reading the file, copy the EXACT text including whitespace for start_line and end_line
+
+Key Lessons from Edit Tool Failures:
+- Failure reason: String matching is not precise, including differences in line breaks, spaces, and indentation
+- Multi-line matching complexity: When start_line contains \n, it must match consecutive lines exactly; any difference will fail
+- Success strategy: Use single-line exact matching, copy the exact content from the original file (including indentation)`,
         schema: z.object({
             file_path: z.string().describe('The absolute path to the file to modify'),
             start_line: z
                 .string()
                 .describe(
-                    'The line content to start the replacement range (can be partial match or two lines separated by \\n)',
+                    'REQUIRED: The line content to start the replacement range (uses includes() for matching, but must match exactly including whitespace)',
                 ),
-            end_line: z.string().describe('The line content to end the replacement range (can be partial match)'),
+            end_line: z
+                .string()
+                .describe(
+                    'REQUIRED: The line content to end the replacement range (uses includes() for matching, but must match exactly including whitespace). Note: This line is also deleted - the replacement includes from start_line through end_line inclusive)',
+                ),
             new_string: z.string().describe('The new content to insert in place of the range'),
         }),
     },
