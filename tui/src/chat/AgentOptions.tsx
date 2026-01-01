@@ -31,15 +31,7 @@ const AgentOptions: React.FC<AgentOptionsProps> = ({ onClose }) => {
     };
 
     return (
-        <Box
-            flexDirection="column"
-            width="100%"
-            height="100%"
-            borderStyle="double"
-            borderColor="green"
-            paddingX={1}
-            paddingY={0}
-        >
+        <Box flexDirection="column" width="100%" height="100%" paddingX={1} paddingY={0}>
             <Text color="green" bold>
                 🤖 选择一个 Agent:
             </Text>

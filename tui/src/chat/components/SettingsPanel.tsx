@@ -59,7 +59,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ onClose }) => {
     };
 
     return (
-        <Box flexDirection="column" borderStyle="double" borderColor="magenta" paddingX={1} paddingY={0} flexGrow={1}>
+        <Box flexDirection="column" paddingX={1} paddingY={0} flexGrow={1}>
             <Box paddingBottom={0} justifyContent="space-between">
                 <Text color="magenta" bold>
                     ⚙️ 设置

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
 import TextInput from 'ink-text-input';
@@ -8,29 +8,22 @@ import { ChatProvider, useChat } from '@langgraph-js/sdk/react';
 import { Message } from '@langgraph-js/sdk';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
 import SettingsPanel from './components/SettingsPanel';
-import { useWindowSize } from '../hooks/useWindowSize';
 import AgentOptions from './AgentOptions';
 import { useCommandHandler } from './components/CommandHandler';
 import { LangGraphFetch } from '../../../agents/code/export';
-
-const MESSAGE_APPROX_HEIGHT = 3; // Approximate lines per message (更紧凑)
-
-const ChatMessages: React.FC<{ scrollOffset: number; terminalHeight: number }> = ({ scrollOffset, terminalHeight }) => {
+import WelcomeHeader from './components/WelcomeHeader';
+import TokenProgressBar from './components/TokenProgressBar';
+const ChatMessages = () => {
     const { renderMessages, loading, inChatError, collapsedTools, toggleToolCollapse, isFELocking } = useChat();
 
-    const availableHeight = terminalHeight - 5; // Account for header and input box
-    const maxVisibleMessages = Math.floor(availableHeight / MESSAGE_APPROX_HEIGHT);
-
-    const startIndex = Math.max(0, renderMessages.length - maxVisibleMessages - scrollOffset);
-    const endIndex = startIndex + maxVisibleMessages;
-
-    const visibleMessages = renderMessages.slice(startIndex, endIndex);
+    const visibleMessages = renderMessages;
 
     return (
         <Box flexDirection="column" flexGrow={1} paddingX={0} paddingY={0}>
+            {visibleMessages.length === 0 && <WelcomeHeader />}
             <MessagesBox
                 renderMessages={visibleMessages}
-                startIndex={startIndex}
+                startIndex={0}
                 collapsedTools={collapsedTools}
                 toggleToolCollapse={toggleToolCollapse}
             />
@@ -55,8 +48,8 @@ interface ChatInputProps {
     setMode: (mode: 'agent') => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
-    const { userInput, setUserInput, sendMessage, currentAgent, client, currentChatId } = useChat();
+const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
+    const { userInput, setUserInput, sendMessage, client } = useChat();
     const { extraParams } = useSettings();
 
     // 使用命令处理组件
@@ -88,7 +81,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
     };
 
     return (
-        <Box flexDirection="column" borderStyle="double" borderColor="cyan" paddingX={1} paddingY={0}>
+        <Box flexDirection="column" paddingX={0} paddingY={0}>
             {/* 命令错误显示 */}
             <commandHandler.CommandErrorUI />
 
@@ -112,18 +105,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
                     focus={mode === 'agent'}
                 />
             </Box>
-            <Box justifyContent="space-between" marginTop={0}>
-                <Box alignItems="center">
-                    <Text color="magenta" bold>
-                        🤖{' '}
-                    </Text>
-                    <Text color="white">
-                        {client?.availableAssistants.find((a) => a.graph_id === currentAgent)?.name || '未选择'}
-                    </Text>
-                </Box>
-                <Text color="gray" dimColor>
-                    💬 {currentChatId?.slice(-8) || 'N/A'}
-                </Text>
+            <Box paddingX={1} justifyContent="flex-end">
+                <TokenProgressBar currentTokens={client?.tokenCounter.input_tokens || 0} />
             </Box>
         </Box>
     );
@@ -131,18 +114,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode, setMode }) => {
 
 const Chat: React.FC = () => {
     const { extraParams } = useSettings();
-    const { toggleHistoryVisible, renderMessages, setUserInput, createNewChat } = useChat();
+    const { toggleHistoryVisible, setUserInput, createNewChat } = useChat();
     const [activeView, setActiveView] = useState<
         'chat' | 'history' | 'settings' | 'graph' | 'artifacts' | 'agentOptions'
     >('chat');
     const [mode, setMode] = useState<'command' | 'agent'>('agent');
-    const [scrollOffset, setScrollOffset] = useState(0);
-    const { height: terminalHeight } = useWindowSize();
-
-    const availableHeight = terminalHeight - 4; // Account for header and input box (更紧凑)
-    const maxVisibleMessages = Math.floor(availableHeight / MESSAGE_APPROX_HEIGHT);
-    const totalMessages = renderMessages.length;
-    const maxScrollOffset = Math.max(0, totalMessages - maxVisibleMessages);
     // Global Ctrl+C exit handler
     useInput((input, key) => {
         if (key.ctrl && input === 'c') {
@@ -166,7 +142,6 @@ const Chat: React.FC = () => {
                 // 'n' for new chat
                 createNewChat(); // 调用 client 上的 newChat 方法
                 setUserInput(''); // 清空输入框
-                setScrollOffset(0); // 滚动到最底部
                 setMode('agent'); // 进入 agent 模式
             }
         },
@@ -187,37 +162,16 @@ const Chat: React.FC = () => {
         { isActive: mode === 'agent' }, // Active when in input or agent mode
     );
 
-    // Scroll input handler
-    useInput(
-        (input, key) => {
-            if (activeView !== 'chat' || mode === 'command') {
-                return;
-            }
-
-            if (key.upArrow) {
-                setScrollOffset((prev) => Math.min(maxScrollOffset, prev + 1));
-            } else if (key.downArrow) {
-                setScrollOffset((prev) => Math.max(0, prev - 1));
-            }
-        },
-        { isActive: activeView === 'chat' && mode !== 'command' },
-    );
-
-    // Handle auto-scroll to bottom when new messages arrive
-    useEffect(() => {
-        setScrollOffset(0);
-    }, [totalMessages, maxScrollOffset]);
-
     // Props for ChatInput
     const chatInputMode = 'agent'; // Always agent mode
     const setChatInputMode = (newMode: 'agent') => setMode(newMode); // Keep setMode to agent
 
     return (
-        <Box flexDirection="column" width="100%" height="100%">
+        <Box flexDirection="column" width="100%">
             <Box flexGrow={1} flexDirection="row">
                 {activeView === 'chat' && (
                     <Box flexDirection="column" flexGrow={1}>
-                        <ChatMessages scrollOffset={scrollOffset} terminalHeight={terminalHeight} />
+                        <ChatMessages />
                         <ChatInput mode={chatInputMode} setMode={setChatInputMode} />
                     </Box>
                 )}
@@ -246,7 +200,7 @@ const Chat: React.FC = () => {
                     />
                 )}
             </Box>
-            <Box borderStyle="double" borderColor="magenta" paddingX={1} paddingY={0} justifyContent="space-between">
+            <Box paddingX={1} paddingY={0} justifyContent="space-between">
                 <Text>
                     <Text color="magenta" bold>
                         ⚡ LangGraph Chat
@@ -260,7 +214,7 @@ const Chat: React.FC = () => {
                     {mode === 'agent' && (
                         <Text color="cyan" bold>
                             {' '}
-                            [{extraParams.activeAgent}] {extraParams.main_model}
+                            {extraParams.main_model}
                         </Text>
                     )}
                 </Text>
@@ -294,8 +248,6 @@ const Chat: React.FC = () => {
                         </Text>
                     ) : (
                         <Text>
-                            <Text color="yellow">↑↓</Text>
-                            <Text color="gray">:滚动 </Text>
                             <Text color="cyan" bold>
                                 ESC
                             </Text>

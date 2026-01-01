@@ -1,43 +1,117 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { execa } from 'execa';
-import { background_processes, type ManagedProcess } from './bash_manager.js';
+import { execa, type ResultPromise } from 'execa';
+
+// 管理后台进程的状态
+export interface ManagedProcess {
+    process: ResultPromise;
+    stdout: string[];
+    stderr: string[];
+}
+
+export const background_processes = new Map<number, ManagedProcess>();
+
+// 检测操作系统
+const isWindows = process.platform === 'win32';
+const defaultShell = isWindows ? 'cmd.exe' : '/bin/bash';
+const shellArgs = isWindows ? ['/d', '/s', '/c'] : ['-c'];
 
 export const bash_tool = tool(
-    async ({ command, timeout, run_in_background }) => {
-        if (run_in_background) {
-            const child_process = execa('bash', ['-c', command], {
-                timeout,
-                reject: false,
-            });
+    async ({ command, timeout, run_in_background, kill_process_id, get_output_id, filter }) => {
+        // 1. Kill Process Logic
+        if (kill_process_id) {
+            const pid = parseInt(kill_process_id, 10);
+            const managed_process = background_processes.get(pid);
 
-            if (!child_process.pid) {
-                return 'Failed to start command in background.';
+            if (!managed_process) {
+                return `Error: No background process found with ID ${kill_process_id}.`;
             }
 
-            const managed_process: ManagedProcess = {
-                process: child_process,
-                stdout: [],
-                stderr: [],
-            };
-            background_processes.set(child_process.pid, managed_process);
+            managed_process.process.kill();
+            background_processes.delete(pid);
 
-            child_process.stdout?.on('data', (data) => {
-                managed_process.stdout.push(data.toString());
-            });
-            child_process.stderr?.on('data', (data) => {
-                managed_process.stderr.push(data.toString());
-            });
-            child_process.on('close', () => {
-                // Optionally, handle process exit
-            });
+            return `Successfully killed process with ID ${kill_process_id}.`;
+        }
 
-            return `Command started in background with ID: ${child_process.pid}`;
-        } else {
+        // 2. Get Output Logic
+        if (get_output_id) {
+            const pid = parseInt(get_output_id, 10);
+            const managed_process = background_processes.get(pid);
+
+            if (!managed_process) {
+                return `Error: No background process found with ID ${get_output_id}.`;
+            }
+
+            let stdout = managed_process.stdout.join('');
+            let stderr = managed_process.stderr.join('');
+
+            // Clear buffers after reading
+            managed_process.stdout = [];
+            managed_process.stderr = [];
+
+            if (filter) {
+                const regex = new RegExp(filter);
+                stdout = stdout
+                    .split('\n')
+                    .filter((line) => regex.test(line))
+                    .join('\n');
+                stderr = stderr
+                    .split('\n')
+                    .filter((line) => regex.test(line))
+                    .join('\n');
+            }
+
+            let output = '';
+            if (stdout) output += `STDOUT:\n${stdout}\n`;
+            if (stderr) output += `STDERR:\n${stderr}\n`;
+
+            return output || 'No new output since last check.';
+        }
+
+        // 3. Run Command Logic
+        if (!command) {
+            return `Error: 'command' argument is required unless using 'kill_process_id' or 'get_output_id'.`;
+        }
+
+        if (run_in_background) {
             try {
-                const result = await execa('bash', ['-c', command], {
+                const child_process = execa(defaultShell, [...shellArgs, command], {
                     timeout,
                     reject: false,
+                    windowsVerbatimArguments: isWindows, // Windows 特殊处理
+                });
+
+                if (!child_process.pid) {
+                    return 'Failed to start command in background.';
+                }
+
+                const managed_process: ManagedProcess = {
+                    process: child_process,
+                    stdout: [],
+                    stderr: [],
+                };
+                background_processes.set(child_process.pid, managed_process);
+
+                child_process.stdout?.on('data', (data) => {
+                    managed_process.stdout.push(data.toString());
+                });
+                child_process.stderr?.on('data', (data) => {
+                    managed_process.stderr.push(data.toString());
+                });
+                child_process.on('close', () => {
+                    // 进程结束后可以在这里做清理，或者保留直到用户手动 kill/read 完
+                });
+
+                return `Command started in background with ID: ${child_process.pid}`;
+            } catch (error) {
+                return `Error starting background command: ${error}`;
+            }
+        } else {
+            try {
+                const result = await execa(defaultShell, [...shellArgs, command], {
+                    timeout,
+                    reject: false,
+                    windowsVerbatimArguments: isWindows,
                 });
                 if (result.exitCode !== 0) {
                     return result.stderr;
@@ -49,145 +123,31 @@ export const bash_tool = tool(
         }
     },
     {
-        name: 'Bash',
-        description: `Executes a given bash command in a persistent shell session with optional timeout, ensuring proper handling and security measures.
+        name: 'Terminal',
+        description: `Executes commands in a persistent shell session (Bash on Linux/macOS, CMD on Windows).
+Features:
+- Run commands (foreground or background)
+- Retrieve background process output
+- Kill background processes
+- Cross-platform support (auto-detects OS)
 
-Before executing the command, please follow these steps:
+Usage:
+1. Run Command: Provide \`command\`. Optional: \`run_in_background\`, \`timeout\`.
+2. Check Output: Provide \`get_output_id\`. Optional: \`filter\`.
+3. Kill Process: Provide \`kill_process_id\`.
 
-1. Directory Verification:
-   - If the command will create new directories or files, first use the LS tool to verify the parent directory exists and is the correct location
-   - For example, before running "mkdir foo/bar", first use LS to check that "foo" exists and is the intended parent directory
-
-2. Command Execution:
-   - Always quote file paths that contain spaces with double quotes (e.g., cd "path with spaces/file.txt")
-   - Examples of proper quoting:
-     - cd "/Users/name/My Documents" (correct)
-     - cd /Users/name/My Documents (incorrect - will fail)
-     - python "/path/with spaces/script.py" (correct)
-     - python /path/with spaces/script.py (incorrect - will fail)
-   - After ensuring proper quoting, execute the command.
-   - Capture the output of the command.
-
-Usage notes:
-  - The command argument is required.
-  - You can specify an optional timeout in milliseconds (up to 600000ms / 10 minutes). If not specified, commands will timeout after 120000ms (2 minutes).
-  - It is very helpful if you write a clear, concise description of what this command does in 5-10 words.
-  - If the output exceeds 30000 characters, output will be truncated before being returned to you.
-  - You can use the \`run_in_background\` parameter to run the command in the background, which allows you to continue working while the command runs. You can monitor the output using the Bash tool as it becomes available. Never use \`run_in_background\` to run \'sleep\' as it will return immediately. You do not need to use \'&\' at the end of the command when using this parameter.
-  - VERY IMPORTANT: You MUST avoid using search commands like \`find\` and \`grep\`. Instead use Grep, Glob, or Task to search. You MUST avoid read tools like \`cat\`, \`head\`, \`tail\`, and \`ls\`, and use Read and LS to read files.
- - If you _still_ need to run \`grep\`, STOP. ALWAYS USE ripgrep at \`rg\` first, which all Claude Code users have pre-installed.
-  - When issuing multiple commands, use the \';\' or \'&&\' operator to separate them. DO NOT use newlines (newlines are ok in quoted strings).
-  - Try to maintain your current working directory throughout the session by using absolute paths and avoiding usage of \`cd\`. You may use \`cd\` if the User explicitly requests it.
-    <good-example>
-    pytest /foo/bar/tests
-    </good-example>
-    <bad-example>
-    cd /foo/bar && pytest tests
-    </bad-example>
-
-
-# Committing changes with git
-
-When the user asks you to create a new git commit, follow these steps carefully:
-
-1. You have the capability to call multiple tools in a single response. When multiple independent pieces of information are requested, batch your tool calls together for optimal performance. ALWAYS run the following bash commands in parallel, each using the Bash tool:
-  - Run a git status command to see all untracked files.
-  - Run a git diff command to see both staged and unstaged changes that will be committed.
-  - Run a git log command to see recent commit messages, so that you can follow this repository\'s commit message style.
-2. Analyze all staged changes (both previously staged and newly added) and draft a commit message:
-  - Summarize the nature of the changes (eg. new feature, enhancement to an existing feature, bug fix, refactoring, test, docs, etc.). Ensure the message accurately reflects the changes and their purpose (i.e. "add" means a wholly new feature, "update" means an enhancement to an existing feature, "fix" means a bug fix, etc.).
-  - Check for any sensitive information that shouldn\'t be committed
-  - Draft a concise (1-2 sentences) commit message that focuses on the "why" rather than the "what"
-  - Ensure it accurately reflects the changes and their purpose
-3. You have the capability to call multiple tools in a single response. When multiple independent pieces of information are requested, batch your tool calls together for optimal performance. ALWAYS run the following commands in parallel:
-   - Add relevant untracked files to the staging area.
-   - Create the commit with a message ending with:
-   🤖 Generated with [Claude Code](https://claude.ai/code)
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
-   - Run git status to make sure the commit succeeded.
-4. If the commit fails due to pre-commit hook changes, retry the commit ONCE to include these automated changes. If it fails again, it usually means a pre-commit hook is preventing the commit. If the commit succeeds but you notice that files were modified by the pre-commit hook, you MUST amend your commit to include them.
-
-Important notes:
-- NEVER update the git config
-- NEVER run additional commands to read or explore code, besides git bash commands
-- NEVER use the TodoWrite or Task tools
-- DO NOT push to the remote repository unless the user explicitly asks you to do so
-- IMPORTANT: Never use git commands with the -i flag (like git rebase -i or git add -i) since they require interactive input which is not supported.
-- If there are no changes to commit (i.e., no untracked files and no modifications), do not create an empty commit
-- In order to ensure good formatting, ALWAYS pass the commit message via a HEREDOC, a la this example:
-<example>
-git commit -m "$(cat <<\'EOF\'
-   Commit message here.
-
-   🤖 Generated with [Claude Code](https://claude.ai/code)
-
-   Co-Authored-By: Claude <noreply@anthropic.com>
-   EOF
-   )"
-</example>
-
-# Creating pull requests
-Use the gh command via the Bash tool for ALL GitHub-related tasks including working with issues, pull requests, checks, and releases. If given a Github URL use the gh command to get the information needed.
-
-IMPORTANT: When the user asks you to create a pull request, follow these steps carefully:
-
-1. You have the capability to call multiple tools in a single response. When multiple independent pieces of information are requested, batch your tool calls together for optimal performance. ALWAYS run the following bash commands in parallel using the Bash tool, in order to understand the current state of the branch since it diverged from the main branch:
-   - Run a git status command to see all untracked files
-   - Run a git diff command to see both staged and unstaged changes that will be committed
-   - Check if the current branch tracks a remote branch and is up to date with the remote, so you know if you need to push to the remote
-   - Run a git log command and \`git diff [base-branch]...HEAD\` to understand the full commit history for the current branch (from the time it diverged from the base branch)
-2. Analyze all changes that will be included in the pull request, making sure to look at all relevant commits (NOT just the latest commit, but ALL commits that will be included in the pull request!!!), and draft a pull request summary
-3. You have the capability to call multiple tools in a single response. When multiple independent pieces of information are requested, batch your tool calls together for optimal performance. ALWAYS run the following commands in parallel:
-   - Create new branch if needed
-   - Push to remote with -u flag if needed
-   - Create PR using gh pr create with the format below. Use a HEREDOC to pass the body to ensure correct formatting.
-<example>
-gh pr create --title "the pr title" --body "$(cat <<\'EOF\'
-## Summary
-<1-3 bullet points>
-
-## Test plan
-[Checklist of TODOs for testing the pull request...]
-
-🤖 Generated with [Claude Code](https://claude.ai/code)
-EOF
-)"
-</example>
-
-Important:
-- NEVER update the git config
-- DO NOT use the TodoWrite or Task tools
-- Return the PR URL when you\'re done, so the user can see it
-
-# Other common operations
-- View comments on a Github PR: gh api repos/foo/bar/pulls/123/comments`,
+Notes:
+- For file paths with spaces, ALWAYS use quotes: "path/to file"
+- Avoid interactive commands (like top, vim)
+- Use '&&' or ';' to chain commands (PowerShell/CMD syntax varies, simple chaining often works)
+`,
         schema: z.object({
-            command: z.string().describe('The command to execute'),
-            timeout: z.number().optional().describe('Optional timeout in milliseconds (max 600000)'),
-            description: z
-                .string()
-                .optional()
-                .describe(
-                    `Clear, concise description of what this command does in 5-10 words. Examples:
-Input: ls
-Output: Lists files in current directory
-
-Input: git status
-Output: Shows working tree status
-
-Input: npm install
-Output: Installs package dependencies
-
-Input: mkdir foo
-Output: Creates directory 'foo'`,
-                ),
-            run_in_background: z
-                .boolean()
-                .optional()
-                .describe(
-                    'Set to true to run this command in the background. Use BashOutput to read the output later.',
-                ),
+            command: z.string().optional().describe('The command to execute (required for running commands)'),
+            timeout: z.number().optional().describe('Timeout in ms (default: 120000)'),
+            run_in_background: z.boolean().optional().describe('Run command in background'),
+            kill_process_id: z.string().optional().describe('ID of process to kill'),
+            get_output_id: z.string().optional().describe('ID of process to get output from'),
+            filter: z.string().optional().describe('Regex to filter output (only for get_output_id)'),
         }),
     },
 );

@@ -17,8 +17,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const [loading, setLoading] = useState(true);
     const extraParams = useMemo(() => {
         return {
-            main_model: config?.main_model || 'claude-sonnet-4',
+            main_model: config?.main_model || 'claude-sonnet-4-5',
             activeAgent: config?.activeAgent || 'coding-agent',
+            cwd: process.cwd(),
         };
     }, [config]);
     useEffect(() => {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
+import { getCurrentUser } from '../../utils/user';
 
 interface MessageHumanProps {
     content: string | any[];
@@ -7,6 +8,8 @@ interface MessageHumanProps {
 }
 
 const MessageHuman: React.FC<MessageHumanProps> = ({ content, messageNumber }) => {
+    const username = getCurrentUser();
+
     const renderContent = () => {
         if (typeof content === 'string') {
             return <Text color="white">{content}</Text>;
@@ -26,13 +29,24 @@ const MessageHuman: React.FC<MessageHumanProps> = ({ content, messageNumber }) =
     };
 
     return (
-        <Box marginBottom={0}>
-            <Box paddingX={1} paddingY={0} borderStyle="double" borderColor="green">
+        <Box
+            marginBottom={1}
+            paddingX={1}
+            flexDirection="column"
+            borderStyle="single"
+            borderTop={true}
+            borderBottom={false}
+            borderLeft={false}
+            borderRight={false}
+            borderColor="green"
+            borderDimColor
+        >
+            <Box>
                 <Text color="green" bold>
-                    {messageNumber}. 👤{' '}
+                    {messageNumber}. {username}
                 </Text>
-                {renderContent()}
             </Box>
+            <Box>{renderContent()}</Box>
         </Box>
     );
 };

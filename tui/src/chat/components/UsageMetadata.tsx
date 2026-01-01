@@ -43,38 +43,32 @@ export const UsageMetadata: React.FC<UsageMetadataProps> = ({
     const speed = spendSeconds > 0 && Number.isFinite(outputTokens) ? outputTokens / spendSeconds : 0;
 
     return (
-        <Box marginTop={0}>
+        <Box marginTop={0} flexGrow={1} justifyContent="flex-end" paddingLeft={1}>
             <Box gap={1}>
                 {(totalTokens > 0 || inputTokens > 0 || outputTokens > 0) && (
-                    <Text color="gray" dimColor>
-                        📊<Text color="yellow">{formatTokens(totalTokens)}</Text> 📥
-                        <Text color="green">{formatTokens(inputTokens)}</Text> 📤
+                    <Text dimColor>
+                        <Text color="white">Tokens:</Text>
+                        <Text color="green">{formatTokens(inputTokens)}</Text>
+                        <Text color="white">/</Text>
                         <Text color="red">{formatTokens(outputTokens)}</Text>
                     </Text>
                 )}
                 {spendSeconds > 0 && (
-                    <Text color="gray">
-                        ⏱️ <Text>{spendSeconds.toFixed(2)}</Text>s
+                    <Text dimColor>
+                        <Text color="white">Time:</Text>
+                        <Text color="yellow">{spendSeconds.toFixed(0)}s</Text>
                     </Text>
                 )}
                 {speed > 0 && (
-                    <Text color="gray">
-                        ⚡ <Text>{speed.toFixed(2)}</Text> TPS
+                    <Text dimColor>
+                        <Text color="white">Speed:</Text>
+                        <Text color="cyan">{speed.toFixed(2)} t/s</Text>
                     </Text>
                 )}
                 {response_metadata?.model_name && (
-                    <Text color="gray" dimColor>
-                        🤖<Text color="blue">{response_metadata.model_name}</Text>
-                    </Text>
-                )}
-                {tool_call_id && (
-                    <Text color="gray" dimColor>
-                        #️⃣<Text>{tool_call_id.slice(0, 8)}</Text>
-                    </Text>
-                )}
-                {id && (
-                    <Text color="gray" dimColor>
-                        🆔<Text>{id.slice(0, 8)}</Text>
+                    <Text>
+                        <Text color="white">Model:</Text>
+                        <Text color="blue">{response_metadata.model_name}</Text>
                     </Text>
                 )}
             </Box>

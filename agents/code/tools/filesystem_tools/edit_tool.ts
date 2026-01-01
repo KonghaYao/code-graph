@@ -11,14 +11,22 @@ export const edit_tool = tool(
             // 查找开头行的匹配
             const startMatches: number[] = [];
             for (let i = 0; i < lines.length; i++) {
-                if (lines[i].includes(start_line)) {
-                    // 检查是否是两行匹配的情况
-                    if (i + 1 < lines.length && start_line.includes('\n')) {
-                        const [firstLine, secondLine] = start_line.split('\n');
-                        if (lines[i].includes(firstLine) && lines[i + 1].includes(secondLine)) {
+                if (start_line.includes('\n')) {
+                    const startLines = start_line.split('\n');
+                    if (i + startLines.length <= lines.length) {
+                        let isMatch = true;
+                        for (let j = 0; j < startLines.length; j++) {
+                            if (!lines[i + j].includes(startLines[j])) {
+                                isMatch = false;
+                                break;
+                            }
+                        }
+                        if (isMatch) {
                             startMatches.push(i);
                         }
-                    } else {
+                    }
+                } else {
+                    if (lines[i].includes(start_line)) {
                         startMatches.push(i);
                     }
                 }
@@ -56,7 +64,9 @@ export const edit_tool = tool(
             }
 
             if (validRanges.length > 1) {
-                return `Warning: Multiple valid ranges found in ${file_path}. Please make start_line and end_line more specific to avoid ambiguity.`;
+                return `Warning: Multiple valid ranges found in ${file_path} (Lines: ${validRanges
+                    .map((r) => `${r.start + 1}-${r.end + 1}`)
+                    .join(', ')}). Please make start_line and end_line more specific to avoid ambiguity.`;
             }
 
             const range = validRanges[0];

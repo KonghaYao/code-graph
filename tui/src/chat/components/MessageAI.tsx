@@ -4,6 +4,7 @@ import Markdown from './Markdown';
 import { RenderMessage } from '@langgraph-js/sdk';
 import { UsageMetadata } from './UsageMetadata';
 import { getMessageContent } from '@langgraph-js/sdk';
+import { useSettings } from '../context/SettingsContext';
 
 interface MessageAIProps {
     message: RenderMessage;
@@ -11,22 +12,25 @@ interface MessageAIProps {
 }
 
 const MessageAI: React.FC<MessageAIProps> = ({ message, messageNumber }) => {
+    const { extraParams } = useSettings();
+    const modelName = extraParams.main_model || 'AI';
+
     return (
-        <Box borderStyle="double" borderColor="cyan" paddingX={1} paddingY={0} flexDirection="column" marginBottom={0}>
+        <Box flexDirection="column" marginBottom={1} paddingX={1}>
             <Box paddingBottom={0}>
                 <Text color="cyan" bold>
-                    {messageNumber}. 🤖 {message.name}
+                    {messageNumber}. {modelName} ({message.name})
                 </Text>
+                <UsageMetadata
+                    response_metadata={message.response_metadata as any}
+                    usage_metadata={message.usage_metadata || {}}
+                    spend_time={message.spend_time}
+                    id={message.id}
+                />
             </Box>
             <Box>
-                <Markdown>{getMessageContent(message.content)}</Markdown>
+                <Text>{getMessageContent(message.content)}</Text>
             </Box>
-            <UsageMetadata
-                response_metadata={message.response_metadata as any}
-                usage_metadata={message.usage_metadata || {}}
-                spend_time={message.spend_time}
-                id={message.id}
-            />
         </Box>
     );
 };

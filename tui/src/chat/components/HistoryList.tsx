@@ -2,7 +2,6 @@ import React, { useEffect, useMemo } from 'react';
 import { Box, Text, useInput } from 'ink';
 import SelectInput from 'ink-select-input';
 import { useChat } from '@langgraph-js/sdk/react';
-import { getHistoryContent } from '@langgraph-js/sdk';
 import { formatTime } from '@langgraph-js/sdk';
 interface HistoryListProps {
     onClose: () => void;
@@ -28,10 +27,6 @@ const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
 
     const items = useMemo(
         () => [
-            {
-                label: '➕ 创建新对话',
-                value: 'new_chat',
-            },
             ...historyList
                 .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
                 .map((thread) => ({
@@ -42,6 +37,10 @@ const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
                     key: thread.thread_id,
                     thread: thread,
                 })),
+            {
+                label: '➕ 创建新对话',
+                value: 'new_chat',
+            },
         ],
         [historyList],
     );
@@ -60,7 +59,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
     // For now, delete functionality is omitted from this SelectInput-based UI.
 
     return (
-        <Box flexDirection="column" borderStyle="double" borderColor="yellow" paddingX={1} paddingY={0} flexGrow={1}>
+        <Box flexDirection="column" paddingX={1} paddingY={0} flexGrow={1}>
             <Box paddingBottom={0} justifyContent="space-between">
                 <Text color="yellow" bold>
                     📜 历史记录

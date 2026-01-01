@@ -1,8 +1,8 @@
-import { Box, Text } from 'ink';
+import { Box } from 'ink';
 import MessageHuman from './MessageHuman';
 import MessageAI from './MessageAI';
 import MessageTool from './MessageTool';
-import { formatTokens, getMessageContent, LangGraphClient, RenderMessage } from '@langgraph-js/sdk';
+import { formatTokens, getMessageContent, RenderMessage } from '@langgraph-js/sdk';
 
 export const MessagesBox = ({
     renderMessages,
