@@ -3,7 +3,7 @@
         "outDir": "./dist",
         "rootDir": ".",
         "baseUrl": ".",
-        "target": "ES2021",
+        "target": "esnext",
         "module": "esnext",
         "moduleResolution": "bundler",
         "esModuleInterop": true,

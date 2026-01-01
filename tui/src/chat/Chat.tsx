@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import Spinner from 'ink-spinner';
 import TextInput from 'ink-text-input';
@@ -49,14 +49,18 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
-    const { userInput, setUserInput, sendMessage, client } = useChat();
+    const { userInput, setUserInput, sendMessage, client, renderMessages } = useChat();
     const { extraParams } = useSettings();
 
     // 使用命令处理组件
     const commandHandler = useCommandHandler({
         extraParams,
     });
-
+    const lastMessageToken = useMemo(() => {
+        const index = renderMessages.findLastIndex((i) => i.usage_metadata?.input_tokens);
+        if (index === -1) return 0;
+        return renderMessages[index].usage_metadata?.input_tokens;
+    }, [renderMessages]);
     const sendTextMessage = async () => {
         if (!userInput) return;
 
@@ -106,7 +110,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
                 />
             </Box>
             <Box paddingX={1} justifyContent="flex-end">
-                <TokenProgressBar currentTokens={client?.tokenCounter.input_tokens || 0} />
+                <TokenProgressBar currentTokens={lastMessageToken || 0} />
             </Box>
         </Box>
     );
