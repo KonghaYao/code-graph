@@ -5,7 +5,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "bun run tui/src/app.tsx"
+        "dev": "bun run tui/src/app.tsx",
+        "preview": "bun run tui/dist/code-graph.js"
     },
     "dependencies": {
         "@langchain/core": "^1.1.8",
@@ -25,6 +26,7 @@
     },
     "devDependencies": {
         "@types/node": "^20.19.14",
+        "rollup-plugin-node-externals": "^8.1.2",
         "tsx": "^4.20.5",
         "typescript": "^5.9.2"
     },

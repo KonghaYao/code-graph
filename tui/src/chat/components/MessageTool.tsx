@@ -1,7 +1,7 @@
 import React, { JSX } from 'react';
 import { Box, Text } from 'ink';
 import Markdown from './Markdown';
-import SyntaxHighlight from 'ink-syntax-highlight';
+// import SyntaxHighlight from 'ink-syntax-highlight';
 import { LangGraphClient, RenderMessage, ToolMessage } from '@langgraph-js/sdk';
 import { UsageMetadata } from './UsageMetadata';
 import { useChat } from '@langgraph-js/sdk/react';
@@ -117,7 +117,7 @@ const truncateContentForDisplay = (content: string, maxLines: number = 4): strin
 
 const InputPreviewer = ({ content }: { content: any }) => {
     const formattedJson = formatJsonForTerminal(content, 0, 2, 5); // 限制深度为2，长度为5
-    return <SyntaxHighlight language="yaml" code={formattedJson} />;
+    return <Text>{formattedJson}</Text>;
 };
 
 const MessageTool: React.FC<MessageToolProps> = ({ message, getMessageContent, isCollapsed, messageNumber }) => {
