@@ -46,6 +46,11 @@ export type Props = {
      * Function to call when `Enter` is pressed, where first argument is a value of the input.
      */
     readonly onSubmit?: (value: string) => void;
+
+    /**
+     * Whether the input is disabled and cannot be edited.
+     */
+    readonly disabled?: boolean; // eslint-disable-line react/boolean-prop-naming
 };
 
 function TextInput({
@@ -58,6 +63,7 @@ function TextInput({
     onChange,
     onSubmit,
     onHotKey,
+    disabled = false,
 }: Props) {
     const [state, setState] = useState({
         cursorOffset: (originalValue || '').length,
@@ -92,7 +98,7 @@ function TextInput({
     let renderedPlaceholder = placeholder ? chalk.grey(placeholder) : undefined;
 
     // Fake mouse cursor, because it's too inconvenient to deal with actual cursor and ansi escapes
-    if (showCursor && focus) {
+    if (showCursor && focus && !disabled) {
         renderedPlaceholder =
             placeholder.length > 0
                 ? chalk.inverse(placeholder[0]) + chalk.grey(placeholder.slice(1))
@@ -115,6 +121,10 @@ function TextInput({
 
     useInput(
         (input, key) => {
+            if (disabled) {
+                return;
+            }
+
             if (onHotKey) {
                 const result = onHotKey(input, key);
                 if (!result) {
@@ -202,10 +212,14 @@ function TextInput({
                 onChange(nextValue);
             }
         },
-        { isActive: focus },
+        { isActive: focus && !disabled },
     );
 
-    return <Text>{placeholder ? (value.length > 0 ? renderedValue : renderedPlaceholder) : renderedValue}</Text>;
+    // Apply dim styling when disabled
+    const displayText = disabled ? chalk.dim(renderedValue) : renderedValue;
+    const displayPlaceholder = disabled ? chalk.dim(renderedPlaceholder) : renderedPlaceholder;
+
+    return <Text>{placeholder ? (value.length > 0 ? displayText : displayPlaceholder) : displayText}</Text>;
 }
 export { TextInput as EnhancedTextInput };
 export default TextInput;
@@ -217,8 +231,8 @@ type UncontrolledProps = {
     readonly initialValue?: string;
 } & Omit<Props, 'value' | 'onChange'>;
 
-export function UncontrolledTextInput({ initialValue = '', ...props }: UncontrolledProps) {
+export function UncontrolledTextInput({ initialValue = '', disabled = false, ...props }: UncontrolledProps) {
     const [value, setValue] = useState(initialValue);
 
-    return <TextInput {...props} value={value} onChange={setValue} />;
+    return <TextInput {...props} value={value} onChange={setValue} disabled={disabled} />;
 }

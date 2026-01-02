@@ -2,17 +2,13 @@ import { Box, Static } from 'ink';
 import MessageHuman from './MessageHuman';
 import MessageAI from './MessageAI';
 import MessageTool from './MessageTool';
-import { formatTokens, getMessageContent, RenderMessage } from '@langgraph-js/sdk';
+import { RenderMessage } from '@langgraph-js/sdk';
 
 export const MessagesBox = ({
     renderMessages,
-    collapsedTools,
-    toggleToolCollapse,
     startIndex,
 }: {
     renderMessages: RenderMessage[];
-    collapsedTools: string[];
-    toggleToolCollapse: (id: string) => void;
 
     startIndex: number;
 }) => {
@@ -30,15 +26,7 @@ export const MessagesBox = ({
                     key={message.unique_id}
                 />
             ) : message.type === 'tool' ? (
-                <MessageTool
-                    message={message}
-                    getMessageContent={getMessageContent}
-                    formatTokens={formatTokens}
-                    isCollapsed={collapsedTools.includes(message.id!)}
-                    onToggleCollapse={() => toggleToolCollapse(message.id!)}
-                    messageNumber={index + 1 + startIndex}
-                    key={message.unique_id}
-                />
+                <MessageTool message={message} messageNumber={index + 1 + startIndex} key={message.unique_id} />
             ) : (
                 <MessageAI message={message} messageNumber={index + 1 + startIndex} key={message.unique_id} />
             )}

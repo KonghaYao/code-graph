@@ -16,19 +16,14 @@ import TokenProgressBar from './components/TokenProgressBar';
 import DefaultTools from './tools/index';
 
 const ChatMessages = () => {
-    const { renderMessages, loading, inChatError, collapsedTools, toggleToolCollapse, isFELocking } = useChat();
+    const { renderMessages, loading, inChatError, isFELocking } = useChat();
 
     const visibleMessages = renderMessages;
 
     return (
         <Box flexDirection="column" flexGrow={1} paddingX={0} paddingY={0}>
             {visibleMessages.length === 0 && <WelcomeHeader />}
-            <MessagesBox
-                renderMessages={visibleMessages}
-                startIndex={0}
-                collapsedTools={collapsedTools}
-                toggleToolCollapse={toggleToolCollapse}
-            />
+            <MessagesBox renderMessages={visibleMessages} startIndex={0} />
             {loading && !isFELocking() && (
                 <Box marginTop={0} paddingLeft={1}>
                     <Text>
@@ -51,7 +46,7 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
-    const { userInput, setUserInput, sendMessage, client, renderMessages, stopGeneration } = useChat();
+    const { userInput, setUserInput, sendMessage, loading, renderMessages, stopGeneration } = useChat();
     const { extraParams } = useSettings();
 
     // 使用命令处理组件
@@ -104,6 +99,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
                     </Text>
                 </Box>
                 <EnhancedTextInput
+                    disabled={loading} // 后面可以改为 interrupt 状态时，才禁用，添加上缓冲区的概念
                     value={userInput as string}
                     onChange={setUserInput}
                     onSubmit={sendTextMessage}

@@ -1,6 +1,6 @@
 import React, { JSX } from 'react';
 import { Box, Text } from 'ink';
-import { RenderMessage, ToolMessage } from '@langgraph-js/sdk';
+import { getMessageContent, RenderMessage, ToolMessage } from '@langgraph-js/sdk';
 import { UsageMetadata } from './UsageMetadata';
 import { useChat } from '@langgraph-js/sdk/react';
 import { ToolRenderData } from '@langgraph-js/sdk';
@@ -16,10 +16,6 @@ const TOOL_COLOR_NAMES = [
 
 interface MessageToolProps {
     message: ToolMessage & RenderMessage;
-    getMessageContent: (content: any) => string;
-    formatTokens: (tokens: number) => string;
-    isCollapsed: boolean;
-    onToggleCollapse: () => void;
     messageNumber: number;
 }
 
@@ -145,7 +141,7 @@ const InputPreviewer = ({ content }: { content: any }) => {
     return <Text>{renderHighlightedContent(content)}</Text>;
 };
 
-const MessageTool: React.FC<MessageToolProps> = ({ message, getMessageContent, isCollapsed, messageNumber }) => {
+const MessageTool: React.FC<MessageToolProps> = ({ message, messageNumber }) => {
     const { getToolUIRender, client } = useChat();
     const tool = new ToolRenderData<
         {
@@ -179,7 +175,7 @@ const MessageTool: React.FC<MessageToolProps> = ({ message, getMessageContent, i
                     tool_call_id={message.tool_call_id}
                 />
             </Box>
-            {message.sub_messages ? (
+            {message.sub_messages?.length ? (
                 <Text color={borderColor}>hidden {message.sub_messages.length} subagents message </Text>
             ) : null}
 
