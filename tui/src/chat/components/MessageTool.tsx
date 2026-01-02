@@ -179,6 +179,9 @@ const MessageTool: React.FC<MessageToolProps> = ({ message, getMessageContent, i
                     tool_call_id={message.tool_call_id}
                 />
             </Box>
+            {message.sub_messages ? (
+                <Text color={borderColor}>hidden {message.sub_messages.length} subagents message </Text>
+            ) : null}
 
             <Box flexDirection="column" paddingTop={0} paddingLeft={0}>
                 {/* 入参 */}
