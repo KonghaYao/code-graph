@@ -17,7 +17,6 @@ import DefaultTools from './tools/index';
 
 const ChatMessages = () => {
     const { renderMessages, loading, inChatError, isFELocking } = useChat();
-
     const visibleMessages = renderMessages;
 
     return (

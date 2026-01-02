@@ -9,7 +9,6 @@ export const MessagesBox = ({
     startIndex,
 }: {
     renderMessages: RenderMessage[];
-
     startIndex: number;
 }) => {
     // Separate history (static) and active (dynamic) messages

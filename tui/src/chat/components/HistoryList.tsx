@@ -75,6 +75,7 @@ const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
     );
 
     const handleSelect = (item: any) => {
+        console.clear();
         if (item.value === 'new_chat') {
             createNewChat();
         } else {
