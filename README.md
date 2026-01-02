@@ -16,6 +16,7 @@
 -   [ ] Memory System
 -   [ ] Magic Input
     -   [ ] 缓冲区（like cursor）
+-   [ ] MCP
 
 ## 项目结构
 

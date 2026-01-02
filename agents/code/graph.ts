@@ -7,7 +7,7 @@ import { createAgent } from 'langchain';
 import { z } from 'zod';
 import { createStateEntrypoint } from '@langgraph-js/pure-graph';
 import { CodeState } from './state.js';
-import { humanInTheLoopMiddleware } from '@langgraph-js/auk';
+import { ask_user_with_options, ask_user_with_options_config, humanInTheLoopMiddleware } from '@langgraph-js/auk';
 import { add_memory_tool } from './tools/memory/memory_tool.js';
 import { create_finder } from './subagents/finder.js';
 import { SkillsMiddleware } from './middlewares/skills.js';
@@ -19,6 +19,8 @@ const codingAgent = async (state: z.infer<typeof CodeState>) => {
     });
     const allTools = [
         // exit_plan_mode_tool,
+
+        ask_user_with_options,
 
         todo_write_tool,
         glob_tool,
@@ -46,6 +48,7 @@ const codingAgent = async (state: z.infer<typeof CodeState>) => {
                     terminal: {
                         allowedDecisions: ['approve', 'reject', 'edit'],
                     },
+                    ...ask_user_with_options_config.interruptOn,
                 },
             }),
         ],

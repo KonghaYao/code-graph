@@ -3,6 +3,7 @@ import { Box, Text } from 'ink';
 import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
 import { useState } from 'react';
+import { InputPreviewer } from '../components/MessageTool';
 
 // Color scheme for terminal actions
 const ACTION_COLORS: { [key: string]: string } = {
@@ -154,10 +155,7 @@ export const terminal = createUITool({
             if (!tool.output) return null;
 
             return (
-                <Box flexDirection="column" marginTop={1}>
-                    <Text color="cyan" bold>
-                        📋 Terminal Output
-                    </Text>
+                <Box flexDirection="column">
                     <Box borderStyle="single" borderColor="cyan" paddingX={1} marginTop={1}>
                         <Text>{tool.output}</Text>
                     </Box>
@@ -167,9 +165,9 @@ export const terminal = createUITool({
 
         return (
             <Box flexDirection="column">
+                <InputPreviewer content={tool.getInputRepaired()}></InputPreviewer>
                 {/* Main Content */}
                 {isEditing ? renderEditUI() : actionButtons()}
-
                 {/* Output */}
                 {renderOutput()}
             </Box>

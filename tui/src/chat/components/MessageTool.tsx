@@ -6,12 +6,11 @@ import { useChat } from '@langgraph-js/sdk/react';
 import { ToolRenderData } from '@langgraph-js/sdk';
 
 const TOOL_COLOR_NAMES = [
-    'blue',
     'green',
     'yellow',
     'magenta',
     'cyan', // Closest available
-    'blue', // Closest available
+    'blue',
 ];
 
 interface MessageToolProps {
@@ -40,7 +39,7 @@ const truncateContentForDisplay = (content: string, maxLines: number = 4): strin
 };
 
 /** 使用自制的 YAML 高亮，缩减包大小 */
-const InputPreviewer = ({ content }: { content: any }) => {
+export const InputPreviewer = ({ content }: { content: any }) => {
     // Ink 内置颜色的递归渲染 (GitHub Dark 风格)
     const renderHighlightedContent = (
         data: any,
@@ -164,7 +163,7 @@ const MessageTool: React.FC<MessageToolProps> = ({ message, messageNumber }) => 
         <Box flexDirection="column" paddingX={1} paddingY={0} marginBottom={1}>
             <Box>
                 <Text color={borderColor} bold>
-                    {messageNumber}. 🔧 {message.name}
+                    {messageNumber}. {message.name}
                     {label}
                 </Text>
                 <UsageMetadata
@@ -179,17 +178,17 @@ const MessageTool: React.FC<MessageToolProps> = ({ message, messageNumber }) => 
                 <Text color={borderColor}>hidden {message.sub_messages.length} subagents message </Text>
             ) : null}
 
-            <Box flexDirection="column" paddingTop={0} paddingLeft={0}>
-                {/* 入参 */}
-                <InputPreviewer content={tool.getInputRepaired()} />
-                {render ? (
-                    (render(message as RenderMessage) as JSX.Element)
-                ) : (
+            {render ? (
+                (render(message as RenderMessage) as JSX.Element)
+            ) : (
+                <Box flexDirection="column" paddingTop={0} paddingLeft={0}>
+                    {/* 入参 */}
+                    <InputPreviewer content={tool.getInputRepaired()} />
                     <Box paddingTop={1} paddingBottom={0}>
                         <Text dimColor>{truncateContentForDisplay(getMessageContent(message.content))}</Text>
                     </Box>
-                )}
-            </Box>
+                </Box>
+            )}
         </Box>
     );
 };

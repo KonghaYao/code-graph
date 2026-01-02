@@ -38,9 +38,9 @@ export type Props = {
     /**
      * Function to call when value updates.
      */
-    readonly onChange: (value: string) => void;
+    readonly onChange?: (value: string) => void;
 
-    readonly onHotKey: (value: string, key: Key) => boolean;
+    readonly onHotKey?: (value: string, key: Key) => boolean;
 
     /**
      * Function to call when `Enter` is pressed, where first argument is a value of the input.
@@ -209,7 +209,7 @@ function TextInput({
             });
 
             if (nextValue !== originalValue) {
-                onChange(nextValue);
+                onChange?.(nextValue);
             }
         },
         { isActive: focus && !disabled },
