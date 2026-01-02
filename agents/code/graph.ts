@@ -9,6 +9,9 @@ import { createStateEntrypoint } from '@langgraph-js/pure-graph';
 import { CodeState } from './state.js';
 import { humanInTheLoopMiddleware } from '@langgraph-js/auk';
 import { add_memory_tool } from './tools/memory/memory_tool.js';
+import { create_finder } from './subagents/finder.js';
+import { SkillsMiddleware } from './middlewares/skills.js';
+import { SubAgentsMiddleware } from './middlewares/subagents.js';
 const codingAgent = async (state: z.infer<typeof CodeState>) => {
     const model = new ChatOpenAI({
         model: state.main_model,
@@ -27,6 +30,8 @@ const codingAgent = async (state: z.infer<typeof CodeState>) => {
         ...bash_tools,
         add_memory_tool,
     ];
+    const subagents = new SubAgentsMiddleware();
+    subagents.addSubAgents('finder', create_finder);
 
     const agent = createAgent({
         model: model,
@@ -34,6 +39,8 @@ const codingAgent = async (state: z.infer<typeof CodeState>) => {
         tools: [...allTools],
         stateSchema: CodeState,
         middleware: [
+            subagents,
+            new SkillsMiddleware({}),
             humanInTheLoopMiddleware({
                 interruptOn: {
                     terminal: {
