@@ -1,6 +1,6 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { rgPath } from '@vscode/ripgrep';
+import { rgPath } from '@lvce-editor/ripgrep';
 import { execa } from 'execa';
 
 // 使用 execa 执行命令的异步函数
@@ -134,6 +134,7 @@ Performance:
 - Respects .gitignore by default (use --no-ignore to override)
 `,
         schema: z.object({
+            label: z.string().describe('what you want to do'),
             args: z
                 .array(z.string())
                 .describe(

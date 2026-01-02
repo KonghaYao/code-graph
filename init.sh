@@ -1,0 +1,1 @@
+export RIPGREP_PREBUILT_BINARIES_MIRROR=https://v6.gh-proxy.org/https://github.com/microsoft/ripgrep-prebuilt/releases/download

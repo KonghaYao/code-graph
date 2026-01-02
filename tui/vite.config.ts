@@ -21,7 +21,7 @@ export default defineConfig({
                 'pg',
                 'redis',
                 'react-devtools-core',
-                '@vscode/ripgrep', // 修复特殊文件引用的情况
+                '@lvce-editor/ripgrep', // 修复特殊文件引用的情况
                 'node-sqlite3-wasm', // 修复特殊文件引用的情况
             ],
         }),

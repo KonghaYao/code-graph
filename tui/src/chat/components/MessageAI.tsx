@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import Markdown from './Markdown';
 import { RenderMessage } from '@langgraph-js/sdk';
 import { UsageMetadata } from './UsageMetadata';
 import { getMessageContent } from '@langgraph-js/sdk';

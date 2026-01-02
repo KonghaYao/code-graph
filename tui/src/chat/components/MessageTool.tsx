@@ -1,22 +1,18 @@
 import React, { JSX } from 'react';
 import { Box, Text } from 'ink';
-import Markdown from './Markdown';
-// import SyntaxHighlight from 'ink-syntax-highlight';
-import { LangGraphClient, RenderMessage, ToolMessage } from '@langgraph-js/sdk';
+import { RenderMessage, ToolMessage } from '@langgraph-js/sdk';
 import { UsageMetadata } from './UsageMetadata';
 import { useChat } from '@langgraph-js/sdk/react';
 import { ToolRenderData } from '@langgraph-js/sdk';
 
-const TOOL_COLORS: { [key: string]: string } = {
-    'border-red-400': 'red',
-    'border-blue-400': 'blue',
-    'border-green-500': 'green',
-    'border-yellow-400': 'yellow',
-    'border-purple-400': 'magenta',
-    'border-pink-400': 'cyan', // Closest available
-    'border-indigo-400': 'blue', // Closest available
-};
-const TOOL_COLOR_NAMES = Object.keys(TOOL_COLORS);
+const TOOL_COLOR_NAMES = [
+    'blue',
+    'green',
+    'yellow',
+    'magenta',
+    'cyan', // Closest available
+    'blue', // Closest available
+];
 
 interface MessageToolProps {
     message: ToolMessage & RenderMessage;
@@ -33,75 +29,7 @@ const getToolColor = (tool_name: string): string => {
         hash = tool_name.charCodeAt(i) + ((hash << 5) - hash);
     }
     const index = Math.abs(hash % TOOL_COLOR_NAMES.length);
-    const colorName = TOOL_COLOR_NAMES[index];
-    return TOOL_COLORS[colorName];
-};
-
-const formatJsonForTerminal = (
-    data: any,
-    indent: number = 0,
-    maxDepth: number = 2,
-    maxLength: number = 5,
-    maxValueLength: number = 100,
-): string => {
-    const indentChar = '  '; // Using two spaces for indentation
-    const currentIndent = indentChar.repeat(indent);
-    const nextIndent = indentChar.repeat(indent + 1);
-
-    if (data === null) {
-        return 'null';
-    }
-
-    if (typeof data !== 'object') {
-        const stringified = JSON.stringify(data); // Safely stringify primitive values
-        // 控制字符串值的长度
-        if (typeof data === 'string' && stringified.length > maxValueLength + 2) {
-            // +2 for quotes
-            const truncated = stringified.substring(1, maxValueLength + 1); // Remove opening quote
-            return `${truncated}..." (truncated, ${stringified.length - 2} chars)`;
-        }
-        return stringified;
-    }
-
-    if (indent >= maxDepth) {
-        return '{...} (truncated)'; // Indicate truncation for deeply nested objects/arrays
-    }
-
-    if (Array.isArray(data)) {
-        if (data.length === 0) {
-            return '[]';
-        }
-
-        const items: string[] = [];
-        for (let i = 0; i < Math.min(data.length, maxLength); i++) {
-            items.push(
-                `${nextIndent}- ${formatJsonForTerminal(data[i], indent + 1, maxDepth, maxLength, maxValueLength)}`,
-            );
-        }
-        if (data.length > maxLength) {
-            items.push(`${nextIndent}... (${data.length - maxLength} more)`);
-        }
-
-        return `\n${items.join('\n')}`;
-    }
-
-    // Object
-    const keys = Object.keys(data);
-    if (keys.length === 0) {
-        return '{}';
-    }
-
-    const properties: string[] = [];
-    for (let i = 0; i < Math.min(keys.length, maxLength); i++) {
-        const key = keys[i];
-        const value = formatJsonForTerminal(data[key], indent + 1, maxDepth, maxLength, maxValueLength);
-        properties.push(`${currentIndent}${JSON.stringify(key).replace(/^"|"$/g, '')}: ${value}`);
-    }
-    if (keys.length > maxLength) {
-        properties.push(`${currentIndent}... (${keys.length - maxLength} more)`);
-    }
-
-    return `\n${properties.join('\n')}`;
+    return TOOL_COLOR_NAMES[index];
 };
 
 const truncateContentForDisplay = (content: string, maxLines: number = 4): string => {
@@ -115,22 +43,133 @@ const truncateContentForDisplay = (content: string, maxLines: number = 4): strin
     return [...firstTwo, `... and more ${lines.length - 5} lines`, ...lastTwo].join('\n');
 };
 
+/** 使用自制的 YAML 高亮，缩减包大小 */
 const InputPreviewer = ({ content }: { content: any }) => {
-    const formattedJson = formatJsonForTerminal(content, 0, 2, 5); // 限制深度为2，长度为5
-    return <Text>{formattedJson}</Text>;
+    // Ink 内置颜色的递归渲染 (GitHub Dark 风格)
+    const renderHighlightedContent = (
+        data: any,
+        indent: number = 0,
+        depth: number = 0,
+    ): JSX.Element | JSX.Element[] => {
+        const indentChar = '  ';
+        const currentIndent = indentChar.repeat(indent);
+
+        if (depth >= 3) {
+            return <Text dimColor>{'{...} (truncated)'}</Text>;
+        }
+
+        if (data === null) {
+            return <Text color="gray">null</Text>;
+        }
+
+        if (typeof data !== 'object') {
+            const stringified = JSON.stringify(data);
+            if (typeof data === 'string' && stringified.length > 102) {
+                const truncated = stringified.substring(1, 101);
+                return (
+                    <Text>
+                        <Text color="cyan">"{truncated}..."</Text>{' '}
+                        <Text dimColor>(truncated, {stringified.length - 2} chars)</Text>
+                    </Text>
+                );
+            }
+
+            // Ink 内置颜色类型着色
+            if (typeof data === 'string') {
+                return <Text color="cyan">{stringified}</Text>; // 青色用于字符串
+            } else if (typeof data === 'number') {
+                return <Text color="yellow">{data}</Text>; // 黄色用于数字
+            } else if (typeof data === 'boolean') {
+                return <Text color="magenta">{data.toString()}</Text>; // 洋红色用于布尔值
+            } else {
+                return <Text>{stringified}</Text>;
+            }
+        }
+
+        if (Array.isArray(data)) {
+            if (data.length === 0) {
+                return <Text color="gray">[]</Text>;
+            }
+
+            const maxLength = 5;
+            return (
+                <>
+                    {'\n'}
+                    {data.slice(0, maxLength).map((item, index) => (
+                        <Text key={index}>
+                            <Text>{currentIndent}</Text>
+                            <Text color="green">- </Text> {/* 绿色用于数组标记 */}
+                            {renderHighlightedContent(item, indent + 1, depth + 1)}
+                            {index < Math.min(data.length, maxLength) - 1 ? '\n' : ''}
+                        </Text>
+                    ))}
+                    {data.length > maxLength && (
+                        <Text>
+                            {'\n'}
+                            <Text>{currentIndent}</Text>
+                            <Text dimColor>... ({data.length - maxLength} more)</Text>
+                        </Text>
+                    )}
+                </>
+            );
+        }
+        // Object rendering
+        const keys = Object.keys(data);
+        if (keys.length === 0) {
+            return <Text color="gray">{}</Text>;
+        }
+
+        const maxLength = 5;
+        return (
+            <>
+                {keys.slice(0, maxLength).map((key, index) => (
+                    <Text key={key}>
+                        <Text>{currentIndent}</Text>
+                        <Text color="blue">{key}</Text> {/* 蓝色用于键 */}
+                        <Text color="gray">: </Text> {/* 灰色用于冒号 */}
+                        {renderHighlightedContent(data[key], indent + 1, depth + 1)}
+                        {index < Math.min(keys.length, maxLength) - 1 ? '\n' : ''}
+                    </Text>
+                ))}
+                {keys.length > maxLength && (
+                    <Text>
+                        {'\n'}
+                        <Text>{currentIndent}</Text>
+                        <Text dimColor>... ({keys.length - maxLength} more)</Text>
+                    </Text>
+                )}
+            </>
+        );
+    };
+
+    return <Text>{renderHighlightedContent(content)}</Text>;
 };
 
 const MessageTool: React.FC<MessageToolProps> = ({ message, getMessageContent, isCollapsed, messageNumber }) => {
     const { getToolUIRender, client } = useChat();
-    const tool = new ToolRenderData(message, client!);
+    const tool = new ToolRenderData<
+        {
+            title?: string;
+            label?: string;
+            description?: string;
+        },
+        any
+    >(message, client!);
+    const inputRepaired = tool.getInputRepaired();
+    const label = inputRepaired?.title
+        ? `: ${inputRepaired.title}`
+        : inputRepaired?.description
+        ? `: ${inputRepaired.description}`
+        : '';
     const render = getToolUIRender(message.name!);
-    const borderColor = getToolColor(message.name!);
-
+    let borderColor = getToolColor(message.name!);
+    borderColor = message.status === 'error' ? 'red' : borderColor;
     return (
         <Box flexDirection="column" paddingX={1} paddingY={0} marginBottom={1}>
             <Box>
                 <Text color={borderColor} bold>
                     {messageNumber}. 🔧 {message.name}
+                    {label}
                 </Text>
                 <UsageMetadata
                     response_metadata={message.response_metadata as any}

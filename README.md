@@ -48,30 +48,30 @@ templates/agent-template/
 
 ### 代理
 
-- `react-agent`：专注于交互式软件工程任务的编程代理，能使用编辑、搜索、读写等丰富工具。
-- `swarm`：多智能体管理系统，负责协调代理间状态和任务路由。
+-   `react-agent`：专注于交互式软件工程任务的编程代理，能使用编辑、搜索、读写等丰富工具。
+-   `swarm`：多智能体管理系统，负责协调代理间状态和任务路由。
 
 代理使用 OpenAI 的 Chat 模型，支持自定义配置和系统提示，灵活扩展工具集。
 
 ### 核心功能
 
-- 语言模型驱动的编码辅助工具
-- 多种文件系统操作工具（编辑(edit_tool)、多点编辑(multi_edit_tool)、读写(read_tool/write_tool)、查找(glob_tool/grep_tool)）
-- Bash 任务管理工具（执行(bash_tool)、查看输出(bash_output_tool)、终止(kill_bash_tool)）
-- 任务规划和进度管理支持（通过 TodoWrite 等工具）
-- 终端 UI 基于 Ink，提供交互式聊天体验
+-   语言模型驱动的编码辅助工具
+-   多种文件系统操作工具（编辑(edit_tool)、多点编辑(multi_edit_tool)、读写(read_tool/write_tool)、查找
+    (glob_tool/grep_tool)）
+-   Bash 任务管理工具（执行(bash_tool)、查看输出(bash_output_tool)、终止(kill_bash_tool)）
+-   任务规划和进度管理支持（通过 TodoWrite 等工具）
+-   终端 UI 基于 Ink，提供交互式聊天体验
 
 ### 自定义
 
-- 添加工具到 `agents/react-agent/tools/` 并在 `tools/index.ts` 中导出
-- 修改或添加图到 `agents/` 并在 `langgraph.json` 中注册
-- 针对每个代理编辑 `configuration.ts` 和 `prompts.ts`
+-   添加工具到 `agents/react-agent/tools/` 并在 `tools/index.ts` 中导出
+-   修改或添加图到 `agents/` 并在 `langgraph.json` 中注册
+-   针对每个代理编辑 `configuration.ts` 和 `prompts.ts`
 
 ### 运行与开发
 
-- 使用 `pnpm dev` 启动开发环境
-- 使用 `pnpm build` 构建项目
-
+-   使用 `pnpm dev` 启动开发环境
+-   使用 `pnpm build` 构建项目
 
 ```sh
 # openai model base settings
@@ -89,23 +89,24 @@ SQLITE_DATABASE_URL=./.langgraph_api/langgraph.db
 
 本项目由多个智能体组成，主要包括 `react-agent` 和 `swarm`，均基于 `langchain` 与 `langgraph-js/pro` 框架构建。
 
-- `react-agent`：专注于交互式软件工程任务的编程代理，能使用编辑、搜索、读写等丰富工具。
-- `swarm`：多智能体管理系统，负责协调代理间状态和任务路由。
+-   `react-agent`：专注于交互式软件工程任务的编程代理，能使用编辑、搜索、读写等丰富工具。
+-   `swarm`：多智能体管理系统，负责协调代理间状态和任务路由。
 
 代理使用 OpenAI 的 Chat 模型，支持自定义配置和系统提示，灵活扩展工具集。
 
 ## 核心功能
 
-- 语言模型驱动的编码辅助工具
-- 多种文件系统操作工具：编辑(edit_tool)、多点编辑(multi_edit_tool)、读写(read_tool/write_tool)、查找(glob_tool/grep_tool)
-- Bash 任务管理工具：执行(bash_tool)、查看输出(bash_output_tool)、终止(kill_bash_tool)
-- 任务规划和进度管理支持（通过 TodoWrite 等工具）
-- 终端 UI 基于 Ink，提供交互式聊天体验
+-   语言模型驱动的编码辅助工具
+-   多种文件系统操作工具：编辑(edit_tool)、多点编辑(multi_edit_tool)、读写(read_tool/write_tool)、查找
+    (glob_tool/grep_tool)
+-   Bash 任务管理工具：执行(bash_tool)、查看输出(bash_output_tool)、终止(kill_bash_tool)
+-   任务规划和进度管理支持（通过 TodoWrite 等工具）
+-   终端 UI 基于 Ink，提供交互式聊天体验
 
 ## 运行与开发
 
-- 使用 `pnpm dev` 启动开发环境
-- 使用 `pnpm build` 构建项目
+-   使用 `pnpm dev` 启动开发环境
+-   使用 `pnpm build` 构建项目
 
 ## 贡献及反馈
 
