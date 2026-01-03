@@ -8,10 +8,10 @@ import { z } from 'zod';
 import { createStateEntrypoint } from '@langgraph-js/pure-graph';
 import { CodeState } from './state.js';
 import { ask_user_with_options, ask_user_with_options_config, humanInTheLoopMiddleware } from '@langgraph-js/auk';
-import { add_memory_tool } from './tools/memory/memory_tool.js';
 import { create_finder } from './subagents/finder.js';
 import { SkillsMiddleware } from './middlewares/skills.js';
 import { SubAgentsMiddleware } from './middlewares/subagents.js';
+import { MemoryMiddleware } from './middlewares/memory.js';
 const codingAgent = async (state: z.infer<typeof CodeState>) => {
     const model = new ChatOpenAI({
         model: state.main_model,
@@ -30,19 +30,19 @@ const codingAgent = async (state: z.infer<typeof CodeState>) => {
         write_tool,
         replace_tool,
         ...bash_tools,
-        add_memory_tool,
     ];
     const subagents = new SubAgentsMiddleware();
     subagents.addSubAgents('finder', create_finder);
 
     const agent = createAgent({
-        model: model,
+        model,
         systemPrompt: await getSystemPrompt(state),
         tools: [...allTools],
         stateSchema: CodeState,
         middleware: [
             subagents,
-            new SkillsMiddleware({}),
+            MemoryMiddleware(model),
+            new SkillsMiddleware(),
             humanInTheLoopMiddleware({
                 interruptOn: {
                     terminal: {
@@ -55,9 +55,7 @@ const codingAgent = async (state: z.infer<typeof CodeState>) => {
     });
 
     const response = await agent.invoke(state, { recursionLimit: 200 });
-    if (response.messages.length - state.messages.length >= 10) {
-        console.log('messages length is too long, adding memory', response.messages.length);
-    }
+
     return {
         task_store: response.task_store,
         messages: response.messages,

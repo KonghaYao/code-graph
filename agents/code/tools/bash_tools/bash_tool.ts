@@ -140,6 +140,7 @@ Notes:
 - For file paths with spaces, ALWAYS use quotes: "path/to file"
 - Avoid interactive commands (like top, vim)
 - Use '&&' or ';' to chain commands (PowerShell/CMD syntax varies, simple chaining often works)
+- CAN'T BATCH CALL THIS TOOL!
 `,
         schema: z.object({
             description: z.string().describe('what you want to do'),

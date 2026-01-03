@@ -83,7 +83,7 @@ export const terminal = createUITool({
                 } else {
                     tool.sendResumeData({
                         type: selectState as any,
-                        message: editValue,
+                        message: 'User Reject to run this tool, reason: ' + editValue,
                     });
                     setEditing(false);
                     setEditValue('');

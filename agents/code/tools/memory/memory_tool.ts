@@ -1,45 +1,23 @@
-import { tool, ToolRuntime } from '@langchain/core/tools';
+import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { MemoryStorage } from './storage_layer';
 
 /**
  * 添加记忆到记忆文件中
  */
 export const add_memory_tool = tool(
-    async ({ title, details, example }, runtime: ToolRuntime) => {
+    async ({ content, tags }) => {
         try {
-            const memoryDir = path.join(process.cwd(), '.langgraph_api');
-            const memoryFile = path.join(memoryDir, 'memory.md');
+            const storage = new MemoryStorage();
 
-            // 确保目录存在
-            await fs.mkdir(memoryDir, { recursive: true });
+            // 使用存储层添加记忆
+            await storage.add({
+                content,
+                tags,
+                timestamp: new Date().toISOString(),
+            });
 
-            // 生成当前日期
-            const date = new Date().toISOString().split('T')[0];
-
-            // 构建记忆条目
-            const memoryEntry = `---
-
-## ${title}
-
-**日期**: ${date}
-
-**会话 ID**: ${
-                /** @ts-ignore */
-                runtime.config?.thread_id || 'N/A'
-            }
-
-### 详细描述
-${details}
-
-${example ? `### 示例\n${example}\n` : ''}
-`;
-
-            // 追加到文件
-            await fs.appendFile(memoryFile, memoryEntry, 'utf-8');
-
-            return `记忆 "${title}" 已成功添加到 ${memoryFile}`;
+            return `记忆已成功添加到 ${storage.getFilePath()}`;
         } catch (error: any) {
             return `添加记忆时出错: ${error.message}`;
         }
@@ -55,20 +33,67 @@ ${example ? `### 示例\n${example}\n` : ''}
 - 需要记录特殊配置或决策的原因
 
 使用建议：
-- 将复杂情况简化为清晰的 example（代码片段、命令、配置等）
-- example 中展示最核心的用法或解决方案
-- details 和 example 都支持 Markdown 格式
+- content 应该是清晰完整的描述，包含关键信息和上下文
+- 使用合适的标签（tags）来分类和组织记忆
+- content 支持 Markdown 格式，可以包含代码片段
 
 查询已有记忆：
-- 使用 Read 或 Grep 工具搜索 .langgraph_api/memory.md 文件
-- 可以搜索关键词来查找相关的历史记忆`,
+- 使用 query_memory 工具搜索记忆内容
+- 可以通过关键词、标签或全文搜索来查找相关的历史记忆`,
         schema: z.object({
-            title: z.string().describe('记忆的简短标题，概括主题'),
-            details: z.string().describe('详细描述，说明背景和上下文（支持 Markdown）'),
-            example: z
-                .string()
-                .optional()
-                .describe('简化的示例，展示核心用法或解决方案（支持 Markdown，建议使用代码块）'),
+            content: z.string().describe('记忆内容，包含完整的描述和上下文（支持 Markdown）'),
+            tags: z
+                .array(z.string())
+                .describe('标签数组，用于分类和组织记忆（如 ["skill-creation", "documentation"]）'),
+        }),
+    },
+);
+
+/**
+ * 查询记忆文件中的内容
+ */
+export const query_memory_tool = tool(
+    async ({ keyword, search_type, head_limit }) => {
+        try {
+            const storage = new MemoryStorage();
+
+            // 使用存储层进行搜索
+            const result = await storage.search({
+                keyword,
+                searchType: search_type,
+                headLimit: head_limit,
+            });
+
+            return result;
+        } catch (error: any) {
+            return `查询记忆时出错: ${error.message}`;
+        }
+    },
+    {
+        name: 'query_memory',
+        description: `查询记忆文件中的内容。用于查找之前记录的重要信息、解决方案或经验。
+
+何时使用：
+- 需要查找之前记录的项目信息
+- 想要回顾历史解决方案
+- 需要搜索特定主题的记忆内容
+
+搜索类型：
+- "tags": 只在标签中搜索（适合按分类查找）
+- "content": 只在内容中搜索（默认，适合查找具体信息）
+- "full": 在标签和内容中搜索（最全面，可能返回更多结果）
+
+使用建议：
+- 使用关键词来缩小搜索范围
+- 如果不提供关键词，会返回所有记忆内容
+- 可以使用 head_limit 限制输出行数以提高性能`,
+        schema: z.object({
+            keyword: z.string().optional().describe('搜索关键词，留空则返回所有记忆'),
+            search_type: z
+                .enum(['tags', 'content', 'full'])
+                .default('content')
+                .describe('搜索类型：tags=标签搜索，content=内容搜索，full=全文搜索'),
+            head_limit: z.number().optional().describe('限制输出行数，用于性能优化（默认不限制）'),
         }),
     },
 );
