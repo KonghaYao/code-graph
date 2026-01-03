@@ -12,60 +12,65 @@ import { create_finder } from './subagents/finder.js';
 import { SkillsMiddleware } from './middlewares/skills.js';
 import { SubAgentsMiddleware } from './middlewares/subagents.js';
 import { MemoryMiddleware } from './middlewares/memory.js';
-const codingAgent = async (state: z.infer<typeof CodeState>) => {
-    const model = new ChatOpenAI({
-        model: state.main_model,
-        streamUsage: true,
-    });
-    const allTools = [
-        // exit_plan_mode_tool,
-
-        ask_user_with_options,
-
-        todo_write_tool,
-        glob_tool,
-        grep_tool,
-
-        read_tool,
-        write_tool,
-        replace_tool,
-        ...bash_tools,
-    ];
-    const subagents = new SubAgentsMiddleware();
-    subagents.addSubAgents('finder', create_finder);
-
-    const agent = createAgent({
-        model,
-        systemPrompt: await getSystemPrompt(state),
-        tools: [...allTools],
-        stateSchema: CodeState,
-        middleware: [
-            subagents,
-            MemoryMiddleware(model),
-            new SkillsMiddleware(),
-            humanInTheLoopMiddleware({
-                interruptOn: {
-                    terminal: {
-                        allowedDecisions: ['approve', 'reject', 'edit'],
-                    },
-                    ...ask_user_with_options_config.interruptOn,
-                },
-            }),
-        ],
-    });
-
-    const response = await agent.invoke(state, { recursionLimit: 200 });
-
-    return {
-        task_store: response.task_store,
-        messages: response.messages,
-    };
-};
+import { MCPMiddleware } from './middlewares/mcp.js';
 
 export const graph = createStateEntrypoint(
     {
         name: 'graph',
         stateSchema: CodeState,
     },
-    codingAgent,
+    async (state: z.infer<typeof CodeState>) => {
+        const model = new ChatOpenAI({
+            model: state.main_model,
+            streamUsage: true,
+        });
+
+        // Create MCP middleware with servers
+        const mcpMiddleware = await MCPMiddleware(state.mcp_config as any);
+
+        const allTools = [
+            // exit_plan_mode_tool,
+
+            ask_user_with_options,
+
+            todo_write_tool,
+            glob_tool,
+            grep_tool,
+
+            read_tool,
+            write_tool,
+            replace_tool,
+            ...bash_tools,
+        ];
+        const subagents = new SubAgentsMiddleware();
+        subagents.addSubAgents('finder', create_finder);
+
+        const agent = createAgent({
+            model,
+            systemPrompt: await getSystemPrompt(state),
+            tools: [...allTools],
+            stateSchema: CodeState,
+            middleware: [
+                subagents,
+                MemoryMiddleware(model),
+                new SkillsMiddleware(),
+                mcpMiddleware,
+                humanInTheLoopMiddleware({
+                    interruptOn: {
+                        terminal: {
+                            allowedDecisions: ['approve', 'reject', 'edit'],
+                        },
+                        ...ask_user_with_options_config.interruptOn,
+                    },
+                }),
+            ],
+        });
+
+        const response = await agent.invoke(state as any, { recursionLimit: 200 });
+
+        return {
+            task_store: response.task_store,
+            messages: response.messages,
+        };
+    },
 );

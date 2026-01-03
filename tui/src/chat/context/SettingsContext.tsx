@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react';
-import { getConfig, updateConfig as updateDbConfig, initDb, AppConfig } from '../store/index';
+import { getConfig, updateConfig as updateDbConfig, initDb, AppConfig, MCPConfig } from '../store/index';
 import { get_allowed_models } from '../../../../agents/code/utils/get_allowed_models';
 
 interface SettingsContextType {
@@ -7,6 +7,7 @@ interface SettingsContextType {
     updateConfig: (newConfig: Partial<AppConfig>) => Promise<void>;
     extraParams: {
         main_model: string;
+        mcp_config?: MCPConfig;
     };
     AVAILABLE_MODELS: string[];
 }
@@ -22,6 +23,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         return {
             main_model: config?.main_model || AVAILABLE_MODELS[0],
             cwd: process.cwd(),
+            mcp_config: config?.mcp_config,
         };
     }, [config, AVAILABLE_MODELS]);
 

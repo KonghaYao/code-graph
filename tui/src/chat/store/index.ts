@@ -3,8 +3,10 @@ import { JSONFile } from 'lowdb/node';
 
 export interface AppConfig {
     main_model: string;
+    mcp_config?: MCPConfig;
 }
 
+export interface MCPConfig {}
 interface Data {
     config: AppConfig;
 }
