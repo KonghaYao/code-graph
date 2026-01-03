@@ -1,12 +1,16 @@
 {
-    "name": "code-graph",
-    "version": "1.0.0",
+    "name": "zen-code",
+    "version": "1.0.2",
     "description": "",
-    "main": "index.js",
-    "bin": "dist/app.js",
+    "main": "dist/zen-code.mjs",
+    "bin": "dist/zen-code.mjs",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "dev": "bun run src/app.tsx",
-        "build": "vite build"
+        "build": "vite build",
+        "prepublish": "pnpm build"
     },
     "keywords": [],
     "author": "KonghaYao",

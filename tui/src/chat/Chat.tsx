@@ -7,8 +7,6 @@ import HistoryList from './components/HistoryList';
 import { ChatProvider, useChat } from '@langgraph-js/sdk/react';
 import { Message } from '@langgraph-js/sdk';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
-import SettingsPanel from './components/SettingsPanel';
-import AgentOptions from './AgentOptions';
 import { useCommandHandler } from './components/CommandHandler';
 import { LangGraphFetch } from '../../../agents/code/export';
 import WelcomeHeader from './components/WelcomeHeader';
@@ -129,7 +127,7 @@ const Chat: React.FC = () => {
     }, []);
 
     const [activeView, setActiveView] = useState<
-        'chat' | 'history' | 'settings' | 'graph' | 'artifacts' | 'agentOptions'
+        'chat' | 'history' | 'graph' | 'artifacts'
     >('chat');
     const [mode, setMode] = useState<'command' | 'agent'>('agent');
     // Global Ctrl+C exit handler
@@ -149,9 +147,7 @@ const Chat: React.FC = () => {
             else if (input === 'h') {
                 toggleHistoryVisible();
                 setActiveView('history');
-            } else if (input === 's') setActiveView('settings');
-            else if (input === 'g') setActiveView('agentOptions'); // 'g' for agent options
-            else if (input === 'n') {
+            } else if (input === 'n') {
                 // 'n' for new chat
                 console.clear();
                 createNewChat(); // 调用 client 上的 newChat 方法
@@ -197,22 +193,6 @@ const Chat: React.FC = () => {
                         }}
                     />
                 )}
-                {activeView === 'settings' && (
-                    <SettingsPanel
-                        onClose={() => {
-                            setActiveView('chat');
-                            setMode('agent');
-                        }}
-                    />
-                )}
-                {activeView === 'agentOptions' && (
-                    <AgentOptions
-                        onClose={() => {
-                            setActiveView('chat');
-                            setMode('agent');
-                        }}
-                    />
-                )}
             </Box>
             <Box paddingX={1} paddingY={0} justifyContent="space-between">
                 <Text>
@@ -243,14 +223,7 @@ const Chat: React.FC = () => {
                                 h
                             </Text>
                             <Text color="gray">:历史 </Text>
-                            <Text color="cyan" bold>
-                                s
-                            </Text>
-                            <Text color="gray">:设置 </Text>
-                            <Text color="cyan" bold>
-                                g
-                            </Text>
-                            <Text color="gray">:选择 </Text>
+
                             <Text color="cyan" bold>
                                 n
                             </Text>
@@ -283,8 +256,8 @@ const ChatWrapper: React.FC = () => {
 
     return (
         <ChatProvider
-            apiUrl={config.apiUrl}
-            defaultAgent={config.agentName}
+            apiUrl={''}
+            defaultAgent={'code'}
             defaultHeaders={{}}
             withCredentials={false}
             showHistory={false}

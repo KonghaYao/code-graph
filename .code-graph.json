@@ -1,6 +1,5 @@
 {
     "config": {
-        "agentName": "code",
         "main_model": "mimo-v2-flash"
     }
 }

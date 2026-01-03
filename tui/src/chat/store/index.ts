@@ -2,10 +2,7 @@ import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
 
 export interface AppConfig {
-    apiUrl: string;
-    agentName: string;
     main_model: string;
-    activeAgent: string;
 }
 
 interface Data {
@@ -14,10 +11,7 @@ interface Data {
 
 const defaultData: Data = {
     config: {
-        apiUrl: 'http://127.0.0.1:8123',
-        agentName: 'code',
-        main_model: 'claude-sonnet-4',
-        activeAgent: 'code',
+        main_model: 'claude-sonnet-4-5',
     },
 };
 
