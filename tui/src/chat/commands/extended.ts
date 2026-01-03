@@ -70,11 +70,6 @@ export const templateCommand: CommandDefinition = {
 };
 
 /**
- * 可用模型列表
- */
-const AVAILABLE_MODELS = ['claude-sonnet-4.5', 'gpt-5.2', 'gemini-3-pro', 'glm-4.7'];
-
-/**
  * /model 命令 - 切换模型
  */
 export const modelCommand: CommandDefinition = {
@@ -86,7 +81,7 @@ export const modelCommand: CommandDefinition = {
         if (args.length === 0) {
             // 显示当前模型和可用模型列表
             const currentModel = context.extraParams?.main_model || 'N/A';
-            const modelList = AVAILABLE_MODELS.map(
+            const modelList = context.AVAILABLE_MODELS?.map(
                 (model, index) => `  ${index + 1}. ${model}${model === currentModel ? ' (当前)' : ''}`,
             ).join('\n');
 
@@ -102,11 +97,11 @@ export const modelCommand: CommandDefinition = {
 
         // 检查是否为数字序号
         const modelIndex = parseInt(modelInput, 10);
-        if (!isNaN(modelIndex) && modelIndex >= 1 && modelIndex <= AVAILABLE_MODELS.length) {
-            targetModel = AVAILABLE_MODELS[modelIndex - 1];
+        if (!isNaN(modelIndex) && modelIndex >= 1 && modelIndex <= (context.AVAILABLE_MODELS?.length || 0)) {
+            targetModel = context.AVAILABLE_MODELS?.[modelIndex - 1];
         } else {
             // 检查是否为完整模型名或部分匹配
-            targetModel = AVAILABLE_MODELS.find(
+            targetModel = context.AVAILABLE_MODELS?.find(
                 (model) => model === modelInput || model.toLowerCase().includes(modelInput.toLowerCase()),
             );
         }

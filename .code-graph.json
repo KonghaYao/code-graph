@@ -1,5 +1,5 @@
 {
-    "config": {
-        "main_model": "mimo-v2-flash"
-    }
+  "config": {
+    "main_model": "mimo-v2-flash"
+  }
 }

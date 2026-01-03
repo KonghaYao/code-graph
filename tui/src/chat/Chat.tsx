@@ -24,7 +24,7 @@ const ChatMessages = () => {
             {loading && !isFELocking() && (
                 <Box marginTop={0} paddingLeft={1}>
                     <Text>
-                        <Spinner type="dots" /> <Text color="cyan">正在思考中... alt + C 中断</Text>
+                        <Spinner type="dots" /> <Text color="cyan">正在思考中... Ctrl + C 中断</Text>
                     </Text>
                 </Box>
             )}
@@ -92,7 +92,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
             <Box alignItems="center">
                 <Box marginRight={1}>
                     <Text color={commandHandler.isCommandInput ? 'yellow' : 'green'} bold>
-                        {commandHandler.isCommandInput ? '⚡' : '💬'}
+                        {commandHandler.isCommandInput ? '⚡ ' : '💬 '}
                     </Text>
                 </Box>
                 <EnhancedTextInput
@@ -120,19 +120,19 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
 
 const Chat: React.FC = () => {
     const { extraParams } = useSettings();
-    const { toggleHistoryVisible, setUserInput, createNewChat, setTools } = useChat();
+    const { toggleHistoryVisible, setUserInput, createNewChat, setTools, loading, stopGeneration } = useChat();
     useEffect(() => {
         console.clear();
         setTools(DefaultTools);
     }, []);
 
-    const [activeView, setActiveView] = useState<
-        'chat' | 'history' | 'graph' | 'artifacts'
-    >('chat');
+    const [activeView, setActiveView] = useState<'chat' | 'history' | 'graph' | 'artifacts'>('chat');
     const [mode, setMode] = useState<'command' | 'agent'>('agent');
     // Global Ctrl+C exit handler
     useInput((input, key) => {
-        if (key.ctrl && input === 'c') {
+        if (loading) {
+            stopGeneration();
+        } else if (key.ctrl && input === 'c') {
             process.exit();
         }
     });
@@ -256,13 +256,15 @@ const ChatWrapper: React.FC = () => {
 
     return (
         <ChatProvider
-            apiUrl={''}
-            defaultAgent={'code'}
+            apiUrl="http://127.0.0.1:8123"
+            defaultAgent="code"
             defaultHeaders={{}}
             withCredentials={false}
             showHistory={false}
             showGraph={false}
-            onInitError={(error, currentAgent) => {}}
+            onInitError={(error, currentAgent) => {
+                console.error(error, currentAgent);
+            }}
             fetch={LangGraphFetch as any}
         >
             <Chat />

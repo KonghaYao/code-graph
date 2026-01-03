@@ -20,7 +20,7 @@ const WelcomeHeader: React.FC = () => {
             <Box flexDirection="row" marginTop={1} gap={2}>
                 {/* Left: Logo */}
                 <Box flexDirection="column">
-                    <Text color="magenta" bold>
+                    <Text color="cyan" bold>
                         {`███████╗███████╗███╗   ██╗
 ╚══███╔╝██╔════╝████╗  ██║
   ███╔╝ █████╗  ██╔██╗ ██║

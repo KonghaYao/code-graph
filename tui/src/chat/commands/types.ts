@@ -32,6 +32,7 @@ export interface CommandContext {
     createNewChat: () => void;
     /** 更新配置函数 */
     updateConfig?: (config: any) => Promise<void>;
+    AVAILABLE_MODELS?: string[];
 }
 
 export interface CommandDefinition {

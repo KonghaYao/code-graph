@@ -18,6 +18,7 @@
         "experimentalDecorators": true,
         "jsx": "react-jsx",
         "allowJs": true,
+        "skipLibCheck": true,
         "strict": true
     },
     "include": ["tui/", "agents/"],

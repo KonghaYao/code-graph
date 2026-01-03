@@ -42,7 +42,7 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
     // 从 useChat 获取所有需要的状态和函数
     const { userInput, setUserInput, sendMessage, currentAgent, client, createNewChat } = useChat();
     // 从 useSettings 获取配置更新函数
-    const { extraParams, updateConfig } = useSettings();
+    const { extraParams, updateConfig, AVAILABLE_MODELS } = useSettings();
 
     const [commandError, setCommandError] = useState<string | null>(null);
     const [commandSuccessMessage, setCommandSuccessMessage] = useState<string | null>(null);
@@ -67,6 +67,7 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
                 extraParams,
                 createNewChat,
                 updateConfig,
+                AVAILABLE_MODELS,
             };
 
             const result = await commandRegistry.executeCommand(userInput, commandContext);
@@ -103,7 +104,17 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
             setTimeout(() => setCommandError(null), 3000);
             return true; // 即使出错也认为命令已处理
         }
-    }, [userInput, setUserInput, sendMessage, currentAgent, client, extraParams, createNewChat, onCommandExecuted]);
+    }, [
+        userInput,
+        setUserInput,
+        sendMessage,
+        currentAgent,
+        client,
+        extraParams,
+        createNewChat,
+        onCommandExecuted,
+        AVAILABLE_MODELS,
+    ]);
 
     // 命令提示UI组件
     const CommandHintUI: React.FC = () => {

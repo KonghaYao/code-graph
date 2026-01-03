@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react';
 import { getConfig, updateConfig as updateDbConfig, initDb, AppConfig } from '../store/index';
+import { get_allowed_models } from '../../../../agents/code/utils/get_allowed_models';
 
 interface SettingsContextType {
     config: AppConfig | null;
     updateConfig: (newConfig: Partial<AppConfig>) => Promise<void>;
     extraParams: {
         main_model: string;
-        activeAgent: string;
     };
+    AVAILABLE_MODELS: string[];
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -15,18 +16,33 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [config, setConfig] = useState<AppConfig | null>(null);
     const [loading, setLoading] = useState(true);
+    const [AVAILABLE_MODELS, setModels] = useState<string[]>([]);
+
     const extraParams = useMemo(() => {
         return {
-            main_model: config?.main_model || 'claude-sonnet-4-5',
-            activeAgent: config?.activeAgent || 'coding-agent',
+            main_model: config?.main_model || AVAILABLE_MODELS[0],
             cwd: process.cwd(),
         };
-    }, [config]);
+    }, [config, AVAILABLE_MODELS]);
+
     useEffect(() => {
         const loadConfig = async () => {
             await initDb();
             const loadedConfig = getConfig();
-            setConfig(loadedConfig);
+
+            // 并行加载模型列表
+            const models = await get_allowed_models().catch(() => []);
+            setModels(models);
+
+            // 如果配置中没有 main_model，使用第一个可用模型
+            if (!loadedConfig.main_model && models[0]) {
+                const updatedConfig = { ...loadedConfig, main_model: models[0] };
+                setConfig(updatedConfig);
+                await updateDbConfig({ main_model: models[0] });
+            } else {
+                setConfig(loadedConfig);
+            }
+
             setLoading(false);
         };
         loadConfig();
@@ -35,8 +51,6 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const updateConfig = async (newConfig: Partial<AppConfig>) => {
         const updatedConfig = { ...config, ...newConfig } as AppConfig;
         setConfig(updatedConfig);
-        // @ts-ignore activeAgent 字段不需要持久化
-        delete newConfig['activeAgent'];
         await updateDbConfig(newConfig);
     };
 
@@ -45,7 +59,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
 
     return (
-        <SettingsContext.Provider value={{ config, updateConfig, extraParams }}>{children}</SettingsContext.Provider>
+        <SettingsContext.Provider value={{ config, updateConfig, extraParams, AVAILABLE_MODELS }}>
+            {children}
+        </SettingsContext.Provider>
     );
 };
 
