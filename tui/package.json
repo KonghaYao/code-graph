@@ -22,15 +22,17 @@
         "node-sqlite3-wasm": "^0.8.52"
     },
     "devDependencies": {
-        "@langchain/mcp-adapters": "^1.1.1",
         "@inkjs/ui": "^2.0.0",
+        "@langchain/mcp-adapters": "^1.1.1",
         "@langgraph-js/sdk": "^4.3.6",
         "@nanostores/react": "^1.0.0",
+        "@types/diff-match-patch": "^1.0.36",
         "@types/marked-terminal": "^6.1.1",
         "@types/react": "^19.1.12",
         "@vitejs/plugin-react": "^5.1.2",
         "chalk": "^5.6.2",
         "comlink": "^4.4.2",
+        "diff-match-patch": "^1.0.5",
         "ink": "^6.2.3",
         "ink-markdown": "^1.0.4",
         "ink-select-input": "^6.2.0",

@@ -1,7 +1,21 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 import { promises as fs } from 'fs';
-
+export const editToolSchema = z.object({
+    description: z.string().describe('What you want to do'),
+    file_path: z.string().describe('The absolute path to the file to modify'),
+    start_line: z
+        .string()
+        .describe(
+            'REQUIRED: The line content to start the replacement range (uses includes() for matching, but must match exactly including whitespace)',
+        ),
+    end_line: z
+        .string()
+        .describe(
+            'REQUIRED: The line content to end the replacement range (uses includes() for matching, but must match exactly including whitespace). Note: This line is also deleted - the replacement includes from start_line through end_line inclusive)',
+        ),
+    new_string: z.string().describe('The new content to insert in place of the range'),
+});
 export const edit_tool = tool(
     async ({ file_path, start_line, end_line, new_string }) => {
         try {
@@ -135,19 +149,6 @@ Key Lessons from Edit Tool Failures:
 - Failure reason: String matching is not precise, including differences in line breaks, spaces, and indentation
 - Multi-line matching complexity: When start_line contains \n, it must match consecutive lines exactly; any difference will fail
 - Success strategy: Use single-line exact matching, copy the exact content from the original file (including indentation)`,
-        schema: z.object({
-            file_path: z.string().describe('The absolute path to the file to modify'),
-            start_line: z
-                .string()
-                .describe(
-                    'REQUIRED: The line content to start the replacement range (uses includes() for matching, but must match exactly including whitespace)',
-                ),
-            end_line: z
-                .string()
-                .describe(
-                    'REQUIRED: The line content to end the replacement range (uses includes() for matching, but must match exactly including whitespace). Note: This line is also deleted - the replacement includes from start_line through end_line inclusive)',
-                ),
-            new_string: z.string().describe('The new content to insert in place of the range'),
-        }),
+        schema: editToolSchema,
     },
 );

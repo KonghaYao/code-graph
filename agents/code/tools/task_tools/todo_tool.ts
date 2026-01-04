@@ -1,10 +1,14 @@
 import { tool } from '@langchain/core/tools';
 import { z } from 'zod';
 
-const todoSchema = z.object({
+export const todoSchema = z.object({
     content: z.string().min(1),
     status: z.enum(['pending', 'in_progress', 'completed']),
     id: z.string(),
+});
+
+export const todoWriteSchema = z.object({
+    todos: z.array(todoSchema).describe('The updated todo list'),
 });
 
 export const todo_write_tool = tool(
@@ -188,8 +192,6 @@ The assistant did not use the todo list because this is a single command executi
 
 When in doubt, use this tool. Being proactive with task management demonstrates attentiveness and ensures you complete all requirements successfully.
 `,
-        schema: z.object({
-            todos: z.array(todoSchema).describe('The updated todo list'),
-        }),
+        schema: todoWriteSchema,
     },
 );

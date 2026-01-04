@@ -154,10 +154,20 @@ export const terminal = createUITool({
         const renderOutput = () => {
             if (!tool.output) return null;
 
+            // Show only the last 10 lines of output
+            const lines = tool.output.split('\n');
+            const omittedCount = Math.max(0, lines.length - 10);
+            const last10Lines = lines.slice(-10).join('\n');
+
             return (
                 <Box flexDirection="column">
-                    <Box borderStyle="single" borderColor="cyan" paddingX={1} marginTop={1}>
-                        <Text>{tool.output}</Text>
+                    <Box borderStyle="single" borderColor="cyan" flexDirection="column" paddingX={1} marginTop={1}>
+                        {omittedCount > 0 && (
+                            <Text color="gray" dimColor>
+                                ... {omittedCount} lines omitted ...
+                            </Text>
+                        )}
+                        <Text>{last10Lines}</Text>
                     </Box>
                 </Box>
             );
