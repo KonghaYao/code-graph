@@ -2,8 +2,8 @@
     "name": "zen-code",
     "version": "1.3.0",
     "description": "",
-    "main": "dist/zen-code.mjs",
-    "bin": "dist/zen-code.mjs",
+    "main": "dist/cli.js",
+    "bin": "dist/cli.js",
     "files": [
         "dist"
     ],
