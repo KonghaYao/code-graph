@@ -2,10 +2,11 @@
     "name": "zen-code",
     "version": "1.3.0",
     "description": "",
-    "main": "dist/cli.js",
-    "bin": "dist/cli.js",
+    "main": "cli.js",
+    "bin": "cli.js",
     "files": [
-        "dist"
+        "dist",
+        "cli.js"
     ],
     "scripts": {
         "dev": "bun run src/app.tsx",
