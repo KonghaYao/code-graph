@@ -34,6 +34,13 @@ export class MemoryStorage {
      */
     private async ensureStorage(): Promise<void> {
         await fs.mkdir(this.memoryDir, { recursive: true });
+
+        // 确保文件存在，如果不存在则创建空文件
+        try {
+            await fs.access(this.memoryFile);
+        } catch {
+            await fs.writeFile(this.memoryFile, '', 'utf-8');
+        }
     }
 
     /**

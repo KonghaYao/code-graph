@@ -1,5 +1,13 @@
 {
-  "config": {
-    "main_model": "mimo-v2-flash"
-  }
+    "config": {
+        "main_model": "mimo-v2-flash",
+        "mcp_config": {
+            "context7": {
+                "url": "https://mcp.context7.com/mcp",
+                "headers": {
+                    "CONTEXT7_API_KEY": "ctx7sk-95e2ee75-058f-4b49-befa-d04cd84d7484"
+                }
+            }
+        }
+    }
 }
