@@ -1,10 +1,20 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { getCurrentUser } from '../../utils/user';
+import { useSettings } from '../context/SettingsContext';
 
 const WelcomeHeader: React.FC = () => {
     const username = getCurrentUser();
     const date = new Date().toLocaleDateString();
+    const { extraParams, AVAILABLE_MODELS, config } = useSettings();
+    const mcpConfig = extraParams.mcp_config || {};
+    const mcpServerCount = Object.keys(mcpConfig).length;
+    
+    // 检查 OpenAI 配置状态
+    const hasOpenAIKey = !!config?.openai_api_key;
+    const hasOpenAIBaseUrl = !!config?.openai_base_url;
+    const hasModels = AVAILABLE_MODELS.length > 0;
+    const isConfigured = hasOpenAIKey && hasOpenAIBaseUrl && hasModels;
 
     return (
         <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1} marginBottom={1}>
@@ -33,10 +43,17 @@ const WelcomeHeader: React.FC = () => {
                 {/* Right: Status Panel */}
                 <Box flexDirection="column" justifyContent="center" flexGrow={1}>
                     <Box marginBottom={1}>
-                        <Text color="green" bold>
-                            {' '}
-                            [ SYSTEM ONLINE ]
-                        </Text>
+                        {isConfigured ? (
+                            <Text color="green" bold>
+                                {' '}
+                                [ SYSTEM ONLINE ]
+                            </Text>
+                        ) : (
+                            <Text color="red" bold>
+                                {' '}
+                                [ CONFIG REQUIRED ]
+                            </Text>
+                        )}
                     </Box>
 
                     <Box flexDirection="column" gap={0}>
@@ -58,9 +75,44 @@ const WelcomeHeader: React.FC = () => {
                             </Text>
                             <Text color="white">{process.version}</Text>
                         </Box>
+                        <Box>
+                            <Text color="blue" dimColor>
+                                MODEL ::{' '}
+                            </Text>
+                            <Text color={hasModels ? 'white' : 'red'}>
+                                {hasModels ? extraParams.main_model : '无可用模型'}
+                            </Text>
+                        </Box>
                     </Box>
                 </Box>
             </Box>
+
+            {/* Configuration Warning */}
+            {!isConfigured && (
+                <Box marginTop={1} paddingX={1} flexDirection="column" gap={0}>
+                    <Text color="red" bold>
+                        ⚠️  需要配置 OpenAI API:
+                    </Text>
+                    {!hasOpenAIKey && (
+                        <Text color="yellow">
+                            {'  '}• /config openai_api_key sk-your-api-key
+                        </Text>
+                    )}
+                    {!hasOpenAIBaseUrl && (
+                        <Text color="yellow">
+                            {'  '}• /config openai_base_url https://api.openai.com/v1
+                        </Text>
+                    )}
+                    {!hasModels && (
+                        <Text color="yellow">
+                            {'  '}• 请确保网络连接正常以获取模型列表
+                        </Text>
+                    )}
+                    <Text color="gray">
+                        {'  '}• 配置后使用 /model 查看可用模型
+                    </Text>
+                </Box>
+            )}
 
             {/* Footer: Capabilities */}
             <Box marginTop={1} paddingTop={1} borderTop={false} flexDirection="row" justifyContent="space-between">
@@ -73,23 +125,20 @@ const WelcomeHeader: React.FC = () => {
                         </Text>
                     </Box>
                     <Box>
-                        <Text color="green">●</Text>
+                        <Text color={mcpServerCount > 0 ? 'green' : 'gray'}>●</Text>
                         <Text color="white" dimColor>
                             {' '}
-                            TOOLS
-                        </Text>
-                    </Box>
-                    <Box>
-                        <Text color="green">●</Text>
-                        <Text color="white" dimColor>
-                            {' '}
-                            FILESYSTEM
+                            MCP ({mcpServerCount})
                         </Text>
                     </Box>
                 </Box>
 
                 <Box>
-                    <Text color="yellow" bold>{`>>> WAITING_FOR_INPUT`}</Text>
+                    {isConfigured ? (
+                        <Text color="yellow" bold>{`>>> WAITING_FOR_INPUT`}</Text>
+                    ) : (
+                        <Text color="red" bold>{`>>> CONFIGURATION_NEEDED`}</Text>
+                    )}
                     <Text color="yellow" dimColor>
                         {' '}
                         ▌

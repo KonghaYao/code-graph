@@ -144,11 +144,15 @@ export const configCommand: CommandDefinition = {
         // 无参数：显示所有配置
         if (args.length === 0) {
             const config = context.extraParams || {};
+            const hasOpenAIKey = !!config.openai_api_key;
+            const hasOpenAIBaseUrl = !!config.openai_base_url;
+            const isConfigured = hasOpenAIKey && hasOpenAIBaseUrl;
+            
             const configLines = [
                 '当前配置:',
                 dbPath,
                 `  main_model: ${config.main_model || 'N/A'}`,
-                `  openai_api_key: ${config.openai_api_key ? '***已设置***' : '未设置'}`,
+                `  openai_api_key: ${hasOpenAIKey ? '***已设置***' : '未设置'}`,
                 `  openai_base_url: ${config.openai_base_url || '未设置'}`,
                 '',
                 '使用方法:',
@@ -160,6 +164,14 @@ export const configCommand: CommandDefinition = {
                 '  openai_api_key     - OpenAI API 密钥',
                 '  openai_base_url    - OpenAI API 基础 URL',
             ];
+            
+            if (!isConfigured) {
+                configLines.push('');
+                configLines.push('⚠️  当前配置不完整，需要设置:');
+                if (!hasOpenAIKey) configLines.push('  • /config openai_api_key sk-your-api-key');
+                if (!hasOpenAIBaseUrl) configLines.push('  • /config openai_base_url https://api.openai.com/v1');
+            }
+            
             return {
                 success: true,
                 message: configLines.join('\n'),
