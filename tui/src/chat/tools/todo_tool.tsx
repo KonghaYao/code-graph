@@ -1,9 +1,6 @@
 import { createUITool, ToolManager } from '@langgraph-js/sdk';
 import { Box, Text } from 'ink';
-import { useState } from 'react';
-import SelectInput from 'ink-select-input';
-import TextInput from 'ink-text-input';
-import { todoWriteSchema } from 'agents/code/tools/task_tools/todo_tool';
+import { todoWriteSchema } from '../../../../agents/code/tools/task_tools/todo_tool';
 
 interface TodoItem {
     id: string;

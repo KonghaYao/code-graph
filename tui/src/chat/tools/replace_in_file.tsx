@@ -1,8 +1,7 @@
 import { createUITool, ToolManager } from '@langgraph-js/sdk';
 import { Box, Text } from 'ink';
-import { useState } from 'react';
 import { generateOptimizedDiff, isLargeText } from './diffUtils';
-import { editToolSchema } from 'agents/code/tools/filesystem_tools';
+import { editToolSchema } from '../../../../agents/code/tools/filesystem_tools';
 
 interface ReplaceInFileInput {
     file_path: string;
