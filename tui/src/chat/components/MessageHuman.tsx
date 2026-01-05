@@ -19,7 +19,7 @@ const MessageHuman: React.FC<MessageHumanProps> = ({ content, messageNumber }) =
             return content
                 .filter((item) => item.type === 'text')
                 .map((item, index) => (
-                    <Text key={index} color="white">
+                    <Text color="white">
                         {item.text}
                     </Text>
                 ));

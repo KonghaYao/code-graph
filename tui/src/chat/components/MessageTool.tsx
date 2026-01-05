@@ -91,7 +91,7 @@ export const InputPreviewer = ({ content }: { content: any }) => {
                 <>
                     {'\n'}
                     {data.slice(0, maxLength).map((item, index) => (
-                        <Text key={index}>
+                        <Text>
                             <Text>{currentIndent}</Text>
                             <Text color="green">- </Text> {/* 绿色用于数组标记 */}
                             {renderHighlightedContent(item, indent + 1, depth + 1)}
@@ -118,7 +118,7 @@ export const InputPreviewer = ({ content }: { content: any }) => {
         return (
             <>
                 {keys.slice(0, maxLength).map((key, index) => (
-                    <Text key={key}>
+                    <Text>
                         <Text>{currentIndent}</Text>
                         <Text color="blue">{key}</Text> {/* 蓝色用于键 */}
                         <Text color="gray">: </Text> {/* 灰色用于冒号 */}

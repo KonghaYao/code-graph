@@ -58,7 +58,7 @@ export const todo_tool = createUITool({
             return (
                 <Box flexDirection="column" marginTop={1}>
                     {todos.map((todo, index) => (
-                        <Box key={todo.id} paddingX={1} paddingY={0}>
+                        <Box paddingX={1} paddingY={0}>
                             <Text color={STATUS_COLORS[todo.status]} bold>
                                 {STATUS_SYMBOLS[todo.status]}{' '}
                             </Text>

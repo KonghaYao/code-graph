@@ -300,6 +300,8 @@ export function generateSimpleDiff(oldText: string, newText: string): {
  * 检查文本是否过大，需要特殊处理
  */
 export function isLargeText(text: string, threshold: number = 1000): boolean {
+    // 修复莫名奇妙的 null 输入问题
+    text = text || ""
     return text.length > threshold || text.split('\n').length > 50;
 }
 
