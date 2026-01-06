@@ -3,7 +3,7 @@
  * 这个文件可以作为添加新命令的参考
  */
 
-import { dbPath } from '../store';
+import { dbPath, getConfig } from '../store';
 import { type CommandDefinition } from './types';
 
 /**
@@ -143,18 +143,18 @@ export const configCommand: CommandDefinition = {
     execute: async (args: string[], context) => {
         // 无参数：显示所有配置
         if (args.length === 0) {
-            const config = context.extraParams || {};
+            const config = getConfig() || {};
             const hasOpenAIKey = !!config.openai_api_key;
             const hasOpenAIBaseUrl = !!config.openai_base_url;
             const isConfigured = hasOpenAIKey && hasOpenAIBaseUrl;
-            
+
             const configLines = [
                 '当前配置:',
                 dbPath,
                 `  main_model: ${config.main_model || 'N/A'}`,
                 `  openai_api_key: ${hasOpenAIKey ? '***已设置***' : '未设置'}`,
                 `  openai_base_url: ${config.openai_base_url || '未设置'}`,
-                '',
+                `  stream_refresh_interval ${config.stream_refresh_interval}`,
                 '使用方法:',
                 '  /config <key> <value>  - 设置配置项',
                 '  /config <key>          - 查看配置项',
@@ -164,14 +164,14 @@ export const configCommand: CommandDefinition = {
                 '  openai_api_key     - OpenAI API 密钥',
                 '  openai_base_url    - OpenAI API 基础 URL',
             ];
-            
+
             if (!isConfigured) {
                 configLines.push('');
                 configLines.push('⚠️  当前配置不完整，需要设置:');
                 if (!hasOpenAIKey) configLines.push('  • /config openai_api_key sk-your-api-key');
                 if (!hasOpenAIBaseUrl) configLines.push('  • /config openai_base_url https://api.openai.com/v1');
             }
-            
+
             return {
                 success: true,
                 message: configLines.join('\n'),
@@ -180,7 +180,7 @@ export const configCommand: CommandDefinition = {
         }
 
         const key = args[0];
-        const validKeys = ['main_model', 'openai_api_key', 'openai_base_url'];
+        const validKeys = ['stream_refresh_interval', 'openai_api_key', 'openai_base_url'];
 
         if (!validKeys.includes(key)) {
             return {

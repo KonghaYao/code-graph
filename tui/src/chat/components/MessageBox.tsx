@@ -1,54 +1,69 @@
 import { Box, Static } from 'ink';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import MessageHuman from './MessageHuman';
 import MessageAI from './MessageAI';
 import MessageTool from './MessageTool';
 import { RenderMessage } from '@langgraph-js/sdk';
+import { useChat } from '@langgraph-js/sdk/react';
+import { getConfig } from '../store/index';
 
-const StaticMessagesBox = ({ renderMessages, startIndex, flashMessageCount = 1 }: { renderMessages: RenderMessage[]; startIndex: number; flashMessageCount?: number }) => {
+export const MessagesBox = ({
+    renderMessages,
+    startIndex,
+    flashMessageCount = 1,
+}: {
+    renderMessages: RenderMessage[];
+    startIndex: number;
+    flashMessageCount?: number;
+}) => {
+    const { loading } = useChat();
+    const [syncedMessages, setSyncedMessages] = useState<RenderMessage[]>(renderMessages);
+    const messagesRef = useRef<RenderMessage[]>(renderMessages);
+
+    // 保持 ref 始终是最新的 renderMessages
+    useEffect(() => {
+        messagesRef.current = renderMessages;
+    }, [renderMessages]);
+
+    // 当不 loading 时，直接更新 renderMessages
+    useEffect(() => {
+        if (!loading) setSyncedMessages(messagesRef.current);
+    }, [loading, renderMessages]);
+
+    // 每秒从 ref 中同步最新的 renderMessages
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setSyncedMessages(messagesRef.current);
+        }, getConfig().stream_refresh_interval || 100);
+
+        return () => clearInterval(timer);
+    }, []);
+
     // 使用 ref 来稳定历史消息的渲染
-    const historyCount = useMemo(() => Math.max(0, renderMessages.length - flashMessageCount), [renderMessages.length, flashMessageCount]);
-    const activeMessages = renderMessages.slice(-flashMessageCount);
+    const historyCount = useMemo(
+        () => Math.max(0, syncedMessages.length - flashMessageCount),
+        [syncedMessages.length, flashMessageCount],
+    );
+    const activeMessages = syncedMessages.slice(-flashMessageCount);
 
-    const renderMessage = useMemo(() => (message: RenderMessage, index: number) => (
+    const renderMessage = (message: RenderMessage, index: number) => (
         <Box key={message.unique_id || message.id} flexDirection="column" marginBottom={0}>
             {message.type === 'human' ? (
-                <MessageHuman
-                    content={message.content}
-                    messageNumber={index + 1 + startIndex}
-                />
+                <MessageHuman content={message.content} messageNumber={index + 1 + startIndex} />
             ) : message.type === 'tool' ? (
                 <MessageTool message={message} messageNumber={index + 1 + startIndex} />
             ) : (
                 <MessageAI message={message} messageNumber={index + 1 + startIndex} />
             )}
         </Box>
-    ), [startIndex]);
+    );
 
     return (
         <Box flexDirection="column" paddingY={0}>
-            <Static items={renderMessages.slice(0, -flashMessageCount)}>{(message, index) => renderMessage(message, index)}</Static>
+            <Static items={syncedMessages.slice(0, -flashMessageCount)}>
+                {(message, index) => renderMessage(message, index)}
+            </Static>
             {activeMessages.map((message, index) => renderMessage(message, historyCount + index))}
         </Box>
     );
-};
-
-const freshCount = 10000;
-
-export const MessagesBox = ({
-    renderMessages,
-    startIndex,
-    flashMessageCount = freshCount,
-}: {
-    renderMessages: RenderMessage[];
-    startIndex: number;
-    flashMessageCount?: number;
-}) => {
-    // 使用唯一的 key 来强制在消息真正发生变化时重新创建组件
-    const messagesKey = useMemo(
-        () => renderMessages.map(m => m.unique_id || m.id).join('-'),
-        [renderMessages]
-    );
-
-    return <StaticMessagesBox key={messagesKey} renderMessages={renderMessages} startIndex={startIndex} flashMessageCount={flashMessageCount} />;
 };

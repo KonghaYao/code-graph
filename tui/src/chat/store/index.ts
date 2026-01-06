@@ -8,6 +8,7 @@ export interface AppConfig {
     mcp_config?: MCPConfig;
     openai_api_key?: string;
     openai_base_url?: string;
+    stream_refresh_interval?: number;
 }
 
 export interface MCPConfig {}

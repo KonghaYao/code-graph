@@ -27,33 +27,32 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         };
     }, [config, AVAILABLE_MODELS]);
 
+    const loadConfig = async () => {
+        await initDb();
+        const loadedConfig = getConfig();
+
+        // 并行加载模型列表
+        const models = await get_allowed_models().catch(() => []);
+        setModels(models);
+
+        // 如果配置中没有 main_model，使用第一个可用模型
+        if (!loadedConfig.main_model && models[0]) {
+            const updatedConfig = { ...loadedConfig, main_model: models[0] };
+            setConfig(updatedConfig);
+            await updateDbConfig({ main_model: models[0] });
+        } else {
+            setConfig(loadedConfig);
+        }
+
+        setLoading(false);
+    };
     useEffect(() => {
-        const loadConfig = async () => {
-            await initDb();
-            const loadedConfig = getConfig();
-
-            // 并行加载模型列表
-            const models = await get_allowed_models().catch(() => []);
-            setModels(models);
-
-            // 如果配置中没有 main_model，使用第一个可用模型
-            if (!loadedConfig.main_model && models[0]) {
-                const updatedConfig = { ...loadedConfig, main_model: models[0] };
-                setConfig(updatedConfig);
-                await updateDbConfig({ main_model: models[0] });
-            } else {
-                setConfig(loadedConfig);
-            }
-
-            setLoading(false);
-        };
         loadConfig();
     }, []);
 
     const updateConfig = async (newConfig: Partial<AppConfig>) => {
-        const updatedConfig = { ...config, ...newConfig } as AppConfig;
-        setConfig(updatedConfig);
         await updateDbConfig(newConfig);
+        loadConfig();
     };
 
     if (loading) {
