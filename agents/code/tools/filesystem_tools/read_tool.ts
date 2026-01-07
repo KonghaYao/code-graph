@@ -41,6 +41,7 @@ Usage:
 - You will regularly be asked to read screenshots. If the user provides a path to a screenshot ALWAYS use this tool to view the file at the path. This tool will work with all temporary file paths like /var/folders/123/abc/T/TemporaryItems/NSIRD_screencaptureui_ZfB1tD/Screenshot.png
 - If you read a file that exists but has empty contents you will receive a system reminder warning in place of file contents.`,
         schema: z.object({
+            description: z.string().optional().describe('what you want to do'),
             file_path: z.string().describe('The absolute path to the file to read'),
             offset: z
                 .number()

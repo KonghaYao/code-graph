@@ -13,6 +13,7 @@ import { SkillsMiddleware } from './middlewares/skills.js';
 import { SubAgentsMiddleware } from './middlewares/subagents.js';
 import { MemoryMiddleware } from './middlewares/memory.js';
 import { MCPMiddleware } from './middlewares/mcp.js';
+import { AgentsMdMiddleware } from './middlewares/agentsMD.js';
 
 export const graph = createStateEntrypoint(
     {
@@ -52,7 +53,8 @@ export const graph = createStateEntrypoint(
             stateSchema: CodeState,
             middleware: [
                 subagents,
-                MemoryMiddleware(model),
+                // MemoryMiddleware(model),
+                new AgentsMdMiddleware(),
                 new SkillsMiddleware(),
                 mcpMiddleware,
                 humanInTheLoopMiddleware({

@@ -78,7 +78,7 @@ export const replace_in_file = createUITool({
                             </>
                         )}
                     </Box>
-                    <Box flexDirection="column" marginTop={1}>
+                    {/* <Box flexDirection="column" marginTop={1}>
                         {diffLines.map((line, idx) => {
                             const key = `${idx}-${line.content.substring(0, 10)}`;
 
@@ -116,7 +116,7 @@ export const replace_in_file = createUITool({
                                 );
                             }
                         })}
-                    </Box>
+                    </Box> */}
                 </Box>
             );
         };

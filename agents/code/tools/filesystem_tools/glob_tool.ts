@@ -41,6 +41,7 @@ export const glob_tool = tool(
 - When you are doing an open ended search that may require multiple rounds of globbing and grepping, use the Agent tool instead
 - You have the capability to call multiple tools in a single response. It is always better to speculatively perform multiple searches as a batch that are potentially useful.`,
         schema: z.object({
+            description: z.string().optional().describe('what you want to do'),
             pattern: z.string().describe('The glob pattern to match files against'),
             path: z
                 .string()

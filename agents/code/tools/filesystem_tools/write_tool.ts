@@ -21,6 +21,7 @@ Usage:
 - NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
 - Only use emojis if the user explicitly requests it. Avoid writing emojis to files unless asked.`,
         schema: z.object({
+            description: z.string().optional().describe('what you want to do'),
             file_path: z.string().describe('The absolute path to the file to write (must be absolute, not relative)'),
             content: z.string().describe('The content to write to the file'),
         }),

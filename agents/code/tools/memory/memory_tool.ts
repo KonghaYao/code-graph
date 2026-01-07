@@ -88,6 +88,7 @@ export const query_memory_tool = tool(
 - 如果不提供关键词，会返回所有记忆内容
 - 可以使用 head_limit 限制输出行数以提高性能`,
         schema: z.object({
+            description: z.string().optional().describe('what you want to do'),
             keyword: z.string().optional().describe('搜索关键词，留空则返回所有记忆'),
             search_type: z
                 .enum(['tags', 'content', 'full'])

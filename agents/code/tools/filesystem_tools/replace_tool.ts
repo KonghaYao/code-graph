@@ -50,6 +50,7 @@ Usage:
 - The edit will FAIL if \`old_string\` is not unique in the file. Either provide a larger string with more surrounding context to make it unique or use \`replace_all\` to change every instance of \`old_string\`. 
 - Use \`replace_all\` for replacing and renaming strings across the file. This parameter is useful if you want to rename a variable for instance.`,
         schema: z.object({
+            description: z.string().optional().describe('what you want to do'),
             file_path: z.string().describe('The absolute path to the file to modify'),
             old_string: z.string().describe('The text to replace'),
             new_string: z.string().describe('The text to replace it with (must be different from old_string)'),
