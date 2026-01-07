@@ -11,6 +11,7 @@ export default defineConfig({
             devDeps: false,
             peerDeps: false,
             optDeps: false,
+            exclude: [],
             include: [
                 'bun:sqlite',
                 'path',
@@ -21,8 +22,18 @@ export default defineConfig({
                 'pg',
                 'redis',
                 'react-devtools-core',
-                '@lvce-editor/ripgrep', // 修复特殊文件引用的情况
                 'node-sqlite3-wasm', // 修复特殊文件引用的情况
+                'execa',
+                'lowdb',
+                'chalk',
+                'extract-zip',
+                'fs-extra',
+                'path-exists',
+                'tempy',
+                'xdg-basedir',
+                'openai',
+                'yaml',
+                'zod',
             ],
         }),
 

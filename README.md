@@ -13,6 +13,7 @@
 -   [x] SubAgent
 -   [x] Agent Skills
 -   [x] MCP
+-   [x] AGENTS.md
 -   [ ] Sandbox
 -   [ ] Memory System
 -   [ ] Magic Input
