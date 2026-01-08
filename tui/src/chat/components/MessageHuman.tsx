@@ -18,35 +18,23 @@ const MessageHuman: React.FC<MessageHumanProps> = ({ content, messageNumber }) =
         if (Array.isArray(content)) {
             return content
                 .filter((item) => item.type === 'text')
-                .map((item, index) => (
-                    <Text color="white">
-                        {item.text}
-                    </Text>
-                ));
+                .map((item, index) => <Text color="white">{item.text}</Text>);
         }
         // Fallback for unexpected content types
         return <Text color="white">{JSON.stringify(content)}</Text>;
     };
 
     return (
-        <Box
-            marginBottom={1}
-            paddingX={1}
-            flexDirection="column"
-            borderStyle="single"
-            borderTop={true}
-            borderBottom={false}
-            borderLeft={false}
-            borderRight={false}
-            borderColor="green"
-            borderDimColor
-        >
+        <Box marginBottom={0} borderTop borderColor="green" flexDirection="column">
             <Box>
-                <Text color="green" bold>
-                    {messageNumber}. {username}
+                <Text color="green">
+                    {messageNumber} {username}
                 </Text>
             </Box>
-            <Box>{renderContent()}</Box>
+            <Box>
+                <Text color="gray">└─ </Text>
+                {renderContent()}
+            </Box>
         </Box>
     );
 };

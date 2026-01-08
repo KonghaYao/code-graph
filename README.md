@@ -10,6 +10,7 @@
 -   [x] Human In the Loop
     -   [ ] Yolo Mode（用于自动控制授权）
     -   [ ] Automatically Security
+-   [ ] /compact 压缩上下文功能
 -   [x] SubAgent
 -   [x] Agent Skills
 -   [x] MCP

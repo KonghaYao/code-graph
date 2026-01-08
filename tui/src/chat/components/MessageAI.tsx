@@ -15,19 +15,14 @@ const MessageAI: React.FC<MessageAIProps> = ({ message, messageNumber }) => {
     const modelName = extraParams.main_model || 'AI';
 
     return (
-        <Box flexDirection="column" marginBottom={1} paddingX={1}>
+        <Box flexDirection="column" marginBottom={0}>
             <Box paddingBottom={0}>
-                <Text color="cyan" bold>
-                    {messageNumber}. {modelName} ({message.name})
+                <Text color="cyan">
+                    {messageNumber} {modelName}
                 </Text>
-                <UsageMetadata
-                    response_metadata={message.response_metadata as any}
-                    usage_metadata={message.usage_metadata || {}}
-                    spend_time={message.spend_time}
-                    id={message.id}
-                />
             </Box>
             <Box>
+                <Text color="gray">└─ </Text>
                 <Text>{getMessageContent(message.content)}</Text>
             </Box>
         </Box>

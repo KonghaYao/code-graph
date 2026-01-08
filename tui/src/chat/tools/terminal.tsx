@@ -40,9 +40,9 @@ export const terminal = createUITool({
             });
 
             return (
-                <Box flexDirection="column">
+                <Box flexDirection="column" paddingX={1}>
                     <Text color="cyan" bold>
-                        ⚡ Terminal Action Required
+                        Terminal Action Required
                     </Text>
                     <Box>
                         <SelectInput
@@ -96,20 +96,20 @@ export const terminal = createUITool({
             const isEditMode = selectState === 'edit';
 
             return (
-                <Box flexDirection="column" padding={1} borderStyle="round" borderColor={actionColor}>
+                <Box flexDirection="column" paddingX={1} marginTop={0}>
                     <Box>
                         <Text color={actionColor} bold>
-                            ⚙️ {selectState.toUpperCase()} MODE
+                            {selectState.toUpperCase()} MODE
                         </Text>
                         <Text color="gray"> - Press Enter to submit, Ctrl+C to cancel</Text>
                     </Box>
 
                     {isEditMode ? (
-                        <Box flexDirection="column" marginTop={1}>
+                        <Box flexDirection="column" marginTop={0}>
                             <Text color="yellow" dimColor>
                                 Editing action arguments (JSON format):
                             </Text>
-                            <Box borderStyle="single" borderColor="yellow" paddingX={1}>
+                            <Box paddingX={1}>
                                 <TextInput
                                     value={editValue}
                                     onChange={setEditValue}
@@ -119,11 +119,11 @@ export const terminal = createUITool({
                             </Box>
                         </Box>
                     ) : (
-                        <Box flexDirection="column" marginTop={1}>
+                        <Box flexDirection="column" marginTop={0}>
                             <Text color="cyan" dimColor>
                                 Enter additional message for this action:
                             </Text>
-                            <Box borderStyle="single" borderColor="cyan" paddingX={1}>
+                            <Box paddingX={1}>
                                 <TextInput
                                     value={editValue}
                                     onChange={setEditValue}
@@ -134,7 +134,7 @@ export const terminal = createUITool({
                         </Box>
                     )}
 
-                    <Box marginTop={1}>
+                    <Box marginTop={0}>
                         <Text color="gray">
                             <Text color={actionColor} bold>
                                 ↵
@@ -175,7 +175,9 @@ export const terminal = createUITool({
 
         return (
             <Box flexDirection="column">
-                <InputPreviewer content={tool.getInputRepaired()}></InputPreviewer>
+                <Box paddingX={1}>
+                    <InputPreviewer content={tool.getInputRepaired()}></InputPreviewer>
+                </Box>
                 {/* Main Content */}
                 {isEditing ? renderEditUI() : actionButtons()}
                 {/* Output */}

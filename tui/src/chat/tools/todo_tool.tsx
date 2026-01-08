@@ -41,36 +41,26 @@ export const todo_tool = createUITool({
         }
 
         const todos = input.todos;
-
-        // Calculate statistics
-        const total = todos.length;
-        const completed = todos.filter((t) => t.status === 'completed').length;
         // Render todo list
         const renderTodoList = () => {
             if (todos.length === 0) {
                 return (
-                    <Box padding={1}>
+                    <Box paddingX={1}>
                         <Text color="gray">No tasks in todo list</Text>
                     </Box>
                 );
             }
 
             return (
-                <Box flexDirection="column" marginTop={1}>
+                <Box flexDirection="column" marginTop={0}>
                     {todos.map((todo, index) => (
-                        <Box paddingX={1} paddingY={0}>
+                        <Box key={todo.id} paddingX={1} paddingY={0}>
                             <Text color={STATUS_COLORS[todo.status]} bold>
                                 {STATUS_SYMBOLS[todo.status]}{' '}
                             </Text>
-                            <Text>
+                            <Text color={todo.status === 'in_progress' ? 'white' : 'gray'}>
                                 {index + 1}. {todo.content}
                             </Text>
-                            {todo.status !== 'pending' && (
-                                <Text color="gray" dimColor>
-                                    {' '}
-                                    [{todo.status}]
-                                </Text>
-                            )}
                         </Box>
                     ))}
                 </Box>
@@ -79,12 +69,9 @@ export const todo_tool = createUITool({
 
         // Main render
         return (
-            <Box flexDirection="column">
+            <Box flexDirection="column" paddingX={0}>
                 {/* Todo List */}
-                <Box flexDirection="column" marginTop={1}>
-                    <Text color="magenta" bold>
-                        📋 Tasks({completed}/{total}):
-                    </Text>
+                <Box flexDirection="column" marginTop={0}>
                     {renderTodoList()}
                 </Box>
             </Box>

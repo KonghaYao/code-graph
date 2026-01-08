@@ -47,7 +47,7 @@ export const MessagesBox = ({
     const activeMessages = syncedMessages.slice(-flashMessageCount);
 
     const renderMessage = (message: RenderMessage, index: number) => (
-        <Box key={message.unique_id || message.id} flexDirection="column" marginBottom={0}>
+        <Box key={message.unique_id || message.id} flexDirection="column" marginTop={1}>
             {message.type === 'human' ? (
                 <MessageHuman content={message.content} messageNumber={index + 1 + startIndex} />
             ) : message.type === 'tool' ? (

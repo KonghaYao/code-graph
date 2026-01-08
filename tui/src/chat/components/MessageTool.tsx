@@ -160,32 +160,39 @@ const MessageTool: React.FC<MessageToolProps> = ({ message, messageNumber }) => 
     let borderColor = getToolColor(message.name!);
     borderColor = message.status === 'error' ? 'red' : borderColor;
     return (
-        <Box flexDirection="column" paddingX={1} paddingY={0} marginBottom={1}>
+        <Box flexDirection="column" paddingLeft={3} paddingY={0} marginBottom={0}>
             <Box>
-                <Text color={borderColor} bold>
-                    {messageNumber}. {message.name}
-                    {label}
+                <Text color={borderColor}>
+                    {messageNumber} {message.name}
+                    <Text color="gray">{label}</Text>
                 </Text>
-                <UsageMetadata
-                    response_metadata={message.response_metadata as any}
-                    usage_metadata={message.usage_metadata || {}}
-                    spend_time={message.spend_time}
-                    id={message.id}
-                    tool_call_id={message.tool_call_id}
-                />
             </Box>
             {message.sub_messages?.length ? (
-                <Text color={borderColor}>hidden {message.sub_messages.length} subagents message </Text>
+                <Box>
+                    <Text color="gray">└─ </Text>
+                    <Text color={borderColor} dimColor>
+                        (hidden {message.sub_messages.length} subagent messages)
+                    </Text>
+                </Box>
             ) : null}
 
             {render ? (
-                (render(message as RenderMessage) as JSX.Element)
+                <Box>
+                    <Text color="gray">└─ </Text>
+                    <Box flexDirection="column">{render(message as RenderMessage) as JSX.Element}</Box>
+                </Box>
             ) : (
-                <Box flexDirection="column" paddingTop={0} paddingLeft={0}>
+                <Box flexDirection="column" paddingTop={0}>
                     {/* 入参 */}
-                    <InputPreviewer content={tool.getInputRepaired()} />
-                    <Box paddingTop={1} paddingBottom={0}>
-                        <Text dimColor>{truncateContentForDisplay(getMessageContent(message.content))}</Text>
+                    <Box>
+                        <Text color="gray">└─ </Text>
+                        <InputPreviewer content={tool.getInputRepaired()} />
+                    </Box>
+                    <Box paddingTop={0} paddingBottom={0}>
+                        <Text color="gray">└─ </Text>
+                        <Text dimColor italic>
+                            {truncateContentForDisplay(getMessageContent(message.content))}
+                        </Text>
                     </Box>
                 </Box>
             )}

@@ -21,12 +21,20 @@ export const ask_user_with_options = createUITool({
             return <Text color="yellow">{tool.output}</Text>;
         }
         const [text, setText] = useState('');
-        const Hint = <Text>Use Blank to Select, Enter to Submit </Text>;
-        const inputBox = <EnhancedTextInput value={text} onSubmit={setText}></EnhancedTextInput>;
+        const Hint = (
+            <Box paddingX={1}>
+                <Text color="gray">Use Blank to Select, Enter to Submit </Text>
+            </Box>
+        );
+        const inputBox = (
+            <Box paddingX={1}>
+                <EnhancedTextInput value={text} onSubmit={setText}></EnhancedTextInput>
+            </Box>
+        );
 
         if (input.type === 'single_select') {
             return (
-                <Box flexDirection="column">
+                <Box flexDirection="column" paddingX={1}>
                     {Hint}
                     <SelectInput
                         items={options}
@@ -42,7 +50,7 @@ export const ask_user_with_options = createUITool({
             );
         } else {
             return (
-                <Box flexDirection="column">
+                <Box flexDirection="column" paddingX={1}>
                     {Hint}
                     <MultiSelect
                         options={options}
