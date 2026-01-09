@@ -1,21 +1,17 @@
 import { createUITool, ToolManager } from '@langgraph-js/sdk';
+import { globToolSchema } from '../../../../agents/code/tools/filesystem_tools/glob_tool';
 import { Box, Text } from 'ink';
-
-interface GlobFilesInput {
-    pattern: string;
-    path?: string;
-}
 
 export const glob_files = createUITool({
     name: 'glob_files',
     description: 'Find files by name patterns',
-    parameters: {} as any,
+    parameters: globToolSchema.shape,
     handler: ToolManager.waitForUIDone,
     render(tool) {
-        const input = tool.getInputRepaired() as GlobFilesInput;
+        const input = tool.getInputRepaired();
         const output = tool.output as string;
 
-        if (!output) return null;
+        if (!output) return <></>;
 
         const files = output.split('\n').filter(Boolean);
         const count = files.length;

@@ -3,7 +3,20 @@ import { z } from 'zod';
 import { promises as fs } from 'fs';
 
 const MAX_LINES = 2000;
-
+export const readFileSchema = z.object({
+    description: z.string().optional().describe('what you want to do'),
+    file_path: z.string().describe('The absolute path to the file to read'),
+    offset: z
+        .number()
+        .default(0)
+        .optional()
+        .describe('The line number to start reading from. Only provide if the file is too large to read at once'),
+    limit: z
+        .number()
+        .default(MAX_LINES)
+        .optional()
+        .describe('The number of lines to read. Only provide if the file is too large to read at once.'),
+});
 export const read_tool = tool(
     async ({ file_path, offset, limit }) => {
         try {
@@ -40,21 +53,6 @@ Usage:
 - You have the capability to call multiple tools in a single response. It is always better to speculatively read multiple files as a batch that are potentially useful. 
 - You will regularly be asked to read screenshots. If the user provides a path to a screenshot ALWAYS use this tool to view the file at the path. This tool will work with all temporary file paths like /var/folders/123/abc/T/TemporaryItems/NSIRD_screencaptureui_ZfB1tD/Screenshot.png
 - If you read a file that exists but has empty contents you will receive a system reminder warning in place of file contents.`,
-        schema: z.object({
-            description: z.string().optional().describe('what you want to do'),
-            file_path: z.string().describe('The absolute path to the file to read'),
-            offset: z
-                .number()
-                .default(0)
-                .optional()
-                .describe(
-                    'The line number to start reading from. Only provide if the file is too large to read at once',
-                ),
-            limit: z
-                .number()
-                .default(MAX_LINES)
-                .optional()
-                .describe('The number of lines to read. Only provide if the file is too large to read at once.'),
-        }),
+        schema: readFileSchema,
     },
 );
