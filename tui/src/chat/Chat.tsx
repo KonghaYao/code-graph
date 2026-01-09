@@ -12,6 +12,7 @@ import { LangGraphFetch } from '../../../agents/code/export';
 import WelcomeHeader from './components/WelcomeHeader';
 import TokenProgressBar from './components/TokenProgressBar';
 import DefaultTools from './tools/index';
+import Shimmer from './components/Shimmer';
 
 const ChatMessages = () => {
     const { renderMessages, loading, inChatError, isFELocking } = useChat();
@@ -22,9 +23,9 @@ const ChatMessages = () => {
             {visibleMessages.length === 0 && <WelcomeHeader />}
             <MessagesBox renderMessages={visibleMessages} startIndex={0} />
             {loading && !isFELocking() && (
-                <Box marginTop={0} paddingLeft={1}>
+                <Box marginTop={1} paddingLeft={1}>
                     <Text>
-                        <Spinner type="dots" /> <Text color="cyan">正在思考中... Ctrl + C 中断</Text>
+                        <Spinner type="dots" /> <Shimmer text="正在思考中... Ctrl + C 中断"></Shimmer>
                     </Text>
                 </Box>
             )}
@@ -266,6 +267,7 @@ const ChatWrapper: React.FC = () => {
                 console.error(error, currentAgent);
             }}
             fetch={LangGraphFetch as any}
+            autoRestoreLastSession
         >
             <Chat />
         </ChatProvider>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from 'ink';
 import { getCurrentUser } from '../../utils/user';
 import { useSettings } from '../context/SettingsContext';
+import Shimmer from './Shimmer';
 
 const WelcomeHeader: React.FC = () => {
     const username = getCurrentUser();
@@ -9,7 +10,7 @@ const WelcomeHeader: React.FC = () => {
     const { extraParams, AVAILABLE_MODELS, config } = useSettings();
     const mcpConfig = extraParams.mcp_config || {};
     const mcpServerCount = Object.keys(mcpConfig).length;
-    
+
     // 检查 OpenAI 配置状态
     const hasOpenAIKey = !!config?.openai_api_key;
     const hasOpenAIBaseUrl = !!config?.openai_base_url;
@@ -30,14 +31,16 @@ const WelcomeHeader: React.FC = () => {
             <Box flexDirection="row" marginTop={1} gap={2}>
                 {/* Left: Logo */}
                 <Box flexDirection="column">
-                    <Text color="cyan" bold>
-                        {`███████╗███████╗███╗   ██╗
+                    {`███████╗███████╗███╗   ██╗
 ╚══███╔╝██╔════╝████╗  ██║
   ███╔╝ █████╗  ██╔██╗ ██║
  ███╔╝  ██╔══╝  ██║╚██╗██║
 ███████╗███████╗██║ ╚████║
-╚══════╝╚══════╝╚═╝  ╚═══╝`}
-                    </Text>
+╚══════╝╚══════╝╚═╝  ╚═══╝`
+                        .split('\n')
+                        .map((i) => {
+                            return <Shimmer interval={40} text={i} />;
+                        })}
                 </Box>
 
                 {/* Right: Status Panel */}
@@ -91,26 +94,14 @@ const WelcomeHeader: React.FC = () => {
             {!isConfigured && (
                 <Box marginTop={1} paddingX={1} flexDirection="column" gap={0}>
                     <Text color="red" bold>
-                        ⚠️  需要配置 OpenAI API:
+                        ⚠️ 需要配置 OpenAI API:
                     </Text>
-                    {!hasOpenAIKey && (
-                        <Text color="yellow">
-                            {'  '}• /config openai_api_key sk-your-api-key
-                        </Text>
-                    )}
+                    {!hasOpenAIKey && <Text color="yellow">{'  '}• /config openai_api_key sk-your-api-key</Text>}
                     {!hasOpenAIBaseUrl && (
-                        <Text color="yellow">
-                            {'  '}• /config openai_base_url https://api.openai.com/v1
-                        </Text>
+                        <Text color="yellow">{'  '}• /config openai_base_url https://api.openai.com/v1</Text>
                     )}
-                    {!hasModels && (
-                        <Text color="yellow">
-                            {'  '}• 请确保网络连接正常以获取模型列表
-                        </Text>
-                    )}
-                    <Text color="gray">
-                        {'  '}• 配置后使用 /model 查看可用模型
-                    </Text>
+                    {!hasModels && <Text color="yellow">{'  '}• 请确保网络连接正常以获取模型列表</Text>}
+                    <Text color="gray">{'  '}• 配置后使用 /model 查看可用模型</Text>
                 </Box>
             )}
 

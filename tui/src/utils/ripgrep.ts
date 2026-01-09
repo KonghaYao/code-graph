@@ -15,7 +15,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const REPOSITORY = `microsoft/ripgrep-prebuilt`;
 const VERSION = process.env.RIPGREP_VERSION || 'v15.0.0';
-const BIN_PATH = join(__dirname, '../bin');
 
 const getTarget = () => {
     const arch = process.env.npm_config_arch || os.arch();
@@ -115,7 +114,14 @@ const downloadRipGrepAndroid = async (platform: string) => {
     }
 };
 
-export const downloadRipGrep = async (overrideBinPath: string) => {
+export const rgPath = join(__dirname, `rg${process.platform === 'win32' ? '.exe' : ''}`);
+
+console.log(rgPath);
+export const downloadRipGrep = async (overrideBinPath?: string) => {
+    if (await pathExists(rgPath)) {
+        console.log('rg cached');
+        return;
+    }
     const platform = process.env.platform || os.platform();
     if (platform === 'android') {
         const didInstall = await downloadRipGrepAndroid(platform);
@@ -129,7 +135,7 @@ export const downloadRipGrep = async (overrideBinPath: string) => {
         `https://v6.gh-proxy.org/https://github.com/${REPOSITORY}/releases/download`;
     const url = `${baseUrl}/${VERSION}/ripgrep-${VERSION}-${target}`;
     const downloadPath = `${xdgCache}/vscode-ripgrep/ripgrep-${VERSION}-${target}`;
-    const binPath = overrideBinPath ?? BIN_PATH;
+    const binPath = overrideBinPath ?? __dirname;
     if (!(await pathExists(downloadPath))) {
         await downloadFile(url, downloadPath);
     } else {
@@ -143,5 +149,3 @@ export const downloadRipGrep = async (overrideBinPath: string) => {
         throw new Error(`Invalid downloadPath ${downloadPath}`);
     }
 };
-
-export const rgPath = join(__dirname, `rg${process.platform === 'win32' ? '.exe' : ''}`);

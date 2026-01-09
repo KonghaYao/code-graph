@@ -35,16 +35,18 @@ export const replace_in_file = createUITool({
         return (
             <Box flexDirection="column" paddingX={1}>
                 <Box>
-                    <Text color="white"> {cleanPath(input.file_path)}</Text>
-                    {hasDiff && (
-                        <>
-                            <Text color="gray"> (</Text>
-                            <Text color="red">-{removedCount}</Text>
-                            <Text color="gray">/</Text>
-                            <Text color="green">+{addedCount}</Text>
-                            <Text color="gray">)</Text>
-                        </>
-                    )}
+                    <Text color="white">
+                        {cleanPath(input.file_path)}
+                        {hasDiff && (
+                            <>
+                                <Text color="gray"> (</Text>
+                                <Text color="red">-{removedCount}</Text>
+                                <Text color="gray">/</Text>
+                                <Text color="green">+{addedCount}</Text>
+                                <Text color="gray">)</Text>
+                            </>
+                        )}
+                    </Text>
                 </Box>
 
                 {output && output.startsWith('Error:') && (

@@ -142,4 +142,4 @@ node_modules
 .langgraph_api
 *.env
 
-src/rg
+src/**/*/rg

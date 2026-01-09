@@ -4,6 +4,7 @@ import { RenderMessage } from '@langgraph-js/sdk';
 import { UsageMetadata } from './UsageMetadata';
 import { getMessageContent } from '@langgraph-js/sdk';
 import { useSettings } from '../context/SettingsContext';
+import LongText from './LongText';
 
 interface MessageAIProps {
     message: RenderMessage;
@@ -21,10 +22,11 @@ const MessageAI: React.FC<MessageAIProps> = ({ message, messageNumber }) => {
                     {messageNumber} {modelName}
                 </Text>
             </Box>
-            <Box>
-                <Text color="gray">└─ </Text>
-                <Text>{getMessageContent(message.content)}</Text>
-            </Box>
+            <LongText
+                text={getMessageContent(message.content)}
+                prefix="└─ "
+                indent="   "
+            />
         </Box>
     );
 };

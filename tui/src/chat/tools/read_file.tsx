@@ -20,10 +20,12 @@ export const read_file = createUITool({
         return (
             <Box flexDirection="column" paddingX={1}>
                 <Box>
-                    <Text color="blue">"{cleanPath(input.file_path)}"</Text>
-                    <Text color="gray" dimColor>
-                        {' '}
-                        ({totalLines} lines)
+                    <Text color="blue">
+                        {cleanPath(input.file_path)}
+
+                        <Text color="gray" dimColor>
+                            ({totalLines} lines)
+                        </Text>
                     </Text>
                 </Box>
             </Box>

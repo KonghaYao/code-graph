@@ -3,7 +3,7 @@ import { getSystemPrompt } from './prompts/coding.js';
 import { bash_tools } from './tools/bash_tools/index.js';
 import { glob_tool, grep_tool, read_tool, replace_tool, write_tool } from './tools/filesystem_tools/index.js';
 import { todo_write_tool } from './tools/task_tools/todo_tool.js';
-import { createAgent } from 'langchain';
+import { createAgent, summarizationMiddleware } from 'langchain';
 import { z } from 'zod';
 import { createStateEntrypoint } from '@langgraph-js/pure-graph';
 import { CodeState } from './state.js';
@@ -52,6 +52,11 @@ export const graph = createStateEntrypoint(
             tools: [...allTools],
             stateSchema: CodeState,
             middleware: [
+                summarizationMiddleware({
+                    model,
+                    trigger: { tokens: 120_000 },
+                    keep: { messages: 100 },
+                }),
                 subagents,
                 // MemoryMiddleware(model),
                 new AgentsMdMiddleware(),
