@@ -1,18 +1,19 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { Box, Text, useInput, useFocusManager } from 'ink';
 import Spinner from 'ink-spinner';
-import { EnhancedTextInput } from './components/input/EnhancedTextInput';
 import { MessagesBox } from './components/MessageBox';
 import HistoryList from './components/HistoryList';
 import { ChatProvider, useChat } from '@langgraph-js/sdk/react';
 import { Message } from '@langgraph-js/sdk';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
+import { ChatInputBufferProvider, useChatInputBuffer } from './context/ChatInputBufferContext';
 import { useCommandHandler } from './components/CommandHandler';
 import { LangGraphFetch } from '../../../agents/code/export';
 import WelcomeHeader from './components/WelcomeHeader';
 import TokenProgressBar from './components/TokenProgressBar';
 import DefaultTools from './tools/index';
 import Shimmer from './components/Shimmer';
+import { ChatInputBuffer } from './components/input/ChatInputBuffer';
 
 const ChatMessages = () => {
     const { renderMessages, loading, inChatError, isFELocking } = useChat();
@@ -51,25 +52,36 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
     const commandHandler = useCommandHandler({
         extraParams,
     });
+
     const lastMessageToken = useMemo(() => {
         const index = renderMessages.findLastIndex((i) => i.usage_metadata?.input_tokens);
         if (index === -1) return 0;
         return renderMessages[index].usage_metadata?.input_tokens;
     }, [renderMessages]);
-    const sendTextMessage = async () => {
-        if (!userInput) return;
 
-        // 尝试执行命令
-        const commandHandled = await commandHandler.executeCommand();
-        if (commandHandled) {
-            return; // 命令已处理，不继续执行普通消息发送
+    const sendTextMessage = async (inputValue: string) => {
+        if (!inputValue) return;
+
+        // 命令优先处理：直接检查而不是依赖 executeCommand 内部检测
+        if (inputValue.startsWith('/')) {
+            // 先更新 userInput，让 CommandHandler 能读取到
+            setUserInput(inputValue);
+
+            // 等待状态更新后再执行命令
+            await new Promise(resolve => setTimeout(resolve, 0));
+
+            const commandHandled = await commandHandler.executeCommand();
+            if (commandHandled) {
+                setUserInput(''); // 命令已处理，清空输入
+                return;
+            }
         }
 
         // 普通消息处理
         const content: Message[] = [
             {
                 type: 'human',
-                content: userInput,
+                content: inputValue,
             },
         ];
 
@@ -87,32 +99,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
             {/* 命令成功消息显示 */}
             <commandHandler.CommandSuccessUI />
 
-            {/* 命令提示 */}
-            <commandHandler.CommandHintUI />
+            {/* 使用 ChatInputBuffer 组件 */}
+            <ChatInputBuffer
+                value={userInput as string}
+                onChange={setUserInput}
+                onSubmit={sendTextMessage}
+                loading={loading}
+                placeholder="输入消息..."
+                commandHandler={commandHandler}
+            />
 
-            <Box alignItems="center">
-                <Box marginRight={1}>
-                    <Text color={commandHandler.isCommandInput ? 'yellow' : 'green'} bold>
-                        {commandHandler.isCommandInput ? '⚡ ' : '💬 '}
-                    </Text>
-                </Box>
-                <EnhancedTextInput
-                    id={'global-input'}
-                    disabled={loading} // 后面可以改为 interrupt 状态时，才禁用，添加上缓冲区的概念
-                    value={userInput as string}
-                    onChange={setUserInput}
-                    onSubmit={sendTextMessage}
-                    onHotKey={(value) => {
-                        if (value === 'ç') {
-                            // stopGeneration();
-                            return false;
-                        }
-                        return true;
-                    }}
-                    placeholder={commandHandler.isCommandInput ? '输入命令... (试试 /help)' : '输入消息...'}
-                    autoFocus
-                />
-            </Box>
             <Box paddingX={1} justifyContent="flex-end">
                 <TokenProgressBar currentTokens={lastMessageToken || 0} />
             </Box>
@@ -122,13 +118,31 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
 
 const Chat: React.FC = () => {
     const { extraParams } = useSettings();
-    const { toggleHistoryVisible, setUserInput, createNewChat, setTools, loading, stopGeneration, currentChatId } =
+    const { toggleHistoryVisible, setUserInput, createNewChat, setTools, loading, stopGeneration, currentChatId, sendMessage } =
         useChat();
+    const { bufferedMessage, clearBuffer } = useChatInputBuffer();
+
+    // 初始化工具
     useEffect(() => {
         console.clear();
         setTools(DefaultTools);
     }, []);
 
+    // loading 结束时自动发送缓冲区消息
+    useEffect(() => {
+        if (!loading && bufferedMessage.trim()) {
+            const content: Message[] = [{
+                type: 'human',
+                content: bufferedMessage,
+            }];
+            sendMessage(content, {
+                extraParams,
+            });
+            clearBuffer(); // 发送后清空缓冲区
+        }
+    }, [loading, bufferedMessage, sendMessage, extraParams, clearBuffer]);
+
+    // 自动聚焦输入框
     useEffect(() => {
         !loading && focusManager.focus('global-input');
     }, [loading]);
@@ -288,7 +302,9 @@ const ChatWrapper: React.FC = () => {
 
 const AppProviders: React.FC = () => (
     <SettingsProvider>
-        <ChatWrapper />
+        <ChatInputBufferProvider>
+            <ChatWrapper />
+        </ChatInputBufferProvider>
     </SettingsProvider>
 );
 

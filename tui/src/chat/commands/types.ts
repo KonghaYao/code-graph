@@ -34,7 +34,10 @@ export interface CommandContext {
     createNewChat: () => void;
     /** 更新配置函数 */
     updateConfig?: (config: any) => Promise<void>;
+    /** 可用模型列表 */
     AVAILABLE_MODELS?: ModelConfig[];
+    /** 渲染消息列表（用于总结等需要访问聊天记录的场景） */
+    renderMessages?: any[];
 }
 
 export interface CommandDefinition {

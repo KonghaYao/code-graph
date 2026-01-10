@@ -7,4 +7,5 @@ export const CodeState = AgentState.extend(SubAgentStateSchema.shape).extend({
     cwd: z.string().default(''),
     agent_name: z.string().default('Code Agent'),
     mcp_config: z.unknown().optional(),
+    switch_command: z.string().optional(),
 });

@@ -1,89 +1,109 @@
 /**
- * Middleware for loading and exposing AGENTS.md documentation to the system prompt.
+ * Middleware for loading and exposing AGENTS.md / CLAUDE.md documentation to the system prompt.
  *
- * This middleware implements a progressive disclosure pattern for AGENTS.md files:
- * 1. Load AGENTS.md content at session start
- * 2. Inject AGENTS.md info into system prompt for discoverability
- * 3. Agent reads full AGENTS.md content when relevant to a task
+ * This middleware implements a progressive disclosure pattern for project documentation files:
+ * 1. Load AGENTS.md or CLAUDE.md content at session start
+ * 2. Inject documentation info into system prompt for discoverability
+ * 3. Agent reads full documentation content when relevant to a task
  *
- * Only supports root-level AGENTS.md: {PROJECT_ROOT}/AGENTS.md
+ * Supports root-level files: {PROJECT_ROOT}/AGENTS.md or {PROJECT_ROOT}/CLAUDE.md
+ * CLAUDE.md is an alias for AGENTS.md (both refer to the same project documentation)
  */
 
 import { AgentMiddleware } from 'langchain';
 import { AIMessage, SystemMessage } from '@langchain/core/messages';
 import fs from 'fs/promises';
 import { join } from 'path';
-// AGENTS.md System Documentation
-const AGENTS_MD_SYSTEM_PROMPT = `
 
-## AGENTS.md 
+// Documentation System Prompt
+const DOCS_SYSTEM_PROMPT = `
 
-{agents_md}`;
+## Project Documentation
+
+{docs_content}`;
 
 /**
- * Middleware for loading and exposing AGENTS.md documentation.
+ * Middleware for loading and exposing AGENTS.md / CLAUDE.md documentation.
  *
- * This middleware implements progressive disclosure for AGENTS.md:
- * - Loads metadata from AGENTS.md at session start
- * - Injects AGENTS.md info into system prompt for discoverability
- * - Agent reads full AGENTS.md content when relevant (progressive disclosure)
+ * This middleware implements progressive disclosure for project documentation:
+ * - Loads metadata from AGENTS.md or CLAUDE.md at session start
+ * - Injects documentation info into system prompt for discoverability
+ * - Agent reads full documentation content when relevant (progressive disclosure)
  *
- * Only supports root-level AGENTS.md: {PROJECT_ROOT}/AGENTS.md
+ * Priority: CLAUDE.md > AGENTS.md (CLAUDE.md takes precedence if both exist)
+ *
+ * Supports root-level files: {PROJECT_ROOT}/AGENTS.md or {PROJECT_ROOT}/CLAUDE.md
  */
 export class AgentsMdMiddleware implements AgentMiddleware {
     name = 'AgentsMdMiddleware';
-    // No context schema needed
     stateSchema = undefined;
-
-    // No context schema needed
     contextSchema = undefined;
-
-    // No additional tools
     tools = [];
 
     private projectRoot: string;
     private systemPromptTemplate: string;
 
     /**
-     * Initialize the AGENTS.md middleware.
+     * Initialize the documentation middleware.
      *
      * @param projectRoot - Path to the project root directory (defaults to process.cwd())
      */
     constructor(options: { projectRoot?: string } = {}) {
         this.projectRoot = options.projectRoot || process.cwd();
-        this.systemPromptTemplate = AGENTS_MD_SYSTEM_PROMPT;
+        this.systemPromptTemplate = DOCS_SYSTEM_PROMPT;
     }
 
     /**
-     * Inject AGENTS.md documentation into the system prompt.
+     * Find and read the project documentation file.
+     * Priority: CLAUDE.md > AGENTS.md
      *
-     * This runs on every model call to ensure AGENTS.md info is always available.
+     * @returns The content of the first found documentation file, or null if none exist
+     */
+    private async findDocumentationFile(): Promise<{ content: string; filename: string } | null> {
+        const candidates = ['CLAUDE.md', 'AGENTS.md'];
+
+        for (const filename of candidates) {
+            const filePath = join(this.projectRoot, filename);
+            try {
+                await fs.access(filePath);
+                const content = await fs.readFile(filePath, 'utf-8');
+                return { content, filename };
+            } catch {
+                // File doesn't exist, try next candidate
+                continue;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Inject project documentation into the system prompt.
+     *
+     * This runs on every model call to ensure documentation info is always available.
      *
      * @param request - The model request being processed
      * @param handler - The handler function to call with the modified request
      * @returns The model response from the handler
      */
     async wrapModelCall(request: any, handler: any): Promise<AIMessage> {
-        if (
-            !(await fs
-                .access(join(this.projectRoot, 'AGENTS.md'))
-                .then(() => true)
-                .catch(() => false))
-        ) {
+        // Try to find and read documentation file
+        const docsFile = await this.findDocumentationFile();
+
+        if (!docsFile) {
+            // No documentation file found, proceed without modification
             return await handler(request);
         }
-        // Read AGENTS.md file
-        const agentsMdFile = await fs.readFile(join(this.projectRoot, 'AGENTS.md'), 'utf-8');
 
-        // Format the AGENTS.md documentation
-        const agentsMdSection = this.systemPromptTemplate.replace('{agents_md}', agentsMdFile);
+        // Format the documentation content
+        const docsSection = this.systemPromptTemplate.replace('{docs_content}', docsFile.content);
 
-        // Create new system message by appending AGENTS.md section
+        // Create new system message by appending documentation section
         let newSystemPrompt: string;
         if (request.systemPrompt) {
-            newSystemPrompt = request.systemPrompt + '\n\n' + agentsMdSection;
+            newSystemPrompt = request.systemPrompt + '\n\n' + docsSection;
         } else {
-            newSystemPrompt = agentsMdSection;
+            newSystemPrompt = docsSection;
         }
 
         // Create a new system message

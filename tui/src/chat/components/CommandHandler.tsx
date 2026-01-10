@@ -40,7 +40,7 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
     const { onCommandExecuted } = props;
 
     // 从 useChat 获取所有需要的状态和函数
-    const { userInput, setUserInput, sendMessage, currentAgent, client, createNewChat } = useChat();
+    const { userInput, setUserInput, sendMessage, currentAgent, client, createNewChat, renderMessages } = useChat();
     // 从 useSettings 获取配置更新函数
     const { extraParams, updateConfig, AVAILABLE_MODELS } = useSettings();
 
@@ -68,6 +68,7 @@ export const useCommandHandler = (props: CommandHandlerProps): CommandHandlerRet
                 createNewChat,
                 updateConfig,
                 AVAILABLE_MODELS,
+                renderMessages,
             };
 
             const result = await commandRegistry.executeCommand(userInput, commandContext);

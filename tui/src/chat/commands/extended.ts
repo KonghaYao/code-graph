@@ -465,6 +465,62 @@ export const mcpCommand: CommandDefinition = {
     },
 };
 
+/**
+ * /summarize 命令 - 触发远程总结功能
+ */
+export const summarizeCommand: CommandDefinition = {
+    name: 'summarize',
+    description: '总结当前聊天记录',
+    aliases: ['sum', 'summary'],
+    usage: '/summarize',
+    execute: async (args: string[], context) => {
+        // 检查是否有聊天记录
+        if (!context.renderMessages || context.renderMessages.length === 0) {
+            return {
+                success: false,
+                message: '当前会话没有消息可以总结',
+                shouldClearInput: true,
+            };
+        }
+
+        // 检查消息数量，至少需要一些消息才能总结
+        const messageCount = context.renderMessages.length;
+        if (messageCount < 20) {
+            return {
+                success: false,
+                message: '消息数量太少，无法进行有意义的总结（至少需要2条消息）',
+                shouldClearInput: true,
+            };
+        }
+
+        try {
+            // 使用 sendMessage 触发远程总结
+            // 通过 extraParams 传递 switch_command
+            const summarizeMessage: any[] = [];
+
+            // 构建包含 switch_command 的 extraParams
+            const summarizeExtraParams = {
+                ...context.extraParams,
+                switch_command: 'summarization',
+            };
+
+            await context.sendMessage(summarizeMessage, { extraParams: summarizeExtraParams });
+
+            return {
+                success: true,
+                message: `正在总结 ${messageCount} 条消息...`,
+                shouldClearInput: true,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: `总结失败: ${error instanceof Error ? error.message : String(error)}`,
+                shouldClearInput: true,
+            };
+        }
+    },
+};
+
 // 导出扩展命令列表
 export const extendedCommands: CommandDefinition[] = [
     statusCommand,
@@ -473,4 +529,5 @@ export const extendedCommands: CommandDefinition[] = [
     configCommand,
     envCommand,
     mcpCommand,
+    summarizeCommand, // NEW: 添加总结命令
 ];

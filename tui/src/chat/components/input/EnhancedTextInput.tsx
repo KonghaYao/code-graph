@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Text, useFocus, useInput } from 'ink';
 import chalk from 'chalk';
-import { Key } from 'readline';
+import { Key } from 'ink';
 
 export type Props = {
     readonly id?: string;
