@@ -26,7 +26,6 @@
         "node-sqlite3-wasm": "^0.8.52",
         "path-exists": "^5.0.0",
         "tempy": "^3.1.0",
-        "@langgraph-js/sdk": "^4",
         "openai": "^6.15.0",
         "yaml": "^2.8.2",
         "zod": "^4",
@@ -36,7 +35,7 @@
     "devDependencies": {
         "@inkjs/ui": "^2.0.0",
         "@langchain/mcp-adapters": "^1.1.1",
-        "@langgraph-js/sdk": "^4.3.6",
+        "@langgraph-js/sdk": "^4.3.7",
         "@nanostores/react": "^1.0.0",
         "@types/diff-match-patch": "^1.0.36",
         "@types/fs-extra": "^11.0.4",

@@ -3,6 +3,7 @@
  * 这个文件可以作为添加新命令的参考
  */
 
+import { ModelConfig } from '../../../../agents/code/utils/get_allowed_models';
 import { dbPath, getConfig } from '../store';
 import { type CommandDefinition } from './types';
 
@@ -83,7 +84,7 @@ export const modelCommand: CommandDefinition = {
             // 显示当前模型和可用模型列表
             const currentModel = context.extraParams?.main_model || 'N/A';
             const modelList = context.AVAILABLE_MODELS?.map(
-                (model, index) => `  ${index + 1}. ${model}${model === currentModel ? ' (当前)' : ''}`,
+                (model, index) => `  ${index + 1}. ${model.id}${model.id === currentModel ? ' (当前)' : ''}`,
             ).join('\n');
 
             return {
@@ -94,7 +95,7 @@ export const modelCommand: CommandDefinition = {
         }
 
         const modelInput = args[0];
-        let targetModel: string | undefined;
+        let targetModel: ModelConfig | undefined;
 
         // 检查是否为数字序号
         const modelIndex = parseInt(modelInput, 10);
@@ -102,17 +103,17 @@ export const modelCommand: CommandDefinition = {
             targetModel = context.AVAILABLE_MODELS?.[modelIndex - 1];
         } else {
             // 检查是否为完整模型名或部分匹配
-            targetModel = context.AVAILABLE_MODELS?.find((model) => model === modelInput);
+            targetModel = context.AVAILABLE_MODELS?.find((model) => model?.id === modelInput);
         }
-        targetModel = targetModel || modelInput;
+        const targetModelID = targetModel?.id || modelInput;
 
         // 执行模型切换
         try {
             if (context.updateConfig) {
-                await context.updateConfig({ main_model: targetModel });
+                await context.updateConfig({ main_model: targetModelID, model_provider: targetModel?.provider });
                 return {
                     success: true,
-                    message: `模型已切换到: ${targetModel}\n\n提示: 如果当前会话未生效，请使用 /init 创建新会话`,
+                    message: `模型已切换到: ${targetModelID}\n\n提示: 如果当前会话未生效，请使用 /init 创建新会话`,
                     shouldClearInput: true,
                 };
             } else {
@@ -146,31 +147,32 @@ export const configCommand: CommandDefinition = {
             const config = getConfig() || {};
             const hasOpenAIKey = !!config.openai_api_key;
             const hasOpenAIBaseUrl = !!config.openai_base_url;
-            const isConfigured = hasOpenAIKey && hasOpenAIBaseUrl;
+            const hasAnthropicKey = !!config.anthropic_api_key;
+            const hasAnthropicBaseUrl = !!config.anthropic_base_url;
 
             const configLines = [
                 '当前配置:',
                 dbPath,
                 `  main_model: ${config.main_model || 'N/A'}`,
+                `  model_provider: ${config.model_provider || 'openai'}`,
                 `  openai_api_key: ${hasOpenAIKey ? '***已设置***' : '未设置'}`,
                 `  openai_base_url: ${config.openai_base_url || '未设置'}`,
-                `  stream_refresh_interval ${config.stream_refresh_interval}`,
+                `  anthropic_api_key: ${hasAnthropicKey ? '***已设置***' : '未设置'}`,
+                `  anthropic_base_url: ${config.anthropic_base_url || '未设置'}`,
+                `  stream_refresh_interval: ${config.stream_refresh_interval}`,
                 '使用方法:',
                 '  /config <key> <value>  - 设置配置项',
                 '  /config <key>          - 查看配置项',
                 '',
                 '可用配置项:',
-                '  main_model         - 主模型名称',
-                '  openai_api_key     - OpenAI API 密钥',
-                '  openai_base_url    - OpenAI API 基础 URL',
+                '  main_model          - 主模型名称',
+                '  model_provider      - 模型提供商 (openai, anthropic)',
+                '  openai_api_key      - OpenAI API 密钥',
+                '  openai_base_url     - OpenAI API 基础 URL',
+                '  anthropic_api_key   - Anthropic API 密钥',
+                '  anthropic_base_url  - Anthropic API 基础 URL',
+                '  stream_refresh_interval - 流刷新间隔',
             ];
-
-            if (!isConfigured) {
-                configLines.push('');
-                configLines.push('⚠️  当前配置不完整，需要设置:');
-                if (!hasOpenAIKey) configLines.push('  • /config openai_api_key sk-your-api-key');
-                if (!hasOpenAIBaseUrl) configLines.push('  • /config openai_base_url https://api.openai.com/v1');
-            }
 
             return {
                 success: true,
@@ -178,9 +180,16 @@ export const configCommand: CommandDefinition = {
                 shouldClearInput: true,
             };
         }
-
         const key = args[0];
-        const validKeys = ['stream_refresh_interval', 'openai_api_key', 'openai_base_url'];
+        const validKeys = [
+            'stream_refresh_interval',
+            'openai_api_key',
+            'openai_base_url',
+            'model_provider',
+            'anthropic_api_key',
+            'anthropic_base_url',
+            'main_model',
+        ];
 
         if (!validKeys.includes(key)) {
             return {
@@ -196,7 +205,7 @@ export const configCommand: CommandDefinition = {
             let value = config[key];
 
             // 隐藏敏感信息
-            if (key === 'openai_api_key' && value) {
+            if ((key === 'openai_api_key' || key === 'anthropic_api_key') && value) {
                 value = '***已设置***';
             }
 
@@ -223,7 +232,7 @@ export const configCommand: CommandDefinition = {
 
             // 显示设置成功的消息
             let displayValue = value;
-            if (key === 'openai_api_key') {
+            if (key === 'openai_api_key' || key === 'anthropic_api_key') {
                 displayValue = '***已设置***';
             }
 
@@ -259,8 +268,11 @@ export const envCommand: CommandDefinition = {
     execute: async (args: string[], context) => {
         const envInfo = [
             '当前环境变量:',
+            `  MODEL_PROVIDER: ${process.env.MODEL_PROVIDER || 'openai'}`,
             `  OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? '***已设置***' : '未设置'}`,
             `  OPENAI_BASE_URL: ${process.env.OPENAI_BASE_URL || '未设置'}`,
+            `  ANTHROPIC_API_KEY: ${process.env.ANTHROPIC_API_KEY ? '***已设置***' : '未设置'}`,
+            `  ANTHROPIC_BASE_URL: ${process.env.ANTHROPIC_BASE_URL || '未设置'}`,
             '',
             '配置文件位置:',
             `  ${dbPath}`,

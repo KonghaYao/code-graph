@@ -2,6 +2,8 @@
  * 命令系统类型定义
  */
 
+import { ModelConfig } from '../../../../agents/code/utils/get_allowed_models';
+
 export interface CommandResult {
     /** 是否成功执行 */
     success: boolean;
@@ -32,7 +34,7 @@ export interface CommandContext {
     createNewChat: () => void;
     /** 更新配置函数 */
     updateConfig?: (config: any) => Promise<void>;
-    AVAILABLE_MODELS?: string[];
+    AVAILABLE_MODELS?: ModelConfig[];
 }
 
 export interface CommandDefinition {

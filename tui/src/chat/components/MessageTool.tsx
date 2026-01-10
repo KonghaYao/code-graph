@@ -27,14 +27,19 @@ const getToolColor = (tool_name: string): string => {
     return TOOL_COLOR_NAMES[index];
 };
 
-const truncateContentForDisplay = (content: string, maxLines: number = 4): string => {
+const truncateContentForDisplay = (content: string, maxLines: number = 4, maxLineLength: number = 100): string => {
     const lines = content.split('\n');
+    const truncateLongLine = (line: string): string => {
+        if (line.length <= maxLineLength) return line;
+        return line.substring(0, maxLineLength) + `... (${line.length - maxLineLength} more chars)`;
+    };
+
     if (lines.length <= maxLines) {
-        return content;
+        return lines.map(truncateLongLine).join('\n');
     }
 
-    const firstTwo = lines.slice(0, 2);
-    const lastTwo = lines.slice(lines.length - 3);
+    const firstTwo = lines.slice(0, 2).map(truncateLongLine);
+    const lastTwo = lines.slice(lines.length - 3).map(truncateLongLine);
     return [...firstTwo, `... and more ${lines.length - 5} lines`, ...lastTwo].join('\n');
 };
 

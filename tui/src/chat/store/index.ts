@@ -5,9 +5,12 @@ import path from 'path';
 
 export interface AppConfig {
     main_model: string;
+    model_provider?: string;
     mcp_config?: MCPConfig;
     openai_api_key?: string;
     openai_base_url?: string;
+    anthropic_api_key?: string;
+    anthropic_base_url?: string;
     stream_refresh_interval?: number;
 }
 
@@ -19,6 +22,7 @@ interface Data {
 const defaultData: Data = {
     config: {
         main_model: 'claude-sonnet-4-5',
+        model_provider: 'openai',
     },
 };
 
@@ -45,11 +49,20 @@ export const getConfig = () => db.data.config;
  * 将配置同步到环境变量
  */
 export const syncEnvFromConfig = () => {
+    if (db.data.config.model_provider) {
+        process.env.MODEL_PROVIDER = db.data.config.model_provider;
+    }
     if (db.data.config.openai_api_key) {
         process.env.OPENAI_API_KEY = db.data.config.openai_api_key;
     }
     if (db.data.config.openai_base_url) {
         process.env.OPENAI_BASE_URL = db.data.config.openai_base_url;
+    }
+    if (db.data.config.anthropic_api_key) {
+        process.env.ANTHROPIC_API_KEY = db.data.config.anthropic_api_key;
+    }
+    if (db.data.config.anthropic_base_url) {
+        process.env.ANTHROPIC_BASE_URL = db.data.config.anthropic_base_url;
     }
 };
 

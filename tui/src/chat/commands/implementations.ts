@@ -11,7 +11,7 @@ import { type CommandDefinition, type CommandResult, type CommandContext } from 
 export const initCommand: CommandDefinition = {
     name: 'init',
     description: '初始化新的对话会话',
-    aliases: ['new', 'start'],
+    aliases: ['new', 'start', 'n'],
     usage: '/init [主题]',
     execute: async (args: string[], context: CommandContext): Promise<CommandResult> => {
         const topic = args.join(' ');

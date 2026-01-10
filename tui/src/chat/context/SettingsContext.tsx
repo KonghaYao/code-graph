@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react';
 import { getConfig, updateConfig as updateDbConfig, initDb, AppConfig, MCPConfig } from '../store/index';
-import { get_allowed_models } from '../../../../agents/code/utils/get_allowed_models';
+import { get_allowed_models, ModelConfig } from '../../../../agents/code/utils/get_allowed_models';
 
 interface SettingsContextType {
     config: AppConfig | null;
@@ -9,7 +9,7 @@ interface SettingsContextType {
         main_model: string;
         mcp_config?: MCPConfig;
     };
-    AVAILABLE_MODELS: string[];
+    AVAILABLE_MODELS: ModelConfig[];
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -17,11 +17,11 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [config, setConfig] = useState<AppConfig | null>(null);
     const [loading, setLoading] = useState(true);
-    const [AVAILABLE_MODELS, setModels] = useState<string[]>([]);
+    const [AVAILABLE_MODELS, setModels] = useState<ModelConfig[]>([]);
 
     const extraParams = useMemo(() => {
         return {
-            main_model: config?.main_model || AVAILABLE_MODELS[0],
+            main_model: config?.main_model || AVAILABLE_MODELS[0]?.id,
             cwd: process.cwd(),
             mcp_config: config?.mcp_config,
         };
@@ -37,9 +37,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
         // 如果配置中没有 main_model，使用第一个可用模型
         if (!loadedConfig.main_model && models[0]) {
-            const updatedConfig = { ...loadedConfig, main_model: models[0] };
-            setConfig(updatedConfig);
-            await updateDbConfig({ main_model: models[0] });
+            const config = { main_model: models[0].id };
+            /** @ts-ignore 避免空值覆盖 */
+            if (models[0].provider) config['model_provider'] = models[0].provider;
+            await updateDbConfig(config);
+            setConfig({ ...getConfig() });
         } else {
             setConfig(loadedConfig);
         }
@@ -52,7 +54,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     const updateConfig = async (newConfig: Partial<AppConfig>) => {
         await updateDbConfig(newConfig);
-        loadConfig();
+        setConfig({ ...getConfig() });
     };
 
     if (loading) {

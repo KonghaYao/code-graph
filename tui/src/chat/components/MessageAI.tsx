@@ -14,7 +14,15 @@ interface MessageAIProps {
 const MessageAI: React.FC<MessageAIProps> = ({ message, messageNumber }) => {
     const { extraParams } = useSettings();
     const modelName = extraParams.main_model || 'AI';
-
+    if (
+        Array.isArray(message.content) &&
+        message.content.every(
+            (i) =>
+                /** @ts-ignore anthropic 的神奇妙招 */
+                i.type === 'tool_use',
+        )
+    )
+        return <></>;
     return (
         <Box flexDirection="column" marginBottom={0}>
             <Box paddingBottom={0}>

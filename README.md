@@ -11,6 +11,7 @@
     -   [ ] Yolo Mode（用于自动控制授权）
     -   [ ] Automatically Security
 -   [x] 自动压缩上下文功能
+-   [x] Anthropic and OpenAI Model Support
 -   [ ] 文件变更检测机制
 -   [x] SubAgent
 -   [x] Agent Skills
