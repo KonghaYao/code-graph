@@ -4,6 +4,7 @@ import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
 import { useState } from 'react';
 import { InputPreviewer } from '../components/MessageTool';
+import { MultiSelectPro } from '../components/input/MulitSelect';
 
 // Color scheme for terminal actions
 const ACTION_COLORS: { [key: string]: string } = {
@@ -45,23 +46,25 @@ export const terminal = createUITool({
                         Terminal Action Required
                     </Text>
                     <Box>
-                        <SelectInput
-                            items={buttons}
-                            onSelect={(item) => {
-                                if (item.value === 'approve') {
+                        <MultiSelectPro
+                            singleSelect
+                            options={buttons}
+                            onSubmit={([item]) => {
+                                if (item === 'approve') {
                                     tool.sendResumeData({
-                                        type: item.value,
+                                        type: item,
                                     });
                                     return;
                                 }
-                                setSelectState(item.value);
+                                setSelectState(item);
                                 setEditing(true);
-                                if (item.value === 'edit') {
+                                if (item === 'edit') {
                                     setEditValue(JSON.stringify(tool.getInputRepaired(), null, 2));
                                 } else {
                                     setEditValue('');
                                 }
                             }}
+                            autoFocus
                         />
                     </Box>
                 </Box>

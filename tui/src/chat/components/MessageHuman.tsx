@@ -32,8 +32,7 @@ const MessageHuman: React.FC<MessageHumanProps> = ({ content, messageNumber }) =
                 </Text>
             </Box>
             <Box>
-                <Text color="gray">└─ </Text>
-                {renderContent()}
+                <Text color="gray">└─ {renderContent()}</Text>
             </Box>
         </Box>
     );

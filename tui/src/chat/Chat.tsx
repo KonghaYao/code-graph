@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Box, Text, useInput } from 'ink';
+import { Box, Text, useInput, useFocusManager } from 'ink';
 import Spinner from 'ink-spinner';
-import { EnhancedTextInput } from './components/EnhancedTextInput';
+import { EnhancedTextInput } from './components/input/EnhancedTextInput';
 import { MessagesBox } from './components/MessageBox';
 import HistoryList from './components/HistoryList';
 import { ChatProvider, useChat } from '@langgraph-js/sdk/react';
@@ -44,7 +44,7 @@ interface ChatInputProps {
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
-    const { userInput, setUserInput, sendMessage, loading, renderMessages, stopGeneration } = useChat();
+    const { userInput, setUserInput, sendMessage, loading, renderMessages } = useChat();
     const { extraParams } = useSettings();
 
     // 使用命令处理组件
@@ -97,19 +97,20 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
                     </Text>
                 </Box>
                 <EnhancedTextInput
+                    id={'global-input'}
                     disabled={loading} // 后面可以改为 interrupt 状态时，才禁用，添加上缓冲区的概念
                     value={userInput as string}
                     onChange={setUserInput}
                     onSubmit={sendTextMessage}
                     onHotKey={(value) => {
                         if (value === 'ç') {
-                            stopGeneration();
+                            // stopGeneration();
                             return false;
                         }
                         return true;
                     }}
                     placeholder={commandHandler.isCommandInput ? '输入命令... (试试 /help)' : '输入消息...'}
-                    focus={mode === 'agent'}
+                    autoFocus
                 />
             </Box>
             <Box paddingX={1} justifyContent="flex-end">
@@ -127,14 +128,21 @@ const Chat: React.FC = () => {
         setTools(DefaultTools);
     }, []);
 
+    useEffect(() => {
+        !loading && focusManager.focus('global-input');
+    }, [loading]);
+
+    const focusManager = useFocusManager();
     const [activeView, setActiveView] = useState<'chat' | 'history' | 'graph' | 'artifacts'>('chat');
     const [mode, setMode] = useState<'command' | 'agent'>('agent');
     // Global Ctrl+C exit handler
     useInput((input, key) => {
-        if (loading) {
-            stopGeneration();
-        } else if (key.ctrl && input === 'c') {
-            process.exit();
+        if (key.ctrl && input === 'c') {
+            if (loading) {
+                stopGeneration();
+            } else {
+                process.exit();
+            }
         }
     });
 
@@ -154,6 +162,7 @@ const Chat: React.FC = () => {
                 createNewChat(); // 调用 client 上的 newChat 方法
                 setUserInput(''); // 清空输入框
                 setMode('agent'); // 进入 agent 模式
+                focusManager.focus('global-input');
             }
         },
         { isActive: mode === 'command' }, // Only active when in command mode

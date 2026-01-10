@@ -10,7 +10,7 @@ import { getConfig } from '../store/index';
 export const MessagesBox = ({
     renderMessages,
     startIndex,
-    flashMessageCount = 1,
+    flashMessageCount = 3,
 }: {
     renderMessages: RenderMessage[];
     startIndex: number;
@@ -44,10 +44,9 @@ export const MessagesBox = ({
         () => Math.max(0, syncedMessages.length - flashMessageCount),
         [syncedMessages.length, flashMessageCount],
     );
-    const activeMessages = syncedMessages.slice(-flashMessageCount);
 
     const renderMessage = (message: RenderMessage, index: number) => (
-        <Box key={message.unique_id || message.id} flexDirection="column" marginTop={1}>
+        <Box key={message.unique_id || message.id || crypto.randomUUID()} flexDirection="column" marginTop={1}>
             {message.type === 'human' ? (
                 <MessageHuman content={message.content} messageNumber={index + 1 + startIndex} />
             ) : message.type === 'tool' ? (
@@ -59,11 +58,17 @@ export const MessagesBox = ({
     );
 
     return (
-        <Box flexDirection="column" paddingY={0}>
-            <Static items={syncedMessages.slice(0, -flashMessageCount)}>
-                {(message, index) => renderMessage(message, index)}
-            </Static>
-            {activeMessages.map((message, index) => renderMessage(message, historyCount + index))}
+        <Box flexDirection="column" paddingY={1}>
+            <Box flexDirection="column">
+                <Static items={syncedMessages.slice(0, -flashMessageCount)}>
+                    {(message, index) => renderMessage(message, index)}
+                </Static>
+            </Box>
+            <Box flexDirection="column">
+                {syncedMessages
+                    .slice(-flashMessageCount)
+                    .map((message, index) => renderMessage(message, historyCount + index))}
+            </Box>
         </Box>
     );
 };

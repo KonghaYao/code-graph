@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Text, useInput } from 'ink';
+import { Text, useFocus, useInput } from 'ink';
 import chalk from 'chalk';
 import { Key } from 'readline';
 
 export type Props = {
+    readonly id?: string;
     /**
      * Text to display when `value` is empty.
      */
@@ -13,7 +14,7 @@ export type Props = {
      * Listen to user's input. Useful in case there are multiple input components
      * at the same time and input must be "routed" to a specific component.
      */
-    readonly focus?: boolean; // eslint-disable-line react/boolean-prop-naming
+    readonly autoFocus?: boolean; // eslint-disable-line react/boolean-prop-naming
 
     /**
      * Replace all chars and mask the value. Useful for password inputs.
@@ -56,15 +57,17 @@ export type Props = {
 function TextInput({
     value: originalValue,
     placeholder = '',
-    focus = true,
     mask,
     highlightPastedText = false,
     showCursor = true,
+    autoFocus = true,
     onChange,
     onSubmit,
     onHotKey,
     disabled = false,
+    id,
 }: Props) {
+    const { isFocused: focus } = useFocus({ autoFocus, id });
     const [state, setState] = useState({
         cursorOffset: (originalValue || '').length,
         cursorWidth: 0,
