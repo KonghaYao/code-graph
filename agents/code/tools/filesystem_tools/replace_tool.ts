@@ -39,7 +39,7 @@ export const replace_tool = tool(
         }
     },
     {
-        name: 'replace_in_file',
+        name: 'edit_file',
         description: `Performs exact string replacements in files. 
 
 Usage:

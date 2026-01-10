@@ -5,13 +5,7 @@ import { UsageMetadata } from './UsageMetadata';
 import { useChat } from '@langgraph-js/sdk/react';
 import { ToolRenderData } from '@langgraph-js/sdk';
 
-const TOOL_COLOR_NAMES = [
-    'green',
-    'yellow',
-    'magenta',
-    'cyan', // Closest available
-    'blue',
-];
+const TOOL_COLOR_NAMES = ['yellow', 'magenta', 'blue'];
 
 interface MessageToolProps {
     message: ToolMessage & RenderMessage;
@@ -163,9 +157,9 @@ const MessageTool: React.FC<MessageToolProps> = ({ message, messageNumber }) => 
         : '';
     const render = getToolUIRender(message.name!);
     let borderColor = getToolColor(message.name!);
-    borderColor = message.status === 'error' ? 'red' : borderColor;
+    borderColor = message.status === 'error' ? 'red' : 'yellow';
     return (
-        <Box flexDirection="column" paddingLeft={3} paddingY={0} marginBottom={0}>
+        <Box flexDirection="column">
             <Box>
                 <Text color={borderColor}>
                     {messageNumber} {message.name}

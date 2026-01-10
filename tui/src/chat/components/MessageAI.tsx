@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { RenderMessage } from '@langgraph-js/sdk';
-import { UsageMetadata } from './UsageMetadata';
 import { getMessageContent } from '@langgraph-js/sdk';
 import { useSettings } from '../context/SettingsContext';
-import LongText from './LongText';
+import Markdown from './Markdown';
+import { getColor } from '../../utils/colors';
 
 interface MessageAIProps {
     message: RenderMessage;
@@ -24,13 +24,14 @@ const MessageAI: React.FC<MessageAIProps> = ({ message, messageNumber }) => {
     )
         return <></>;
     return (
-        <Box flexDirection="column" marginBottom={0}>
-            <Box paddingBottom={0}>
-                <Text color="cyan">
+        <Box flexDirection="column">
+            <Box paddingBottom={0} marginBottom={1}>
+                <Text color={getColor('teal')}>
                     {messageNumber} {modelName}
                 </Text>
             </Box>
-            <LongText text={getMessageContent(message.content).trim()} prefix="└─ " indent="   " />
+            {/* <LongText text={getMessageContent(message.content).trim()} prefix="└─ " indent="   " /> */}
+            <Markdown>{getMessageContent(message.content).trim()}</Markdown>
         </Box>
     );
 };

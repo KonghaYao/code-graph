@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import { getCurrentUser } from '../../utils/user';
+import { getColor } from '../../utils/colors';
 
 interface MessageHumanProps {
     content: string | any[];
@@ -25,9 +26,9 @@ const MessageHuman: React.FC<MessageHumanProps> = ({ content, messageNumber }) =
     };
 
     return (
-        <Box marginBottom={0} borderTop borderColor="green" flexDirection="column">
+        <Box flexDirection="column">
             <Box>
-                <Text color="green">
+                <Text color={getColor('amber')}>
                     {messageNumber} {username}
                 </Text>
             </Box>

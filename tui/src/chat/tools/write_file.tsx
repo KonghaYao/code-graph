@@ -1,5 +1,6 @@
 import { createUITool, ToolManager } from '@langgraph-js/sdk';
 import { Box, Text } from 'ink';
+import { cleanPath } from '../../utils/cleanPath';
 import { z } from 'zod';
 
 const writeToolSchema = z.object({
@@ -14,18 +15,16 @@ export const write_file = createUITool({
     parameters: writeToolSchema.shape,
     handler: ToolManager.waitForUIDone,
     render(tool) {
-        const input = tool.getInputRepaired() as z.infer<typeof writeToolSchema>;
+        const input = tool.getInputRepaired();
         const output = tool.output;
 
-        const lineCount = input.content.split('\n').length;
+        const lineCount = input.content?.split('\n').length;
 
         return (
             <Box flexDirection="column" paddingX={1}>
-                <Box>
-                    <Text color="white">
-                        {input.file_path}
-                        <Text color="gray"> ({lineCount} lines)</Text>
-                    </Text>
+                <Box flexDirection="column">
+                    <Text color="white">{cleanPath(input.file_path)}</Text>
+                    <Text color="gray"> ({lineCount} lines)</Text>
                 </Box>
 
                 {output && output.startsWith('Error:') && (

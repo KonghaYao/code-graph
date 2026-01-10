@@ -10,7 +10,7 @@ type MarkdownProps = {
 
 const Markdown: React.FC<MarkdownProps> = ({ children, ...options }) => {
     // Avoid global configuration by passing options directly to parse.
-    const renderer = new MarkedTerminal(options);
+    const renderer = new MarkedTerminal({}, {});
     const parsedText = parse(children || '', { renderer: renderer as any }) as string;
 
     // Trim trailing newline from marked to prevent layout issues.

@@ -12,7 +12,7 @@ interface ReplaceInFileInput {
 }
 
 export const replace_in_file = createUITool({
-    name: 'replace_in_file',
+    name: 'edit_file',
     description: 'Performs exact string replacements in files with diff visualization',
     parameters: editToolSchema.shape,
     handler: ToolManager.waitForUIDone,

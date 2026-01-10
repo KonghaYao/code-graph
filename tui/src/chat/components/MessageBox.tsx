@@ -6,6 +6,7 @@ import MessageTool from './MessageTool';
 import { RenderMessage } from '@langgraph-js/sdk';
 import { useChat } from '@langgraph-js/sdk/react';
 import { getConfig } from '../store/index';
+import { getColor } from '../../utils/colors';
 
 export const MessagesBox = ({
     renderMessages,
@@ -46,7 +47,20 @@ export const MessagesBox = ({
     );
 
     const renderMessage = (message: RenderMessage, index: number) => (
-        <Box key={message.unique_id || message.id || crypto.randomUUID()} flexDirection="column" marginTop={1}>
+        <Box
+            key={message.unique_id || message.id || crypto.randomUUID()}
+            flexDirection="column"
+            borderStyle="single"
+            borderLeft
+            paddingLeft={1}
+            borderBottom={false}
+            borderTop={false}
+            borderRight={false}
+            borderLeftColor={
+                message.type === 'ai' ? getColor('teal') : message.type === 'human' ? getColor('amber') : 'yellow'
+            }
+            paddingBottom={1}
+        >
             {message.type === 'human' ? (
                 <MessageHuman content={message.content} messageNumber={index + 1 + startIndex} />
             ) : message.type === 'tool' ? (

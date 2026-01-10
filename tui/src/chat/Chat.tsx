@@ -122,7 +122,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
 
 const Chat: React.FC = () => {
     const { extraParams } = useSettings();
-    const { toggleHistoryVisible, setUserInput, createNewChat, setTools, loading, stopGeneration } = useChat();
+    const { toggleHistoryVisible, setUserInput, createNewChat, setTools, loading, stopGeneration, currentChatId } =
+        useChat();
     useEffect(() => {
         console.clear();
         setTools(DefaultTools);
@@ -191,7 +192,7 @@ const Chat: React.FC = () => {
             <Box flexGrow={1} flexDirection="row">
                 {activeView === 'chat' && (
                     <Box flexDirection="column" flexGrow={1}>
-                        <ChatMessages />
+                        <ChatMessages key={currentChatId} />
                         <ChatInput mode={chatInputMode} setMode={setChatInputMode} />
                     </Box>
                 )}
@@ -205,7 +206,7 @@ const Chat: React.FC = () => {
                 )}
             </Box>
             <Box paddingX={1} paddingY={0} justifyContent="space-between">
-                <Text>
+                <Box>
                     <Text color="magenta" bold>
                         ⚡ LangGraph Chat
                     </Text>
@@ -221,8 +222,8 @@ const Chat: React.FC = () => {
                             {extraParams.main_model}
                         </Text>
                     )}
-                </Text>
-                <Text>
+                </Box>
+                <Box>
                     {mode === 'command' ? (
                         <Text>
                             <Text color="cyan" bold>
@@ -245,13 +246,14 @@ const Chat: React.FC = () => {
                         </Text>
                     ) : (
                         <Text>
+                            <Text>{currentChatId?.slice(0, 6) + ' '}</Text>
                             <Text color="cyan" bold>
                                 ESC
                             </Text>
                             <Text color="gray">:命令</Text>
                         </Text>
                     )}
-                </Text>
+                </Box>
             </Box>
         </Box>
     );
