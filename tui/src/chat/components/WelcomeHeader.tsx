@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
 import { getCurrentUser } from '../../utils/user';
 import { useSettings } from '../context/SettingsContext';
 import Shimmer from './Shimmer';
+import { getTerminalName } from '../../utils/colors';
 
 const WelcomeHeader: React.FC = () => {
     const username = getCurrentUser();
@@ -10,12 +11,34 @@ const WelcomeHeader: React.FC = () => {
     const { extraParams, AVAILABLE_MODELS, config } = useSettings();
     const mcpConfig = extraParams.mcp_config || {};
     const mcpServerCount = Object.keys(mcpConfig).length;
+    const terminalName = getTerminalName();
+
+    // 系统环境信息
+    const platform = process.platform;
+    const platformDisplay = platform === 'darwin' ? 'macOS' : platform === 'win32' ? 'Windows' : 'Linux';
+    const cwd = process.cwd();
 
     // 检查 OpenAI 配置状态
     const hasOpenAIKey = !!config?.openai_api_key;
     const hasOpenAIBaseUrl = !!config?.openai_base_url;
     const hasModels = AVAILABLE_MODELS.length > 0;
     const isConfigured = hasOpenAIKey && hasOpenAIBaseUrl && hasModels;
+
+    // 全局动画索引，用于同步所有 Shimmer 组件
+    const [globalShimmerIndex, setGlobalShimmerIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = 40;
+        const maxTextLength = 28; // 最长的一行字符数
+        const spread = 32;
+        const maxIndex = maxTextLength + spread * 2;
+
+        const timer = setInterval(() => {
+            setGlobalShimmerIndex((prev) => (prev + 1) % maxIndex);
+        }, interval);
+
+        return () => clearInterval(timer);
+    }, []);
 
     return (
         <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1} marginBottom={1}>
@@ -38,8 +61,8 @@ const WelcomeHeader: React.FC = () => {
 ███████╗███████╗██║ ╚████║
 ╚══════╝╚══════╝╚═╝  ╚═══╝`
                         .split('\n')
-                        .map((i) => {
-                            return <Shimmer interval={40} text={i} />;
+                        .map((line) => {
+                            return <Shimmer key={line} interval={40} text={line} globalIndex={globalShimmerIndex} />;
                         })}
                 </Box>
 
@@ -74,9 +97,21 @@ const WelcomeHeader: React.FC = () => {
                         </Box>
                         <Box>
                             <Text color="blue" dimColor>
+                                PLATFORM ::{' '}
+                            </Text>
+                            <Text color="white">{platformDisplay}</Text>
+                        </Box>
+                        <Box>
+                            <Text color="blue" dimColor>
                                 NODE ::{' '}
                             </Text>
                             <Text color="white">{process.version}</Text>
+                        </Box>
+                        <Box>
+                            <Text color="blue" dimColor>
+                                TERM ::{' '}
+                            </Text>
+                            <Text color="white">{terminalName}</Text>
                         </Box>
                         <Box>
                             <Text color="blue" dimColor>
@@ -87,6 +122,18 @@ const WelcomeHeader: React.FC = () => {
                             </Text>
                         </Box>
                     </Box>
+                </Box>
+            </Box>
+
+            {/* Working Directory */}
+            <Box marginTop={1} paddingX={1} flexDirection="column" gap={0}>
+                <Box>
+                    <Text color="blue" dimColor>
+                        WORKING_DIR ::
+                    </Text>
+                </Box>
+                <Box>
+                    <Text color="gray">{cwd}</Text>
                 </Box>
             </Box>
 

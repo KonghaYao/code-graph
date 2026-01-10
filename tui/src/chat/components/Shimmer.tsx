@@ -7,6 +7,7 @@ interface ShimmerProps {
     baseColor?: string;
     interval?: number;
     spread?: number; // 过渡区域的大小
+    globalIndex?: number; // 全局索引，用于同步多个 Shimmer
 }
 
 const interpolateColor = (color1: string, color2: string, factor: number) => {
@@ -31,16 +32,22 @@ export const Shimmer: React.FC<ShimmerProps> = ({
     baseColor = '#003333', // Dark Cyan
     interval = 20,
     spread = 32,
+    globalIndex,
 }) => {
-    const [index, setIndex] = useState(0);
+    // 如果提供了 globalIndex，使用它；否则使用本地状态
+    const [localIndex, setLocalIndex] = useState(0);
+    const index = globalIndex !== undefined ? globalIndex : localIndex;
 
+    // 只有在没有 globalIndex 时才启动本地定时器
     useEffect(() => {
+        if (globalIndex !== undefined) return; // 如果有全局索引，不启动本地定时器
+
         const timer = setInterval(() => {
-            setIndex((prevIndex) => (prevIndex + 1) % (text.length + spread * 2));
+            setLocalIndex((prevIndex) => (prevIndex + 1) % (text.length + spread * 2));
         }, interval);
 
         return () => clearInterval(timer);
-    }, [text.length, spread, interval]);
+    }, [text.length, spread, interval, globalIndex]);
 
     return (
         <Text>

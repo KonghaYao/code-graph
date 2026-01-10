@@ -69,6 +69,18 @@ const isModernTerminal = (): boolean => {
 };
 
 /**
+ * Get the terminal name/identifier
+ */
+export const getTerminalName = (): string => {
+    if (process.env.TERM_PROGRAM === 'iTerm.app') return 'iTerm2';
+    if (process.env.WT_SESSION !== undefined) return 'Windows Terminal';
+    if (process.env.TERM_PROGRAM === 'vscode') return 'VSCode';
+    if (process.env.TERM?.includes('screen')) return 'GNU Screen';
+    if (process.env.TERM?.includes('tmux')) return 'tmux';
+    return process.env.TERM || 'unknown';
+};
+
+/**
  * Color configuration with automatic platform detection
  *
  * Usage:

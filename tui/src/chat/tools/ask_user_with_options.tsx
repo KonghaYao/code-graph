@@ -34,7 +34,7 @@ export const ask_user_with_options = createUITool({
             if (selected) {
                 value += `User selected: ` + selected.join(', ');
             }
-            if (value.trim()) {
+            if (text.trim()) {
                 value += '\nUser Custom Input: ' + text;
             }
             tool.sendResumeData({
