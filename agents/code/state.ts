@@ -1,6 +1,7 @@
-import { AgentState } from '@langgraph-js/pro';
+import { AgentState, createDefaultAnnotation, createState } from '@langgraph-js/pro';
 import { z } from 'zod';
-import { SubAgentStateSchema } from './ask_agents';
+import { SubAgentAnnotation, SubAgentStateSchema } from './ask_agents';
+import { MessagesAnnotation } from '@langchain/langgraph';
 
 export const CodeState = AgentState.extend(SubAgentStateSchema.shape).extend({
     main_model: z.string().default('qwen-plus'),
@@ -9,3 +10,13 @@ export const CodeState = AgentState.extend(SubAgentStateSchema.shape).extend({
     mcp_config: z.unknown().optional(),
     switch_command: z.string().optional(),
 });
+
+export const CodeAnnotation = createState(MessagesAnnotation, SubAgentAnnotation).build({
+    main_model: createDefaultAnnotation(() => 'qwen-plus'),
+    cwd: createDefaultAnnotation(() => ''),
+    agent_name: createDefaultAnnotation(() => 'Code Agent'),
+    mcp_config: createDefaultAnnotation(() => null),
+    switch_command: createDefaultAnnotation(() => null),
+});
+
+export type CodeStateType = typeof CodeAnnotation.State;

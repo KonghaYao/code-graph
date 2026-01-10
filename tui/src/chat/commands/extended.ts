@@ -485,7 +485,7 @@ export const summarizeCommand: CommandDefinition = {
 
         // 检查消息数量，至少需要一些消息才能总结
         const messageCount = context.renderMessages.length;
-        if (messageCount < 20) {
+        if (messageCount < 2) {
             return {
                 success: false,
                 message: '消息数量太少，无法进行有意义的总结（至少需要2条消息）',

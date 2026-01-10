@@ -1,11 +1,19 @@
-import { Command } from '@langchain/langgraph';
+import { Annotation, Command } from '@langchain/langgraph';
 import { HumanMessage, tool } from 'langchain';
 import { z } from 'zod';
 import { Message } from '@langchain/core/messages';
 import { type ToolRuntime } from '@langchain/core/tools';
+import { createState } from '@langgraph-js/pro';
 
 export const SubAgentStateSchema = z.object({
     task_store: z.record(z.string(), z.any()).default({}),
+});
+
+export const SubAgentAnnotation = createState().build({
+    task_store: Annotation({
+        reducer: (a, b: any) => ({ ...a, ...b }),
+        default: () => ({}),
+    }),
 });
 
 const schema = z.object({

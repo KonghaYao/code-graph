@@ -1,5 +1,4 @@
-import { CodeState } from '../state.js';
-import { z } from 'zod';
+import { CodeStateType } from '../state.js';
 
 const CORE_SYSTEM_PROMPT = `# Zen Code
 
@@ -185,11 +184,11 @@ const CORE_SYSTEM_PROMPT = `# Zen Code
 **反馈**：https://github.com/KonghaYao/coding-graph/issues
 `;
 
-export async function getSystemPrompt(state: z.infer<typeof CodeState>): Promise<string> {
+export async function getSystemPrompt(state: CodeStateType): Promise<string> {
     return [CORE_SYSTEM_PROMPT, `\n${await getEnvInfo(state)}`].join('\n\n');
 }
 
-export async function getEnvInfo(state: z.infer<typeof CodeState>): Promise<string> {
+export async function getEnvInfo(state: CodeStateType): Promise<string> {
     return `
 # 环境信息
 工作目录: ${state.cwd}

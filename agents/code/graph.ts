@@ -12,8 +12,8 @@ import {
     SystemMessage,
 } from 'langchain';
 import { z } from 'zod';
-import { createStateEntrypoint } from '@langgraph-js/pure-graph';
-import { CodeState } from './state.js';
+
+import { CodeAnnotation as CodeState, CodeStateType } from './state.js';
 import { ask_user_with_options, ask_user_with_options_config, humanInTheLoopMiddleware } from '@langgraph-js/auk';
 import { create_finder } from './subagents/finder.js';
 import { SkillsMiddleware } from './middlewares/skills.js';
@@ -21,35 +21,30 @@ import { SubAgentsMiddleware } from './middlewares/subagents.js';
 import { summary_prompt } from './middlewares/memory.js';
 import { MCPMiddleware } from './middlewares/mcp.js';
 import { AgentsMdMiddleware } from './middlewares/agentsMD.js';
-import { getBufferString, RemoveMessage } from '@langchain/core/messages';
-import { START, StateGraph } from '@langchain/langgraph';
+import { getBufferMessage } from './utils/get_buffer_message.js';
+import { REMOVE_ALL_MESSAGES, START, StateGraph } from '@langchain/langgraph';
+import { RemoveMessage } from '@langchain/core/messages';
 
 const switchBranch = {
-    summarization: async (state: z.infer<typeof CodeState>, runtime: Runtime) => {
-        state.messages;
-
+    summarization: async (state: CodeStateType, runtime: Runtime) => {
         const model = await initChatModel(state.main_model, {
             modelProvider: process.env.MODEL_PROVIDER || 'openai',
             streamUsage: true,
         });
         const message = await model.invoke([
             new SystemMessage(summary_prompt),
-            new HumanMessage(getBufferString(state.messages)),
-            new HumanMessage('请输出结果'),
+            new HumanMessage(getBufferMessage(state.messages)),
+            new HumanMessage('请总结上面的历史记录'),
         ]);
         return {
-            messages: [
-                ...state.messages.map((i) => {
-                    return new RemoveMessage({ id: i.id! });
-                }),
-                message,
-            ],
+            switch_command: '',
+            messages: [new RemoveMessage({ id: REMOVE_ALL_MESSAGES }), message],
         };
     },
 } as const;
 
 export const graph = new StateGraph(CodeState)
-    .addNode('graph', async (state: z.infer<typeof CodeState>, runtime: Runtime) => {
+    .addNode('graph', async (state: CodeStateType, runtime: Runtime) => {
         if (state.switch_command && state.switch_command in switchBranch) {
             return switchBranch[state.switch_command as 'summarization'](state, runtime);
         }
