@@ -1,6 +1,6 @@
 {
     "name": "zen-code",
-    "version": "1.6.2",
+    "version": "1.7.0",
     "description": "",
     "main": "cli.js",
     "bin": "cli.js",
