@@ -134,7 +134,7 @@ const Chat: React.FC = () => {
     }, [loading]);
 
     const focusManager = useFocusManager();
-    const [activeView, setActiveView] = useState<'chat' | 'history' | 'graph' | 'artifacts'>('chat');
+    const [activeView, setActiveView] = useState<'chat' | 'history'>('chat');
     const [mode, setMode] = useState<'command' | 'agent'>('agent');
     // Global Ctrl+C exit handler
     useInput((input, key) => {
@@ -201,6 +201,7 @@ const Chat: React.FC = () => {
                         onClose={() => {
                             setActiveView('chat');
                             setMode('agent');
+                            focusManager.focus('global-input');
                         }}
                     />
                 )}

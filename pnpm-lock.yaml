@@ -99,6 +99,12 @@ importers:
       lowdb:
         specifier: ^7.0.1
         version: 7.0.1
+      marked:
+        specifier: ^16.2.1
+        version: 16.4.2
+      marked-terminal:
+        specifier: ^7.3.0
+        version: 7.3.0(marked@16.4.2)
       node-sqlite3-wasm:
         specifier: ^0.8.52
         version: 0.8.52
@@ -155,7 +161,7 @@ importers:
         specifier: ^1.0.5
         version: 1.0.5
       ink:
-        specifier: ^6.2.3
+        specifier: ^6.6.0
         version: 6.6.0(@types/react@19.2.7)(react-devtools-core@6.1.5)(react@19.2.3)
       ink-markdown:
         specifier: ^1.0.4
@@ -172,12 +178,6 @@ importers:
       ink-text-input:
         specifier: ^6.0.0
         version: 6.0.0(ink@6.6.0(@types/react@19.2.7)(react-devtools-core@6.1.5)(react@19.2.3))(react@19.2.3)
-      marked:
-        specifier: ^16.2.1
-        version: 16.4.2
-      marked-terminal:
-        specifier: ^7.3.0
-        version: 7.3.0(marked@16.4.2)
       react:
         specifier: ^19.1.1
         version: 19.2.3

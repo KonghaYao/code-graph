@@ -4,7 +4,6 @@ import SelectInput from 'ink-select-input';
 import { useChat } from '@langgraph-js/sdk/react';
 import { formatTime } from '@langgraph-js/sdk';
 import type { Thread } from '@langgraph-js/sdk';
-
 interface HistoryListProps {
     onClose: () => void;
 }
