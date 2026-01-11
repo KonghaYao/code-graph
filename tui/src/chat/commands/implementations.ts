@@ -70,43 +70,5 @@ export const helpCommand: CommandDefinition = {
     },
 };
 
-/**
- * /clear 命令 - 清空当前输入
- */
-export const clearCommand: CommandDefinition = {
-    name: 'clear',
-    description: '清空当前输入框',
-    aliases: ['c'],
-    execute: async (args: string[], context: CommandContext): Promise<CommandResult> => {
-        return {
-            success: true,
-            message: '输入框已清空',
-            shouldClearInput: true,
-        };
-    },
-};
-
-/**
- * /init-agent 初始化 agent.md 文件
- */
-export const createAgentMdCommand: CommandDefinition = {
-    name: 'init-agent-md',
-    description: '初始化 agent.md 文件',
-    aliases: ['init-md'],
-    usage: '/init-agent-md',
-    execute: async (args: string[], context: CommandContext): Promise<CommandResult> => {
-        context.updateConfig!({
-            activeAgent: 'doc-write-agent',
-        });
-        context.userInput = '';
-        return {
-            success: true,
-            messageContent: '请开始你的工作',
-            shouldSendMessage: true,
-            shouldClearInput: true,
-        };
-    },
-};
-
 // 导出所有命令
-export const builtinCommands: CommandDefinition[] = [initCommand, helpCommand, clearCommand, createAgentMdCommand];
+export const builtinCommands: CommandDefinition[] = [initCommand, helpCommand];

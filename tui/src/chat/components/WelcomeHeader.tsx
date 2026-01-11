@@ -84,39 +84,27 @@ const WelcomeHeader: React.FC = () => {
 
                     <Box flexDirection="column" gap={0}>
                         <Box>
-                            <Text color="blue" dimColor>
-                                USER ::{' '}
-                            </Text>
+                            <Text color="blue">USER::</Text>
                             <Text color="white">{username}</Text>
                         </Box>
                         <Box>
-                            <Text color="blue" dimColor>
-                                ARCH ::{' '}
-                            </Text>
+                            <Text color="blue">ARCH::</Text>
                             <Text color="white">{process.arch}</Text>
                         </Box>
                         <Box>
-                            <Text color="blue" dimColor>
-                                PLATFORM ::{' '}
-                            </Text>
+                            <Text color="blue">PLATFORM::</Text>
                             <Text color="white">{platformDisplay}</Text>
                         </Box>
                         <Box>
-                            <Text color="blue" dimColor>
-                                NODE ::{' '}
-                            </Text>
+                            <Text color="blue">NODE::</Text>
                             <Text color="white">{process.version}</Text>
                         </Box>
                         <Box>
-                            <Text color="blue" dimColor>
-                                TERM ::{' '}
-                            </Text>
+                            <Text color="blue">TERM::</Text>
                             <Text color="white">{terminalName}</Text>
                         </Box>
                         <Box>
-                            <Text color="blue" dimColor>
-                                MODEL ::{' '}
-                            </Text>
+                            <Text color="blue">{process.env.MODEL_PROVIDER?.toUpperCase()}::</Text>
                             <Text color={hasModels ? 'white' : 'red'}>
                                 {hasModels ? extraParams.main_model : '无可用模型'}
                             </Text>
@@ -128,9 +116,7 @@ const WelcomeHeader: React.FC = () => {
             {/* Working Directory */}
             <Box marginTop={1} paddingX={1} flexDirection="column" gap={0}>
                 <Box>
-                    <Text color="blue" dimColor>
-                        WORKING_DIR ::
-                    </Text>
+                    <Text color="blue">WORKING_DIR ::</Text>
                 </Box>
                 <Box>
                     <Text color="gray">{cwd}</Text>

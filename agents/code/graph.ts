@@ -16,6 +16,8 @@ import { getBufferMessage } from './utils/get_buffer_message.js';
 import { REMOVE_ALL_MESSAGES, START, StateGraph } from '@langchain/langgraph';
 import { RemoveMessage } from '@langchain/core/messages';
 import { initChatModel } from './initChatModel.js';
+import { anthropicPromptCachingMiddleware } from './middlewares/anthropicCache.js';
+
 const switchBranch = {
     summarization: async (state: CodeStateType, runtime: Runtime) => {
         const model = await initChatModel(state.main_model, {
@@ -92,7 +94,7 @@ export const graph = new StateGraph(CodeState)
                     },
                 }),
                 /** @ts-ignore */
-                // process.env.MODEL_PROVIDER === 'anthropic' && anthropicPromptCachingMiddleware(),
+                process.env.MODEL_PROVIDER === 'anthropic' && anthropicPromptCachingMiddleware(),
             ],
         });
 

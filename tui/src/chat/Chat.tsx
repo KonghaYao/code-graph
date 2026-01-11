@@ -14,6 +14,7 @@ import TokenProgressBar from './components/TokenProgressBar';
 import DefaultTools from './tools/index';
 import Shimmer from './components/Shimmer';
 import { ChatInputBuffer } from './components/input/ChatInputBuffer';
+import { notify } from '../utils/notify';
 
 const ChatMessages = () => {
     const { renderMessages, loading, inChatError, isFELocking } = useChat();
@@ -68,7 +69,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
             setUserInput(inputValue);
 
             // 等待状态更新后再执行命令
-            await new Promise(resolve => setTimeout(resolve, 0));
+            await new Promise((resolve) => setTimeout(resolve, 0));
 
             const commandHandled = await commandHandler.executeCommand();
             if (commandHandled) {
@@ -87,6 +88,8 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
 
         sendMessage(content, {
             extraParams,
+        }).then(() => {
+            notify('Zen Code 完成任务');
         });
         setUserInput('');
     };
@@ -118,8 +121,16 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
 
 const Chat: React.FC = () => {
     const { extraParams } = useSettings();
-    const { toggleHistoryVisible, setUserInput, createNewChat, setTools, loading, stopGeneration, currentChatId, sendMessage } =
-        useChat();
+    const {
+        toggleHistoryVisible,
+        setUserInput,
+        createNewChat,
+        setTools,
+        loading,
+        stopGeneration,
+        currentChatId,
+        sendMessage,
+    } = useChat();
     const { bufferedMessage, clearBuffer } = useChatInputBuffer();
 
     // 初始化工具
@@ -131,12 +142,16 @@ const Chat: React.FC = () => {
     // loading 结束时自动发送缓冲区消息
     useEffect(() => {
         if (!loading && bufferedMessage.trim()) {
-            const content: Message[] = [{
-                type: 'human',
-                content: bufferedMessage,
-            }];
+            const content: Message[] = [
+                {
+                    type: 'human',
+                    content: bufferedMessage,
+                },
+            ];
             sendMessage(content, {
                 extraParams,
+            }).then(() => {
+                notify('Zen Code 完成任务');
             });
             clearBuffer(); // 发送后清空缓冲区
         }
@@ -223,7 +238,7 @@ const Chat: React.FC = () => {
             <Box paddingX={1} paddingY={0} justifyContent="space-between">
                 <Box>
                     <Text color="magenta" bold>
-                        ⚡ LangGraph Chat
+                        ⚡ Zen Code
                     </Text>
                     {mode === 'command' && (
                         <Text color="yellow" bold>
@@ -275,12 +290,6 @@ const Chat: React.FC = () => {
 };
 
 const ChatWrapper: React.FC = () => {
-    const { config } = useSettings();
-
-    if (!config) {
-        return <Text>Loading settings...</Text>;
-    }
-
     return (
         <ChatProvider
             apiUrl="http://127.0.0.1:8123"
@@ -295,17 +304,15 @@ const ChatWrapper: React.FC = () => {
             fetch={LangGraphFetch as any}
             autoRestoreLastSession
         >
-            <Chat />
+            <ChatInputBufferProvider>
+                <SettingsProvider>
+                    <Chat />
+                </SettingsProvider>
+            </ChatInputBufferProvider>
         </ChatProvider>
     );
 };
 
-const AppProviders: React.FC = () => (
-    <SettingsProvider>
-        <ChatInputBufferProvider>
-            <ChatWrapper />
-        </ChatInputBufferProvider>
-    </SettingsProvider>
-);
+const AppProviders: React.FC = () => <ChatWrapper />;
 
 export default AppProviders;

@@ -26,6 +26,7 @@ export default defineConfig({
                 'node-sqlite3-wasm', // 修复特殊文件引用的情况
                 'execa',
                 'lowdb',
+                'lowdb/node',
                 'chalk',
                 'extract-zip',
                 'fs-extra',
@@ -43,15 +44,16 @@ export default defineConfig({
                 '@anthropic-ai/sdk',
                 '@langchain/langgraph',
                 'langchain',
+                'node-notifier',
             ],
         }),
         react(),
-        // analyzer({
-        //     analyzerMode: 'server', // Options: 'server', 'static', 'json'
-        //     analyzerPort: 8888, // Port for the server mode
-        //     openAnalyzer: true, // Automatically open the analyzer in the browser
-        //     summary: true, // Show full chunk info in the console
-        // }),
+        analyzer({
+            analyzerMode: 'server', // Options: 'server', 'static', 'json'
+            analyzerPort: 8888, // Port for the server mode
+            openAnalyzer: true, // Automatically open the analyzer in the browser
+            summary: true, // Show full chunk info in the console
+        }),
     ],
     build: {
         outDir: 'dist',

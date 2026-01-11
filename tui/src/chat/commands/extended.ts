@@ -110,7 +110,11 @@ export const modelCommand: CommandDefinition = {
         // 执行模型切换
         try {
             if (context.updateConfig) {
-                await context.updateConfig({ main_model: targetModelID, model_provider: targetModel?.provider });
+                if (targetModel?.provider) {
+                    await context.updateConfig({ main_model: targetModelID, model_provider: targetModel?.provider });
+                } else {
+                    await context.updateConfig({ main_model: targetModelID });
+                }
                 return {
                     success: true,
                     message: `模型已切换到: ${targetModelID}\n\n提示: 如果当前会话未生效，请使用 /init 创建新会话`,
@@ -255,34 +259,6 @@ export const configCommand: CommandDefinition = {
                 shouldClearInput: true,
             };
         }
-    },
-};
-
-/**
- * /env 命令 - 查看环境变量
- */
-export const envCommand: CommandDefinition = {
-    name: 'env',
-    description: '查看当前环境变量配置',
-    aliases: ['printenv'],
-    execute: async (args: string[], context) => {
-        const envInfo = [
-            '当前环境变量:',
-            `  MODEL_PROVIDER: ${process.env.MODEL_PROVIDER || 'openai'}`,
-            `  OPENAI_API_KEY: ${process.env.OPENAI_API_KEY ? '***已设置***' : '未设置'}`,
-            `  OPENAI_BASE_URL: ${process.env.OPENAI_BASE_URL || '未设置'}`,
-            `  ANTHROPIC_API_KEY: ${process.env.ANTHROPIC_API_KEY ? '***已设置***' : '未设置'}`,
-            `  ANTHROPIC_BASE_URL: ${process.env.ANTHROPIC_BASE_URL || '未设置'}`,
-            '',
-            '配置文件位置:',
-            `  ${dbPath}`,
-        ];
-
-        return {
-            success: true,
-            message: envInfo.join('\n'),
-            shouldClearInput: true,
-        };
     },
 };
 
@@ -527,7 +503,6 @@ export const extendedCommands: CommandDefinition[] = [
     templateCommand,
     modelCommand,
     configCommand,
-    envCommand,
     mcpCommand,
     summarizeCommand, // NEW: 添加总结命令
 ];

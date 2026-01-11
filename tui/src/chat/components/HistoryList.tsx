@@ -9,8 +9,7 @@ interface HistoryListProps {
 }
 
 const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
-    const { toggleGraphVisible, historyList, currentChatId, refreshHistoryList, toHistoryChat, createNewChat } =
-        useChat();
+    const { historyList, currentChatId, refreshHistoryList, toHistoryChat, createNewChat } = useChat();
 
     useEffect(() => {
         refreshHistoryList();
@@ -22,7 +21,6 @@ const HistoryList: React.FC<HistoryListProps> = ({ onClose }) => {
         }
         if (key.escape || input === 'q') {
             onClose();
-            toggleGraphVisible();
         }
     });
 
