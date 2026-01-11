@@ -10,8 +10,11 @@
 -   [x] Human In the Loop
     -   [ ] Yolo Mode（用于自动控制授权）
     -   [ ] Automatically Security
--   [x] 自动压缩上下文功能
+-   [x] 现在改为手动进行 /sum
 -   [x] Anthropic and OpenAI Model Support
+-   [x] Magic Input
+    -   [x] 缓冲区（like cursor）
+-   [ ] 支持 template
 -   [ ] 文件变更检测机制
 -   [x] SubAgent
 -   [x] Agent Skills
@@ -19,8 +22,6 @@
 -   [x] AGENTS.md
 -   [ ] Sandbox
 -   [ ] Memory System
--   [ ] Magic Input
-    -   [ ] 缓冲区（like cursor）
 
 ## 项目结构
 

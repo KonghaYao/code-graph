@@ -89,33 +89,17 @@ export const ChatInputBuffer: React.FC<ChatInputBufferProps> = ({
                 </Box>
             )}
 
-            {/* 命令提示 - 使用 internalValue 检测 */}
-            {isCommandInput && commandSuggestions.length > 0 && (
-                <Box marginBottom={1} flexDirection="column">
-                    <Text color="yellow" bold>
-                        命令建议:
-                    </Text>
-                    {commandSuggestions.slice(0, 5).map((suggestion, index: number) => (
-                        <Text key={index} color="cyan">
-                            {suggestion.displayText} - {suggestion.description}
-                        </Text>
-                    ))}
-                    {commandSuggestions.length > 5 && (
-                        <Text color="gray">...还有 {commandSuggestions.length - 5} 个命令</Text>
-                    )}
-                </Box>
-            )}
-
             {/* 外部命令提示（用于错误和成功消息） */}
             <commandHandler.CommandHintUI />
 
             {/* 输入框 */}
             <Box alignItems="center">
-                <Box marginRight={1}>
+                <Box marginX={1}>
                     <Text color={isCommandInput ? 'yellow' : 'green'} bold>
                         {isCommandInput ? '⚡ ' : '💬 '}
                     </Text>
                 </Box>
+
                 <EnhancedTextInput
                     id="global-input"
                     value={internalValue}

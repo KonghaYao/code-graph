@@ -7,7 +7,7 @@ import { ChatProvider, useChat } from '@langgraph-js/sdk/react';
 import { Message } from '@langgraph-js/sdk';
 import { SettingsProvider, useSettings } from './context/SettingsContext';
 import { ChatInputBufferProvider, useChatInputBuffer } from './context/ChatInputBufferContext';
-import { useCommandHandler } from './components/CommandHandler';
+import { useCommandHandler } from './context/CommandHandler';
 import { LangGraphFetch } from '../../../agents/code/export';
 import WelcomeHeader from './components/WelcomeHeader';
 import TokenProgressBar from './components/TokenProgressBar';
@@ -95,7 +95,17 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
     };
 
     return (
-        <Box flexDirection="column" paddingX={0} paddingY={0}>
+        <Box
+            flexDirection="column"
+            paddingX={0}
+            paddingY={0}
+            borderColor="grey"
+            borderTop
+            borderStyle="single"
+            borderLeft={false}
+            borderBottom={false}
+            borderRight={false}
+        >
             {/* 命令错误显示 */}
             <commandHandler.CommandErrorUI />
 
@@ -104,7 +114,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ mode }) => {
 
             {/* 使用 ChatInputBuffer 组件 */}
             <ChatInputBuffer
-                value={userInput as string}
+                value={userInput}
                 onChange={setUserInput}
                 onSubmit={sendTextMessage}
                 loading={loading}

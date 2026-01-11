@@ -31,7 +31,7 @@ export const statusCommand: CommandDefinition = {
         };
     },
 };
-
+import { listTemplates, clearTemplateCache } from '../../../../agents/code/templates/load.js';
 /**
  * /template 命令 - 插入预定义模板
  */
@@ -40,32 +40,63 @@ export const templateCommand: CommandDefinition = {
     description: '插入预定义的消息模板',
     aliases: ['tpl', 't'],
     usage: '/template <模板名>',
-    requiresArgs: true,
-    validateArgs: (args: string[]) => args.length > 0,
     execute: async (args: string[], context) => {
         const templateName = args[0];
-        const templates: Record<string, string> = {
-            bug: '我遇到了一个bug：\n\n**问题描述：**\n\n**重现步骤：**\n1. \n2. \n3. \n\n**期望结果：**\n\n**实际结果：**\n',
-            feature: '我需要实现一个新功能：\n\n**功能描述：**\n\n**需求分析：**\n\n**技术要求：**\n',
-            review: '请帮我审查这段代码：\n\n```\n// 在这里粘贴代码\n```\n\n**关注点：**\n- 性能\n- 安全性\n- 可维护性\n',
-            optimize: '请帮我优化这段代码的性能：\n\n```\n// 在这里粘贴代码\n```\n\n**性能问题：**\n\n**期望改进：**\n',
-        };
 
-        const template = templates[templateName];
-        if (!template) {
-            const availableTemplates = Object.keys(templates).join(', ');
+        // MODIFIED: 使用动态模板加载器替代硬编码模板
+        // 导入模板加载器
+
+        // 如果传入 --refresh 参数，清除缓存
+        if (args.includes('--refresh')) {
+            clearTemplateCache();
             return {
-                success: false,
-                message: `未找到模板 "${templateName}"。可用模板: ${availableTemplates}`,
+                success: true,
+                message: '模板缓存已清除',
+                shouldClearInput: true,
             };
         }
 
-        // 将模板内容设置到输入框
-        context.setUserInput(template);
+        // 加载所有模板
+        const templates = listTemplates();
+
+        // 如果没有提供模板名，列出所有可用模板
+        if (!templateName) {
+            if (templates.length === 0) {
+                return {
+                    success: true,
+                    message: '当前没有可用的模板。可以在 ./.claude/templates/ 目录下创建 .md 模板文件。',
+                    shouldClearInput: true,
+                };
+            }
+
+            const templateList = templates.map((t) => `  - ${t.name}: ${t.description}`).join('\n');
+
+            return {
+                success: true,
+                message: `可用模板:\n${templateList}\n\n使用 /template <name> 插入模板`,
+                shouldClearInput: true,
+            };
+        }
+
+        // 查找指定模板
+        const template = templates.find((t) => t.name === templateName);
+
+        if (!template) {
+            const availableTemplates = templates.map((t) => t.name).join(', ');
+            return {
+                success: false,
+                message: `未找到模板 "${templateName}"。可用模板: ${availableTemplates || '(无)'}`,
+            };
+        }
+
+        setTimeout(() => {
+            // 将模板内容设置到输入框
+            context.setUserInput(template.content);
+        }, 300);
 
         return {
             success: true,
-            message: `已插入模板: ${templateName}`,
+            message: `已插入模板: ${template.name}\n${template.description}`,
             shouldClearInput: false, // 不清空，让用户编辑模板
         };
     },

@@ -83,7 +83,9 @@ export const graph = new StateGraph(CodeState)
                 subagents,
                 // MemoryMiddleware(model),
                 new AgentsMdMiddleware(),
-                new SkillsMiddleware(),
+                new SkillsMiddleware({
+                    projectSkillsDir: './.claude/skills',
+                }),
                 mcpMiddleware,
                 humanInTheLoopMiddleware({
                     interruptOn: {
