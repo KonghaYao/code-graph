@@ -1,8 +1,9 @@
 {
     "name": "zen-code",
-    "version": "1.9.2",
+    "version": "1.9.3",
     "description": "",
     "main": "cli.js",
+    "bin": "cli.js",
     "files": [
         "dist",
         "cli.js"
