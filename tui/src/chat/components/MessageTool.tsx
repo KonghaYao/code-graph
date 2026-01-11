@@ -155,8 +155,8 @@ const MessageTool: React.FC<MessageToolProps> = ({ message, messageNumber }) => 
         : inputRepaired?.description
         ? `: ${inputRepaired.description}`
         : '';
-    const render = getToolUIRender(message.name!);
-    let borderColor = getToolColor(message.name!);
+    const render = message.name ? getToolUIRender(message.name!) : null;
+    let borderColor = getToolColor(message.name || '');
     borderColor = message.status === 'error' ? 'red' : 'yellow';
     return (
         <Box flexDirection="column">

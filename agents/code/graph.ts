@@ -1,17 +1,8 @@
-import { ChatOpenAI } from '@langchain/openai';
 import { getSystemPrompt } from './prompts/coding.js';
 import { bash_tools } from './tools/bash_tools/index.js';
 import { glob_tool, grep_tool, read_tool, replace_tool, write_tool } from './tools/filesystem_tools/index.js';
 import { todo_write_tool } from './tools/task_tools/todo_tool.js';
-import {
-    anthropicPromptCachingMiddleware,
-    createAgent,
-    initChatModel,
-    Runtime,
-    HumanMessage,
-    SystemMessage,
-} from 'langchain';
-import { z } from 'zod';
+import { createAgent, Runtime, HumanMessage, SystemMessage } from 'langchain';
 
 import { CodeAnnotation as CodeState, CodeStateType } from './state.js';
 import { ask_user_with_options, ask_user_with_options_config, humanInTheLoopMiddleware } from '@langgraph-js/auk';
@@ -24,7 +15,7 @@ import { AgentsMdMiddleware } from './middlewares/agentsMD.js';
 import { getBufferMessage } from './utils/get_buffer_message.js';
 import { REMOVE_ALL_MESSAGES, START, StateGraph } from '@langchain/langgraph';
 import { RemoveMessage } from '@langchain/core/messages';
-
+import { initChatModel } from './initChatModel.js';
 const switchBranch = {
     summarization: async (state: CodeStateType, runtime: Runtime) => {
         const model = await initChatModel(state.main_model, {
@@ -52,6 +43,9 @@ export const graph = new StateGraph(CodeState)
             modelProvider: process.env.MODEL_PROVIDER || 'openai',
             streamUsage: true,
         });
+        // const model = new ChatOpenAI({
+        //     model: state.main_model,
+        // });
 
         // Create MCP middleware with servers
         const mcpMiddleware = await MCPMiddleware(state.mcp_config as any);
@@ -98,7 +92,7 @@ export const graph = new StateGraph(CodeState)
                     },
                 }),
                 /** @ts-ignore */
-                process.env.MODEL_PROVIDER === 'anthropic' && anthropicPromptCachingMiddleware(),
+                // process.env.MODEL_PROVIDER === 'anthropic' && anthropicPromptCachingMiddleware(),
             ],
         });
 

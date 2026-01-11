@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import nodeExternals from 'rollup-plugin-node-externals';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { analyzer } from 'vite-bundle-analyzer';
+
 export default defineConfig({
     plugins: [
         nodeExternals({
@@ -11,7 +12,7 @@ export default defineConfig({
             devDeps: false,
             peerDeps: false,
             optDeps: false,
-            exclude: [],
+            exclude: [], // 这里不需要排除任何包。
             include: [
                 'bun:sqlite',
                 'path',
@@ -34,9 +35,16 @@ export default defineConfig({
                 'openai',
                 'yaml',
                 'zod',
+                'marked',
+                'marked-terminal',
+                '@langchain/openai',
+                '@langchain/anthropic',
+                'openai',
+                '@anthropic-ai/sdk',
+                '@langchain/langgraph',
+                'langchain',
             ],
         }),
-
         react(),
         // analyzer({
         //     analyzerMode: 'server', // Options: 'server', 'static', 'json'
@@ -53,7 +61,6 @@ export default defineConfig({
             name: 'code-graph',
             formats: ['es'],
         },
-
         target: 'esnext',
         sourcemap: false,
     },

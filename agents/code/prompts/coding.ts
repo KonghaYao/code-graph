@@ -1,5 +1,6 @@
 import { CodeStateType } from '../state.js';
 
+// 当需要输出长文本时，建议写入文件
 const CORE_SYSTEM_PROMPT = `# Zen Code
 
 你是一个高效的命令行编程助手，名为 Zen Code。输出直接显示在终端，目标是用最少的交互完成任务。

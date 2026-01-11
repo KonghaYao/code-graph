@@ -1,5 +1,5 @@
 import { createUITool, ToolManager } from '@langgraph-js/sdk';
-import { Box, Text } from 'ink';
+import { Box, Text, useFocusManager } from 'ink';
 import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
 import { useState } from 'react';
@@ -70,7 +70,7 @@ export const terminal = createUITool({
                 </Box>
             );
         };
-
+        const focusManager = useFocusManager();
         const handleEditSubmit = () => {
             if (editValue.trim()) {
                 if (selectState === 'edit') {
@@ -92,6 +92,7 @@ export const terminal = createUITool({
                     setEditValue('');
                 }
             }
+            focusManager.focus('global-input');
         };
 
         const renderEditUI = () => {

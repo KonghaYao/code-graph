@@ -41,6 +41,7 @@ export const ask_user_with_options = createUITool({
                 type: 'respond',
                 message: value,
             });
+            fm.focus('global-input');
         };
 
         return (

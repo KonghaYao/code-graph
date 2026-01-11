@@ -30,6 +30,7 @@ const MessageAI: React.FC<MessageAIProps> = ({ message, messageNumber }) => {
                     {messageNumber} {modelName}
                 </Text>
             </Box>
+            {/* <Text>{getMessageContent(message.content).trim()}</Text> */}
             <Markdown>{getMessageContent(message.content).trim()}</Markdown>
         </Box>
     );
