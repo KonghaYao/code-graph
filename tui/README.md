@@ -3,17 +3,22 @@
 A Cli Coder like Claude Code
 
 ```sh
-SQLITE_DATABASE_URI=./.langgraph_api/langgraph.db
-OPENAI_API_KEY=sk-
-OPENAI_BASE_URL=https://api.xiaomimimo.com/v1 # or any other openai endpoint
+bunx --bun zen-code
 ```
 
 ```sh
-bunx zen-code
+# change openai config
+/config openai_api_key sk-***
+/config openai_base_url https://....
+
+# change anthropic config
+/config anthropic_api_key sk-***
+/config anthropic_base_url https://....
+/config model_provider anthropic
 ```
 
-Chang Model in Zen Code
-
 ```sh
-/m mimo-v2-flash
+/m # list all models
+/m 2 # set no.2 model in model list
+/m gpt-5.2 # set specific model name
 ```

@@ -4,7 +4,7 @@ import SelectInput from 'ink-select-input';
 import TextInput from 'ink-text-input';
 import { useState } from 'react';
 import { InputPreviewer } from '../components/MessageTool';
-import { MultiSelectPro } from '../components/input/MulitSelect';
+import { MultiSelectPro } from '../components/input/MultiSelect';
 
 // Color scheme for terminal actions
 const ACTION_COLORS: { [key: string]: string } = {

@@ -3,7 +3,7 @@ import { createUITool, ToolManager } from '@langgraph-js/sdk';
 import { Box, Text, useFocusManager } from 'ink';
 import { useEffect, useState } from 'react';
 import { EnhancedTextInput } from '../components/input/EnhancedTextInput';
-import { MultiSelectPro } from '../components/input/MulitSelect';
+import { MultiSelectPro } from '../components/input/MultiSelect';
 
 export const ask_user_with_options = createUITool({
     name: 'ask_user_with_options',

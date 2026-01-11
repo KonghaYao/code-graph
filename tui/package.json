@@ -1,12 +1,13 @@
 {
     "name": "zen-code",
-    "version": "1.8.0",
+    "version": "1.9.0",
     "description": "",
     "main": "cli.js",
-    "bin": "cli.js",
+    "bin": {
+        "zen-init": "./zen-init.js"
+    },
     "files": [
-        "dist",
-        "cli.js"
+        "dist"
     ],
     "scripts": {
         "dev": "bun run src/app.tsx",
