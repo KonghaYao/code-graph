@@ -1,2 +1,8 @@
 #!/usr/bin/env node
-import './dist/zen-code.mjs';
+const args = process.argv.slice(2);
+
+if (args[0] === 'init') {
+    import('./dist/zen-init.mjs');
+} else {
+    import('./dist/zen-code.mjs');
+}

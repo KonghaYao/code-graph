@@ -3,18 +3,8 @@
 A Cli Coder like Claude Code
 
 ```sh
-bunx --bun zen-code
-```
-
-```sh
-# change openai config
-/config openai_api_key sk-***
-/config openai_base_url https://....
-
-# change anthropic config
-/config anthropic_api_key sk-***
-/config anthropic_base_url https://....
-/config model_provider anthropic
+bunx --bun zen-code init # setup global model config
+bunx --bun zen-code # start chat
 ```
 
 ```sh
